@@ -13,10 +13,11 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-
     public function index()
     {
         try {
+            $this->authorize('viewAny', User::class);
+
             $users = User::orderBy('created_at', 'desc')->paginate(15);
 
             return UserResource::collection($users);
@@ -39,6 +40,8 @@ class UserController extends Controller
     public function store(StoreUserRequest $request): JsonResponse
     {
         try {
+            $this->authorize('create', User::class);
+
             $validatedData = $request->validated();
 
             // Hash de la contraseña usando principio de responsabilidad única
@@ -69,6 +72,8 @@ class UserController extends Controller
     public function show(User $user): UserResource|JsonResponse
     {
         try {
+            $this->authorize('view', $user);
+
             return new UserResource($user);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -95,6 +100,8 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
         try {
+            $this->authorize('update', $user);
+
             $validatedData = $request->validated();
 
             // Solo hash de la contraseña si se proporciona
@@ -131,6 +138,8 @@ class UserController extends Controller
     public function destroy(User $user): JsonResponse
     {
         try {
+            $this->authorize('delete', $user);
+
             $userName = $user->name;
             $user->delete();
 

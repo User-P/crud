@@ -12,9 +12,9 @@ class UserPolicy
      */
     public function viewAny(?User $user): bool
     {
-        // Para este ejemplo, permitimos ver todos los usuarios
-        // En producción, esto debería estar basado en roles/permisos
-        return true;
+        // Solo usuarios autenticados pueden ver la lista de usuarios
+        // Los admins pueden ver todos, los usuarios solo pueden buscar/filtrar
+        return $user !== null;
     }
 
     /**
@@ -22,9 +22,9 @@ class UserPolicy
      */
     public function view(?User $user, User $model): bool
     {
-        // Permitir ver cualquier usuario para este ejemplo
-        // En producción, podría limitarse a que solo puedan ver su propio perfil
-        return true;
+        // Los usuarios pueden ver su propio perfil
+        // Los admins pueden ver cualquier perfil
+        return $user && ($user->id === $model->id || $user->isAdmin());
     }
 
     /**
@@ -32,8 +32,8 @@ class UserPolicy
      */
     public function create(?User $user): bool
     {
-        // Para este ejemplo, permitimos crear usuarios (registro público)
-        // En producción, esto podría requerir permisos de administrador
+        // El registro público está permitido (usuarios pueden registrarse)
+        // Los admins pueden crear cualquier tipo de usuario
         return true;
     }
 
@@ -42,9 +42,9 @@ class UserPolicy
      */
     public function update(?User $user, User $model): bool
     {
-        // Para este ejemplo, permitimos actualizar cualquier usuario
-        // En producción, típicamente solo el propio usuario o un admin
-        return true;
+        // Los usuarios pueden actualizar su propio perfil
+        // Los admins pueden actualizar cualquier perfil
+        return $user && ($user->id === $model->id || $user->isAdmin());
     }
 
     /**
@@ -52,9 +52,9 @@ class UserPolicy
      */
     public function delete(?User $user, User $model): bool
     {
-        // Para este ejemplo, permitimos eliminar usuarios
-        // En producción, esto requeriría permisos de administrador
-        return true;
+        // Solo los admins pueden eliminar usuarios
+        // No pueden eliminarse a sí mismos para evitar problemas
+        return $user && $user->isAdmin() && $user->id !== $model->id;
     }
 
     /**
@@ -62,8 +62,8 @@ class UserPolicy
      */
     public function restore(?User $user, User $model): bool
     {
-        // Solo admins deberían poder restaurar usuarios
-        return true;
+        // Solo admins pueden restaurar usuarios eliminados
+        return $user && $user->isAdmin();
     }
 
     /**
@@ -71,7 +71,8 @@ class UserPolicy
      */
     public function forceDelete(?User $user, User $model): bool
     {
-        // Solo super admins deberían poder eliminar permanentemente
-        return true;
+        // Solo admins pueden eliminar permanentemente usuarios
+        // No pueden eliminarse permanentemente a sí mismos
+        return $user && $user->isAdmin() && $user->id !== $model->id;
     }
 }

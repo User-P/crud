@@ -11,7 +11,12 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // Si se está especificando un rol admin, solo admins pueden crear otros admins
+        if ($this->has('role') && $this->input('role') === 'admin') {
+            return $this->user() && $this->user()->isAdmin();
+        }
+
+        return true; // Registro público permitido para usuarios normales
     }
 
     /**
@@ -22,9 +27,34 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'name' => [
+                'required',
+                'string',
+                'min:2',
+                'max:255',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', // Solo letras y espacios
+            ],
+            'email' => [
+                'required',
+                'string',
+                'email:rfc,dns',
+                'max:255',
+                'unique:users,email',
+                'not_regex:/[<>"\'()]/', // Prevenir XSS
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'max:255',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/', // Al menos 1 minúscula, 1 mayúscula, 1 número, 1 símbolo
+            ],
+            'role' => [
+                'sometimes',
+                'string',
+                'in:admin,user',
+            ],
         ];
     }
 
@@ -38,13 +68,19 @@ class StoreUserRequest extends FormRequest
         return [
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
+            'name.min' => 'El nombre debe tener al menos 2 caracteres.',
             'name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'name.regex' => 'El nombre solo puede contener letras y espacios.',
             'email.required' => 'El email es obligatorio.',
-            'email.email' => 'El email debe tener un formato válido.',
+            'email.email' => 'El email debe tener un formato válido y un dominio real.',
             'email.unique' => 'Este email ya está registrado.',
+            'email.not_regex' => 'El email contiene caracteres no permitidos.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede tener más de 255 caracteres.',
             'password.confirmed' => 'La confirmación de contraseña no coincide.',
+            'password.regex' => 'La contraseña debe contener al menos: 1 letra minúscula, 1 mayúscula, 1 número y 1 símbolo especial.',
+            'role.in' => 'El rol debe ser admin o user.',
         ];
     }
 }

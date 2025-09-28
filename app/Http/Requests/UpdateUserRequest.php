@@ -11,7 +11,21 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $targetUser = $this->route('user');
+        $currentUser = $this->user();
+
+        // Si no hay usuario autenticado, denegar
+        if (!$currentUser) {
+            return false;
+        }
+
+        // Si se está intentando cambiar el rol, solo admins pueden hacerlo
+        if ($this->has('role') && $this->input('role') !== $targetUser->role) {
+            return $currentUser->isAdmin();
+        }
+
+        // Los usuarios pueden actualizar su propio perfil, los admins pueden actualizar cualquiera
+        return $currentUser->id === $targetUser->id || $currentUser->isAdmin();
     }
 
     /**
@@ -24,9 +38,43 @@ class UpdateUserRequest extends FormRequest
         $userId = $this->route('user')?->id;
 
         return [
-            'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $userId,
-            'password' => 'sometimes|nullable|string|min:8|confirmed',
+            'name' => [
+                'sometimes',
+                'required',
+                'string',
+                'min:2',
+                'max:255',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', // Solo letras y espacios
+            ],
+            'email' => [
+                'sometimes',
+                'required',
+                'string',
+                'email:rfc,dns',
+                'max:255',
+                'unique:users,email,' . $userId,
+                'not_regex:/[<>"\'()]/', // Prevenir XSS
+            ],
+            'password' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'min:8',
+                'max:255',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/', // Requisitos de seguridad
+            ],
+            'current_password' => [
+                'sometimes',
+                'required_with:password',
+                'string',
+                'current_password', // Validar contraseña actual cuando se cambia
+            ],
+            'role' => [
+                'sometimes',
+                'string',
+                'in:admin,user',
+            ],
         ];
     }
 
@@ -40,12 +88,20 @@ class UpdateUserRequest extends FormRequest
         return [
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
+            'name.min' => 'El nombre debe tener al menos 2 caracteres.',
             'name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'name.regex' => 'El nombre solo puede contener letras y espacios.',
             'email.required' => 'El email es obligatorio.',
-            'email.email' => 'El email debe tener un formato válido.',
+            'email.email' => 'El email debe tener un formato válido y un dominio real.',
             'email.unique' => 'Este email ya está registrado.',
+            'email.not_regex' => 'El email contiene caracteres no permitidos.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede tener más de 255 caracteres.',
             'password.confirmed' => 'La confirmación de contraseña no coincide.',
+            'password.regex' => 'La contraseña debe contener al menos: 1 letra minúscula, 1 mayúscula, 1 número y 1 símbolo especial.',
+            'current_password.required_with' => 'La contraseña actual es requerida para cambiar la contraseña.',
+            'current_password.current_password' => 'La contraseña actual no es correcta.',
+            'role.in' => 'El rol debe ser admin o user.',
         ];
     }
 }

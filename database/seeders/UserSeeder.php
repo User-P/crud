@@ -17,7 +17,17 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Administrador',
             'email' => 'admin@example.com',
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'password' => \Illuminate\Support\Facades\Hash::make('Admin123!'),
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        // Crear un usuario regular de prueba
+        User::create([
+            'name' => 'Usuario Test',
+            'email' => 'user@example.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('User123!'),
+            'role' => 'user',
             'email_verified_at' => now(),
         ]);
 

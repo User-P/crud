@@ -18,7 +18,12 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'email_verified_at' => $this->email_verified_at?->toISOString(),
+            'role' => $this->role,
+            'email_verified_at' => $this->when($this->email_verified_at, function () {
+                return $this->email_verified_at->toISOString();
+            }),
+            'is_admin' => $this->isAdmin(),
+            'profile_complete' => $this->email_verified_at !== null,
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];
