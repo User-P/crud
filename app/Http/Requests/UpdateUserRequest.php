@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Traits\HandleValidationErrors;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateUserRequest extends FormRequest
 {
+    use HandleValidationErrors;
     /**
      * Determine if the user is authorized to make this request.
      */
