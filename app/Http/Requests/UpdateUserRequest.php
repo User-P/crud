@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Traits\HandleValidationErrors;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -18,6 +19,10 @@ class UpdateUserRequest extends FormRequest
 
         // Si no hay usuario autenticado, denegar
         if (!$currentUser) {
+            return false;
+        }
+
+        if (!$targetUser) {
             return false;
         }
 
@@ -59,25 +64,33 @@ class UpdateUserRequest extends FormRequest
             ],
             'password' => [
                 'sometimes',
-                'nullable',
                 'string',
                 'min:8',
                 'max:255',
                 'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/', // Requisitos de seguridad
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/', // Requisitos de seguridad
             ],
-            'current_password' => [
-                'sometimes',
-                'required_with:password',
-                'string',
-                'current_password', // Validar contraseña actual cuando se cambia
-            ],
+            'current_password' => Rule::when(
+                $this->shouldValidateCurrentPassword(),
+                ['required_with:password', 'string', 'current_password'],
+                ['nullable', 'string']
+            ),
             'role' => [
                 'sometimes',
                 'string',
                 'in:admin,user',
             ],
         ];
+    }
+
+    private function shouldValidateCurrentPassword(): bool
+    {
+        $targetUser = $this->route('user');
+        $currentUser = $this->user();
+
+        return $targetUser !== null
+            && $currentUser !== null
+            && $currentUser->is($targetUser);
     }
 
     /**

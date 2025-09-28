@@ -12,16 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Aplicar middleware JSON a todas las rutas API
         $middleware->api(append: [
             \App\Http\Middleware\ForceJsonResponse::class,
             \App\Http\Middleware\ApiErrorHandler::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // Manejo personalizado de errores para APIs
         $exceptions->render(function (Throwable $exception, $request) {
-            // Solo para rutas API
             if ($request->is('api/*')) {
                 return \App\Http\Controllers\ApiErrorController::handleException($exception, $request);
             }

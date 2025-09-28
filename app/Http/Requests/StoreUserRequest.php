@@ -50,7 +50,7 @@ class StoreUserRequest extends FormRequest
                 'min:8',
                 'max:255',
                 'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/', // Al menos 1 minúscula, 1 mayúscula, 1 número, 1 símbolo
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/', // Al menos 1 minúscula, 1 mayúscula, 1 número, 1 símbolo
             ],
             'role' => [
                 'sometimes',

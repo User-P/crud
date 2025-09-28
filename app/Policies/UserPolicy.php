@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class UserPolicy
 {
@@ -12,9 +11,8 @@ class UserPolicy
      */
     public function viewAny(?User $user): bool
     {
-        // Solo usuarios autenticados pueden ver la lista de usuarios
-        // Los admins pueden ver todos, los usuarios solo pueden buscar/filtrar
-        return $user !== null;
+        // Solo administradores pueden consultar el listado completo de usuarios
+        return $user?->isAdmin() ?? false;
     }
 
     /**
@@ -32,9 +30,8 @@ class UserPolicy
      */
     public function create(?User $user): bool
     {
-        // El registro público está permitido (usuarios pueden registrarse)
-        // Los admins pueden crear cualquier tipo de usuario
-        return true;
+        // Solo los administradores pueden crear usuarios desde el panel protegido
+        return $user?->isAdmin() ?? false;
     }
 
     /**

@@ -17,5 +17,5 @@ Route::prefix('v1/auth')->group(function () {
 });
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
-    Route::resource('user', UserController::class);
+    Route::apiResource('users', UserController::class);
 });

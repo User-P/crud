@@ -6,29 +6,21 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
-        try {
-            $this->authorize('viewAny', User::class);
+        $this->authorize('viewAny', User::class);
 
-            $users = User::orderBy('created_at', 'desc')->paginate(15);
+        $users = User::query()
+            ->latest()
+            ->paginate(15);
 
-            return UserResource::collection($users);
-        } catch (\Exception $e) {
-            Log::error('Error al obtener usuarios: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Error interno del servidor',
-                'error' => 'No se pudieron obtener los usuarios'
-            ], 500);
-        }
+        return UserResource::collection($users);
     }
 
     /**
@@ -39,55 +31,27 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
-        try {
-            $this->authorize('create', User::class);
+        $this->authorize('create', User::class);
 
-            $validatedData = $request->validated();
+        $user = User::create($request->validated());
 
-            // Hash de la contraseña usando principio de responsabilidad única
-            $validatedData['password'] = Hash::make($validatedData['password']);
-
-            $user = User::create($validatedData);
-
-            return (new UserResource($user))
-                ->response()
-                ->setStatusCode(201)
-                ->header('Location', route('user.show', $user));
-        } catch (\Exception $e) {
-            Log::error('Error al crear usuario: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Error interno del servidor',
-                'error' => 'No se pudo crear el usuario'
-            ], 500);
-        }
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED)
+            ->header('Location', route('users.show', $user));
     }
 
     /**
      * Display the specified resource.
      *
      * @param User $user
-     * @return UserResource|JsonResponse
+     * @return UserResource
      */
-    public function show(User $user): UserResource|JsonResponse
+    public function show(User $user): UserResource
     {
-        try {
-            $this->authorize('view', $user);
+        $this->authorize('view', $user);
 
-            return new UserResource($user);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Usuario no encontrado',
-                'error' => 'El usuario solicitado no existe'
-            ], 404);
-        } catch (\Exception $e) {
-            Log::error('Error al obtener usuario: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Error interno del servidor',
-                'error' => 'No se pudo obtener el usuario'
-            ], 500);
-        }
+        return new UserResource($user);
     }
 
     /**
@@ -99,34 +63,18 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        try {
-            $this->authorize('update', $user);
+        $this->authorize('update', $user);
 
-            $validatedData = $request->validated();
+        $validated = array_filter(
+            $request->validated(),
+            static fn ($value) => !is_null($value)
+        );
 
-            // Solo hash de la contraseña si se proporciona
-            if (isset($validatedData['password'])) {
-                $validatedData['password'] = Hash::make($validatedData['password']);
-            }
+        $user->update($validated);
 
-            $user->update($validatedData);
-
-            return (new UserResource($user->fresh()))
-                ->response()
-                ->setStatusCode(200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Usuario no encontrado',
-                'error' => 'El usuario que intenta actualizar no existe'
-            ], 404);
-        } catch (\Exception $e) {
-            Log::error('Error al actualizar usuario: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Error interno del servidor',
-                'error' => 'No se pudo actualizar el usuario'
-            ], 500);
-        }
+        return (new UserResource($user->fresh()))
+            ->response()
+            ->setStatusCode(Response::HTTP_OK);
     }
 
     /**
@@ -137,28 +85,14 @@ class UserController extends Controller
      */
     public function destroy(User $user): JsonResponse
     {
-        try {
-            $this->authorize('delete', $user);
+        $this->authorize('delete', $user);
 
-            $userName = $user->name;
-            $user->delete();
+        $userName = $user->name;
+        $user->delete();
 
-            return response()->json([
-                'message' => "Usuario '{$userName}' eliminado correctamente",
-                'data' => null
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Usuario no encontrado',
-                'error' => 'El usuario que intenta eliminar no existe'
-            ], 404);
-        } catch (\Exception $e) {
-            Log::error('Error al eliminar usuario: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Error interno del servidor',
-                'error' => 'No se pudo eliminar el usuario'
-            ], 500);
-        }
+        return response()->json([
+            'message' => "Usuario '{$userName}' eliminado correctamente",
+            'data' => null,
+        ], Response::HTTP_OK);
     }
 }
