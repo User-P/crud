@@ -8,18 +8,13 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return AnonymousResourceCollection|JsonResponse
-     */
-    public function index(): AnonymousResourceCollection|JsonResponse
+
+    public function index()
     {
         try {
             $users = User::orderBy('created_at', 'desc')->paginate(15);
