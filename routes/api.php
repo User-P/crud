@@ -31,5 +31,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('users', [StatisticsController::class, 'userStatistics']);
         Route::get('activity', [StatisticsController::class, 'activityStatistics']);
         Route::get('dashboard', [StatisticsController::class, 'dashboard']);
+        Route::get('historical/{days?}', [StatisticsController::class, 'historicalStatistics'])
+            ->where('days', '[0-9]+');
     });
 });

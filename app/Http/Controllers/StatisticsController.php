@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DailyStatistic;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -216,5 +217,65 @@ class StatisticsController extends Controller
         }
 
         return $months;
+    }
+
+    /**
+     * Obtener estadísticas históricas de los últimos N días
+     *
+     * @param int $days
+     * @return JsonResponse
+     */
+    public function historicalStatistics(int $days = 30): JsonResponse
+    {
+        $this->authorize('viewAny', User::class); // Solo admins
+
+        // Obtener estadísticas pre-calculadas
+        $statistics = DailyStatistic::lastDays($days)->get();
+
+        if ($statistics->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay estadísticas históricas disponibles. Ejecute el job de cálculo primero.',
+                'data' => [],
+            ], 404);
+        }
+
+        // Preparar datos para gráficos
+        $chartData = [
+            'dates' => $statistics->pluck('date')->map->format('Y-m-d')->toArray(),
+            'total_users' => $statistics->pluck('total_users')->toArray(),
+            'active_users' => $statistics->pluck('active_users')->toArray(),
+            'new_registrations' => $statistics->pluck('new_registrations')->toArray(),
+            'verification_rates' => $statistics->pluck('verification_rate')->toArray(),
+        ];
+
+        // Calcular tendencias
+        $latest = $statistics->first();
+        $previous = $statistics->skip(1)->first();
+
+        $trends = $latest && $previous ? [
+            'user_growth' => $latest->total_users - $previous->total_users,
+            'activity_change' => $latest->active_users - $previous->active_users,
+            'growth_rate' => $latest->trend['growth_rate'] ?? 0,
+        ] : null;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Estadísticas históricas obtenidas correctamente',
+            'data' => [
+                'period' => "{$days} días",
+                'statistics' => $statistics,
+                'chart_data' => $chartData,
+                'trends' => $trends,
+                'summary' => [
+                    'total_records' => $statistics->count(),
+                    'date_range' => [
+                        'from' => $statistics->last()?->date?->format('Y-m-d'),
+                        'to' => $statistics->first()?->date?->format('Y-m-d'),
+                    ],
+                ],
+            ],
+            'generated_at' => now()->toISOString(),
+        ]);
     }
 }
