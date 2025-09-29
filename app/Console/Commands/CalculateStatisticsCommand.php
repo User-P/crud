@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 /**
  * Comando para calcular estadísticas diarias
- * 
+ *
  * Puede ejecutarse manualmente o programarse con cron
  */
 class CalculateStatisticsCommand extends Command
@@ -18,7 +18,7 @@ class CalculateStatisticsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'statistics:calculate 
+    protected $signature = 'statistics:calculate
                            {--date= : Fecha específica (Y-m-d), por defecto ayer}
                            {--queue : Ejecutar en cola en lugar de inmediatamente}';
 
@@ -42,13 +42,13 @@ class CalculateStatisticsCommand extends Command
         // Parsear fecha o usar ayer por defecto
         if ($dateOption) {
             try {
-                $date = Carbon::createFromFormat('Y-m-d', $dateOption);
+                $date = Carbon::createFromFormat('Y-m-d', $dateOption)->startOfDay();
             } catch (\Exception $e) {
                 $this->error('Formato de fecha inválido. Use Y-m-d (ej: 2025-09-28)');
                 return Command::FAILURE;
             }
         } else {
-            $date = Carbon::yesterday();
+            $date = Carbon::yesterday()->startOfDay();
         }
 
         $this->info("📊 Calculando estadísticas para: {$date->toDateString()}");
@@ -60,7 +60,7 @@ class CalculateStatisticsCommand extends Command
         } else {
             // Ejecutar inmediatamente
             $this->info('⚡ Ejecutando cálculo inmediato...');
-            
+
             try {
                 $job = new CalculateDailyStatisticsJob($date);
                 $job->handle();

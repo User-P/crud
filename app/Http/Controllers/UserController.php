@@ -19,7 +19,6 @@ class UserController extends Controller
         $users = User::query()
             ->latest()
             ->paginate(15);
-
         return UserResource::collection($users);
     }
 
@@ -67,7 +66,7 @@ class UserController extends Controller
 
         $validated = array_filter(
             $request->validated(),
-            static fn ($value) => !is_null($value)
+            static fn($value) => !is_null($value)
         );
 
         $user->update($validated);

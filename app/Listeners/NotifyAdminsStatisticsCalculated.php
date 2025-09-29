@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Listener para notificar a administradores cuando se calculan estadísticas
- * 
+ *
  * Implementa ShouldQueue para ejecutarse de forma asíncrona
  */
 class NotifyAdminsStatisticsCalculated implements ShouldQueue

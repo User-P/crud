@@ -9,7 +9,7 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Evento disparado cuando las estadísticas diarias son calculadas
- * 
+ *
  * Permite a otros componentes del sistema reaccionar al cálculo
  * de estadísticas, como enviar notificaciones o actualizar caches.
  */

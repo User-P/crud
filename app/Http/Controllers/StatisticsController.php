@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyStatistic;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class StatisticsController extends Controller
 {
@@ -76,13 +76,16 @@ class StatisticsController extends Controller
 
         $stats = [
             'active_tokens' => DB::table('personal_access_tokens')
-                ->whereNull('expires_at')
-                ->orWhere('expires_at', '>', now())
+                ->where('tokenable_type', User::class)
+                ->where(function ($query) {
+                    $query->whereNull('expires_at')
+                        ->orWhere('expires_at', '>', now());
+                })
                 ->count(),
 
             'tokens_by_user' => DB::table('personal_access_tokens')
                 ->join('users', 'users.id', '=', 'personal_access_tokens.tokenable_id')
-                ->where('personal_access_tokens.tokenable_type', 'App\\Models\\User')
+                ->where('personal_access_tokens.tokenable_type', User::class)
                 ->selectRaw('users.name, COUNT(*) as token_count')
                 ->groupBy('users.id', 'users.name')
                 ->orderBy('token_count', 'desc')
@@ -91,7 +94,7 @@ class StatisticsController extends Controller
 
             'recent_token_activity' => DB::table('personal_access_tokens')
                 ->join('users', 'users.id', '=', 'personal_access_tokens.tokenable_id')
-                ->where('personal_access_tokens.tokenable_type', 'App\\Models\\User')
+                ->where('personal_access_tokens.tokenable_type', User::class)
                 ->selectRaw('users.name, personal_access_tokens.name as token_name, personal_access_tokens.last_used_at')
                 ->whereNotNull('personal_access_tokens.last_used_at')
                 ->orderBy('personal_access_tokens.last_used_at', 'desc')
@@ -121,8 +124,11 @@ class StatisticsController extends Controller
                 'total_admins' => User::where('role', 'admin')->count(),
                 'verified_users' => User::whereNotNull('email_verified_at')->count(),
                 'active_tokens' => DB::table('personal_access_tokens')
-                    ->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now())
+                    ->where('tokenable_type', User::class)
+                    ->where(function ($query) {
+                        $query->whereNull('expires_at')
+                            ->orWhere('expires_at', '>', now());
+                    })
                     ->count(),
             ],
 
@@ -142,6 +148,7 @@ class StatisticsController extends Controller
                     ->get(['name', 'email', 'role', 'created_at']),
                 'recent_logins' => DB::table('personal_access_tokens')
                     ->join('users', 'users.id', '=', 'personal_access_tokens.tokenable_id')
+                    ->where('personal_access_tokens.tokenable_type', User::class)
                     ->selectRaw('users.name, personal_access_tokens.created_at as login_time')
                     ->orderBy('personal_access_tokens.created_at', 'desc')
                     ->limit(5)
@@ -170,20 +177,21 @@ class StatisticsController extends Controller
     private function getRegistrationsByMonthOptimized(): array
     {
         // Una sola consulta para obtener todos los conteos por mes (compatible con SQLite)
-        $results = User::selectRaw("
-            strftime('%Y-%m', created_at) as month,
-            COUNT(*) as count
-        ")
-            ->where('created_at', '>=', Carbon::now()->subMonths(5)->startOfMonth())
-            ->groupBy('month')
+        $startDate = Carbon::now()->copy()->subMonths(5)->startOfMonth();
+        $expression = $this->monthGroupingExpression();
+
+        $results = User::selectRaw("{$expression} as month, COUNT(*) as count")
+            ->where('created_at', '>=', $startDate)
+            ->groupByRaw($expression)
             ->orderBy('month')
             ->pluck('count', 'month')
             ->toArray();
 
         // Construir array con todos los meses (incluyendo los que tienen 0 registros)
         $months = [];
+        $referenceDate = Carbon::now();
         for ($i = 5; $i >= 0; $i--) {
-            $date = Carbon::now()->subMonths($i);
+            $date = $referenceDate->copy()->subMonths($i);
             $monthKey = $date->format('Y-m');
 
             $months[] = [
@@ -194,6 +202,19 @@ class StatisticsController extends Controller
         }
 
         return $months;
+    }
+
+    /**
+     * Obtener la expresión SQL adecuada para agrupar por mes según el driver actual.
+     */
+    private function monthGroupingExpression(): string
+    {
+        return match (DB::getDriverName()) {
+            'mysql' => "DATE_FORMAT(created_at, '%Y-%m')",
+            'pgsql' => "TO_CHAR(created_at, 'YYYY-MM')",
+            'sqlsrv' => "FORMAT(created_at, 'yyyy-MM')",
+            default => "strftime('%Y-%m', created_at)",
+        };
     }
 
     /**

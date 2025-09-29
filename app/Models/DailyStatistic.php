@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Daily Statistics Model
- * 
+ *
  * Almacena estadísticas diarias calculadas de forma asíncrona
  * para optimizar el rendimiento de consultas frecuentes.
  */
@@ -55,7 +55,7 @@ class DailyStatistic extends Model
     public function scopeLastDays($query, int $days = 30)
     {
         return $query->where('date', '>=', Carbon::now()->subDays($days))
-                    ->orderBy('date', 'desc');
+            ->orderBy('date', 'desc');
     }
 
     /**
@@ -67,7 +67,7 @@ class DailyStatistic extends Model
     public function scopeCurrentMonth($query)
     {
         return $query->whereMonth('date', Carbon::now()->month)
-                    ->whereYear('date', Carbon::now()->year);
+            ->whereYear('date', Carbon::now()->year);
     }
 
     /**
@@ -78,14 +78,14 @@ class DailyStatistic extends Model
     public function getTrendAttribute(): array
     {
         $previous = static::where('date', '<', $this->date)
-                          ->orderBy('date', 'desc')
-                          ->first();
+            ->orderBy('date', 'desc')
+            ->first();
 
         if (!$previous) {
             return ['growth_rate' => 0, 'comparison' => 'No hay datos anteriores'];
         }
 
-        $growthRate = $previous->total_users > 0 
+        $growthRate = $previous->total_users > 0
             ? (($this->total_users - $previous->total_users) / $previous->total_users) * 100
             : 100;
 

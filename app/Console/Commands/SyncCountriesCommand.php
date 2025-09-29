@@ -47,7 +47,9 @@ class SyncCountriesCommand extends Command
 
             // Consumir API
             $this->info('📡 Conectando con RestCountries API...');
-            $response = Http::timeout(60)->get('https://restcountries.com/v3.1/lang/spanish');
+            $response = Http::retry(3, 500)
+                ->timeout(60)
+                ->get('https://restcountries.com/v3.1/lang/spanish');
 
             if (!$response->successful()) {
                 $this->error('❌ Error al conectar con la API externa');

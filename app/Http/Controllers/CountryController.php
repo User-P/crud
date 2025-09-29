@@ -14,6 +14,8 @@ class CountryController extends Controller
      */
     public function index(): JsonResponse
     {
+        $this->authorize('viewAny', Country::class);
+
         $countries = Country::query()
             ->orderBy('name')
             ->paginate(20);
@@ -30,9 +32,13 @@ class CountryController extends Controller
      */
     public function syncCountries(): JsonResponse
     {
+        $this->authorize('sync', Country::class);
+
         try {
             // Consumir API de países (RestCountries)
-            $response = Http::timeout(30)->get('https://restcountries.com/v3.1/all');
+            $response = Http::retry(3, 500)
+                ->timeout(30)
+                ->get('https://restcountries.com/v3.1/all');
 
             if (!$response->successful()) {
                 return response()->json([
@@ -114,18 +120,22 @@ class CountryController extends Controller
      */
     public function statistics(): JsonResponse
     {
+        $this->authorize('viewStatistics', Country::class);
+
         $stats = [
             'total_countries' => Country::count(),
             'by_region' => Country::selectRaw('region, COUNT(*) as count')
                 ->whereNotNull('region')
                 ->groupBy('region')
-                ->pluck('count', 'region'),
+                ->pluck('count', 'region')
+                ->toArray(),
             'largest_population' => Country::orderBy('population', 'desc')
-                ->first(['name', 'population']),
+                ->first(['name', 'population'])?->toArray(),
             'smallest_population' => Country::where('population', '>', 0)
                 ->orderBy('population', 'asc')
-                ->first(['name', 'population']),
-            'last_sync' => Country::latest('updated_at')->value('updated_at'),
+                ->first(['name', 'population'])?->toArray(),
+            'last_sync' => optional(Country::latest('updated_at')->value('updated_at'))
+                ?->toISOString(),
         ];
 
         return response()->json([
