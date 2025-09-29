@@ -17,13 +17,13 @@ class StatisticsController extends Controller
         $this->authorize('viewAny', User::class); // Solo admins
 
         // OPTIMIZACIÓN: Una sola consulta agregada para obtener múltiples métricas
-        $aggregatedStats = User::selectRaw('
-      COUNT(*) as total_users,
-      COUNT(CASE WHEN role = "admin" THEN 1 END) as total_admins,
-      COUNT(CASE WHEN role = "user" THEN 1 END) as total_regular_users,
-      COUNT(CASE WHEN email_verified_at IS NOT NULL THEN 1 END) as verified_users,
-      COUNT(CASE WHEN email_verified_at IS NULL THEN 1 END) as unverified_users
-    ')->first();
+        $aggregatedStats = User::selectRaw("
+            COUNT(*) as total_users,
+            COUNT(CASE WHEN role = 'admin' THEN 1 END) as total_admins,
+            COUNT(CASE WHEN role = 'user' THEN 1 END) as total_regular_users,
+            COUNT(CASE WHEN email_verified_at IS NOT NULL THEN 1 END) as verified_users,
+            COUNT(CASE WHEN email_verified_at IS NULL THEN 1 END) as unverified_users
+        ")->first();
 
         // Consulta separada solo para usuarios recientes (necesaria por el LIMIT y ORDER BY)
         $recentUsers = User::latest()
@@ -168,11 +168,11 @@ class StatisticsController extends Controller
      */
     private function getRegistrationsByMonthOptimized(): array
     {
-        // Una sola consulta para obtener todos los conteos por mes
-        $results = User::selectRaw('
-        DATE_FORMAT(created_at, "%Y-%m") as month,
-        COUNT(*) as count
-      ')
+        // Una sola consulta para obtener todos los conteos por mes (compatible con SQLite)
+        $results = User::selectRaw("
+            strftime('%Y-%m', created_at) as month,
+            COUNT(*) as count
+        ")
             ->where('created_at', '>=', Carbon::now()->subMonths(5)->startOfMonth())
             ->groupBy('month')
             ->orderBy('month')
