@@ -39,7 +39,7 @@ class StoreUserRequest extends FormRequest
             'email' => [
                 'required',
                 'string',
-                'email:rfc,dns',
+                'email:rfc',
                 'max:255',
                 'unique:users,email',
                 'not_regex:/[<>"\'()]/', // Prevenir XSS
@@ -56,6 +56,12 @@ class StoreUserRequest extends FormRequest
                 'sometimes',
                 'string',
                 'in:admin,user',
+            ],
+            'country_id' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                'exists:countries,id',
             ],
         ];
     }
@@ -74,7 +80,7 @@ class StoreUserRequest extends FormRequest
             'name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'name.regex' => 'El nombre solo puede contener letras y espacios.',
             'email.required' => 'El email es obligatorio.',
-            'email.email' => 'El email debe tener un formato válido y un dominio real.',
+            'email.email' => 'El email debe tener un formato válido.',
             'email.unique' => 'Este email ya está registrado.',
             'email.not_regex' => 'El email contiene caracteres no permitidos.',
             'password.required' => 'La contraseña es obligatoria.',

@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\DB;
 class StatisticsController extends Controller
 {
     /**
-     * Obtener estadísticas generales de usuarios
+     * Obtener estadísticas generales de usuarios.
+     *
+     * @return JsonResponse
      */
     public function userStatistics(): JsonResponse
     {
@@ -68,7 +70,9 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Obtener estadísticas de actividad (tokens activos)
+     * Obtener estadísticas de actividad (tokens activos).
+     *
+     * @return JsonResponse
      */
     public function activityStatistics(): JsonResponse
     {
@@ -111,7 +115,9 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Dashboard con resumen general
+     * Dashboard con resumen general.
+     *
+     * @return JsonResponse
      */
     public function dashboard(): JsonResponse
     {
@@ -172,7 +178,9 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Obtener registros por mes (últimos 6 meses) - VERSIÓN OPTIMIZADA
+     * Obtener registros por mes (últimos 6 meses) con consulta optimizada.
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function getRegistrationsByMonthOptimized(): array
     {
@@ -206,6 +214,8 @@ class StatisticsController extends Controller
 
     /**
      * Obtener la expresión SQL adecuada para agrupar por mes según el driver actual.
+     *
+     * @return string
      */
     private function monthGroupingExpression(): string
     {
@@ -218,7 +228,9 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Obtener registros por mes (últimos 6 meses) - VERSIÓN ORIGINAL (mantener por compatibilidad)
+     * Obtener registros por mes (últimos 6 meses) - versión original.
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function getRegistrationsByMonth(): array
     {
@@ -241,7 +253,7 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Obtener estadísticas históricas de los últimos N días
+     * Obtener estadísticas históricas de los últimos N días.
      *
      * @param int $days
      * @return JsonResponse

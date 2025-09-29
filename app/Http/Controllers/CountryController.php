@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Log;
 class CountryController extends Controller
 {
     /**
-     * Obtener todos los países desde la base de datos
+     * Obtener todos los países desde la base de datos.
+     *
+     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
@@ -28,7 +30,9 @@ class CountryController extends Controller
     }
 
     /**
-     * Sincronizar países desde la API externa
+     * Sincronizar países desde la API externa.
+     *
+     * @return JsonResponse
      */
     public function syncCountries(): JsonResponse
     {
@@ -88,7 +92,10 @@ class CountryController extends Controller
     }
 
     /**
-     * Procesar datos de un país desde la API externa
+     * Procesar datos de un país desde la API externa.
+     *
+     * @param array<mixed> $data
+     * @return array<string, mixed>|null
      */
     private function processCountryData(array $data): ?array
     {
@@ -116,7 +123,9 @@ class CountryController extends Controller
     }
 
     /**
-     * Obtener estadísticas de países
+     * Obtener estadísticas resumidas de países.
+     *
+     * @return JsonResponse
      */
     public function statistics(): JsonResponse
     {
