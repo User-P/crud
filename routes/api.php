@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,4 +20,16 @@ Route::prefix('v1/auth')->group(function () {
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
+
+    // Rutas de países (API externa)
+    Route::get('countries', [CountryController::class, 'index']);
+    Route::post('countries/sync', [CountryController::class, 'syncCountries']);
+    Route::get('countries/statistics', [CountryController::class, 'statistics']);
+
+    // Rutas de estadísticas (solo admins)
+    Route::prefix('statistics')->group(function () {
+        Route::get('users', [StatisticsController::class, 'userStatistics']);
+        Route::get('activity', [StatisticsController::class, 'activityStatistics']);
+        Route::get('dashboard', [StatisticsController::class, 'dashboard']);
+    });
 });
