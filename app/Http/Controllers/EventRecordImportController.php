@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EventRecordImportRequest;
 use App\Imports\EventRecordsImport;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -11,6 +12,11 @@ use Throwable;
 
 class EventRecordImportController extends Controller
 {
+    public function create(): View
+    {
+        return view('records.import');
+    }
+
     public function store(EventRecordImportRequest $request): JsonResponse
     {
         $import = new EventRecordsImport();
