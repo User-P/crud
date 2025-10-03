@@ -1,15 +1,9 @@
 <?php
 
-use App\Http\Controllers\UserImportController;
+use App\Http\Controllers\EventRecordImportController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn() => response()->json(['message' => 'OK']))->name('home');
 
-// Route::middleware('auth')->group(function () {
-Route::get('/users/import', [UserImportController::class, 'create'])
-    ->name('users.import.create');
-Route::post('/users/import', [UserImportController::class, 'store'])
-    ->name('users.import.store');
-// });
+Route::post('/records/import', [EventRecordImportController::class, 'store'])
+    ->name('records.import');
