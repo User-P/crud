@@ -34,18 +34,7 @@ class UsersImport implements OnEachRow, WithHeadingRow, WithValidation, SkipsOnF
         $data = $this->sanitizeRow($row->toArray());
         $email = $data['email'];
 
-        // Normalizar y validar el campo email_verified_at (formato estricto)
-        try {
-            $emailVerifiedAt = EmailVerifiedAtFormat::normalize($data['email_verified_at'] ?? null);
-        } catch (\InvalidArgumentException $e) {
-            $this->onFailure(new Failure(
-                $row->getIndex(),
-                'email_verified_at',
-                [$e->getMessage()],
-                $row->toArray()
-            ));
-            return;
-        }
+        $emailVerifiedAt = EmailVerifiedAtFormat::normalize($data['email_verified_at'] ?? null);
         $password = $this->preparePassword($data['password'] ?? null);
 
         $payload = array_filter([
@@ -53,8 +42,7 @@ class UsersImport implements OnEachRow, WithHeadingRow, WithValidation, SkipsOnF
             'email' => $email,
             'role' => $data['role'] ?? 'user',
             'country_id' => $data['country_id'],
-            // Guardar como string compatible con timestamp si existe
-            'email_verified_at' => $emailVerifiedAt?->format('Y-m-d H:i:s'),
+            'email_verified_at' => $emailVerifiedAt,
         ], static fn($value) => $value !== null);
 
         $existingUser = User::query()->where('email', $email)->first();
@@ -94,13 +82,13 @@ class UsersImport implements OnEachRow, WithHeadingRow, WithValidation, SkipsOnF
     public function rules(): array
     {
         $nameRegex = '/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u';
+
         return [
             '*.name' => ['required', 'string', 'min:2', 'max:255', "regex:{$nameRegex}"],
             '*.email' => ['required', 'string', 'email:rfc', 'max:255'],
             '*.password' => ['nullable', 'string', 'min:8', 'max:255'],
             '*.role' => ['nullable', 'string', 'in:admin,user'],
             '*.country_id' => ['nullable', 'integer', 'exists:countries,id'],
-            // Validación estricta del formato de fecha
             '*.email_verified_at' => ['nullable', new EmailVerifiedAtFormat()],
         ];
     }
@@ -121,7 +109,6 @@ class UsersImport implements OnEachRow, WithHeadingRow, WithValidation, SkipsOnF
             '*.password.max' => 'La contraseña no puede tener más de 255 caracteres.',
             '*.role.in' => 'El rol debe ser admin o user.',
             '*.country_id.exists' => 'El country_id indicado no existe.',
-            '*.email_verified_at' => 'El campo email_verified_at debe tener el formato DD/MM/YYYY HH:mm:ss o estar vacío.',
         ];
     }
 
@@ -165,37 +152,70 @@ class UsersImport implements OnEachRow, WithHeadingRow, WithValidation, SkipsOnF
      * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
-    // Simplificar sanitizeRow, solo limpiar strings y dejar validación a las reglas.
     private function sanitizeRow(array $row): array
     {
+        $name = Arr::get($row, 'name');
+        $email = Arr::get($row, 'email');
+        $role = Arr::get($row, 'role');
+        $countryId = Arr::get($row, 'country_id');
+
         return [
-            'name' => isset($row['name']) && is_string($row['name']) ? trim($row['name']) : $row['name'],
-            'email' => isset($row['email']) && is_string($row['email']) ? strtolower(trim($row['email'])) : $row['email'],
-            'password' => $row['password'] ?? null,
-            'role' => $row['role'] ?? null,
-            'country_id' => $row['country_id'] ?? null,
-            'email_verified_at' => $row['email_verified_at'] ?? null,
+            'name' => is_string($name) ? trim($name) : $name,
+            'email' => is_string($email) ? strtolower(trim($email)) : $email,
+            'password' => Arr::get($row, 'password'),
+            'role' => $this->normalizeRole($role),
+            'country_id' => $this->normalizeCountryId($countryId),
+            'email_verified_at' => Arr::get($row, 'email_verified_at'),
         ];
     }
 
-
-    // Método normalizeRole eliminado por redundante.
-
-
-    // Método normalizeCountryId eliminado por redundante.
-
-    // Simplificar preparePassword: solo hashear si no está hasheado.
-    private function preparePassword(mixed $password): ?string
+    private function normalizeRole(mixed $role): ?string
     {
-        if (!is_string($password) || trim($password) === '') {
+        if (!is_string($role)) {
             return null;
         }
-        $password = trim($password);
-        // Si ya está hasheado (bcrypt), no volver a hashear
-        if (preg_match('/^\$2y\$/', $password)) {
-            return $password;
+
+        $normalized = strtolower(trim($role));
+
+        return in_array($normalized, ['admin', 'user'], true) ? $normalized : null;
+    }
+
+    private function normalizeCountryId(mixed $countryId): ?int
+    {
+        if ($countryId === null) {
+            return null;
         }
-        return Hash::make($password);
+
+        if ($countryId === '') {
+            return null;
+        }
+
+        return (int) $countryId;
+    }
+
+    private function preparePassword(mixed $password): ?string
+    {
+        if (!is_string($password)) {
+            return null;
+        }
+
+        $password = trim($password);
+
+        if ($password === '') {
+            return null;
+        }
+
+        $info = password_get_info($password);
+
+        if (($info['algo'] ?? 0) === 0) {
+            return Hash::make($password);
+        }
+
+        if (Hash::needsRehash($password)) {
+            return Hash::make($password);
+        }
+
+        return $password;
     }
 
     /**
