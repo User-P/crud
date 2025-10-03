@@ -83,7 +83,7 @@
             margin-top: 1.5rem;
         }
         .card {
-            background: #f9fafb;
+            background: blue;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 1rem;
@@ -104,6 +104,7 @@
             border: 1px solid #e5e7eb;
             padding: 0.75rem;
             text-align: left;
+            color: #111827
         }
         th {
             background: #f3f4f6;
@@ -112,9 +113,6 @@
             background: #eef2ff;
             padding: 0.25rem 0.4rem;
             border-radius: 4px;
-        }
-        .hidden {
-            display: none;
         }
     </style>
 </head>
