@@ -123,6 +123,12 @@
 
         <div id="feedback" class="alert hidden"></div>
 
+        <p>
+            Descarga la estructura esperada desde
+            <a href="{{ route('records.template') }}">esta plantilla Excel</a>
+            y úsala como base para garantizar que las cabeceras y el orden sean válidos.
+        </p>
+
         <form id="import-form" enctype="multipart/form-data">
             @csrf
             <div>
