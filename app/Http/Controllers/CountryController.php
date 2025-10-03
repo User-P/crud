@@ -42,7 +42,7 @@ class CountryController extends Controller
             // Consumir API de países (RestCountries)
             $response = Http::retry(3, 500)
                 ->timeout(30)
-                ->get('https://restcountries.com/v3.1/all');
+                ->get('https://restcountries.com/v3.1/lang/spanish');
 
             if (!$response->successful()) {
                 return response()->json([
