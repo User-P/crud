@@ -50,9 +50,13 @@ class EventRecordsImport implements OnEachRow, WithHeadingRow, WithValidation, S
             '*.category' => ['required', 'string', 'max:120'],
             '*.description' => ['required', 'string'],
             '*.notes' => ['nullable', 'string'],
-            '*.recorded_at' => [
+            '*.recorded_date' => [
                 'required',
-                'regex:/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', // Valida el formato YYYY-MM-DD HH:MM:SS
+                'date_format:Y-m-d', // Validar solo la fecha (YYYY-MM-DD)
+            ],
+            '*.recorded_time' => [
+                'required',
+                'regex:/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', // Validar solo la hora (HH:MM:SS)
             ],
         ];
     }
@@ -63,8 +67,10 @@ class EventRecordsImport implements OnEachRow, WithHeadingRow, WithValidation, S
             '*.source.required' => 'Debes indicar la fuente.',
             '*.category.required' => 'Debes indicar la categoría.',
             '*.description.required' => 'La descripción es obligatoria.',
-            '*.recorded_at.required' => 'El campo recorded_at es obligatorio.',
-            '*.recorded_at.regex' => 'El campo recorded_at debe estar en el formato "YYYY-MM-DD HH:MM:SS" e incluir una hora válida.',
+            '*.recorded_date.required' => 'El campo recorded_date es obligatorio.',
+            '*.recorded_date.date_format' => 'El campo recorded_date debe estar en el formato "YYYY-MM-DD".',
+            '*.recorded_time.required' => 'El campo recorded_time es obligatorio.',
+            '*.recorded_time.regex' => 'El campo recorded_time debe estar en el formato "HH:MM:SS".',
         ];
     }
 
@@ -94,7 +100,11 @@ class EventRecordsImport implements OnEachRow, WithHeadingRow, WithValidation, S
 
     private function prepareRow(array $row): array
     {
-        $recordedAt = $this->parseTimestamp(Arr::get($row, 'recorded_at'));
+        $recordedDate = Arr::get($row, 'recorded_date');
+        $recordedTime = Arr::get($row, 'recorded_time');
+
+        // Combinar fecha y hora en un solo timestamp
+        $recordedAt = $this->combineDateAndTime($recordedDate, $recordedTime);
 
         return [
             'source' => trim((string) Arr::get($row, 'source')),
@@ -116,21 +126,12 @@ class EventRecordsImport implements OnEachRow, WithHeadingRow, WithValidation, S
         return $notes === '' ? null : $notes;
     }
 
-    private function parseTimestamp(mixed $value): string
+    private function combineDateAndTime(string $date, string $time): string
     {
-        if ($value === null || $value === '') {
-            throw new \InvalidArgumentException('El campo recorded_at no puede estar vacío.');
-        }
-
-        // Verificar si el formato es correcto
-        if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', (string) $value)) {
-            throw new \InvalidArgumentException('El campo recorded_at debe estar en el formato "YYYY-MM-DD HH:MM:SS".');
-        }
-
         try {
-            return Carbon::parse((string) $value)->toDateTimeString();
+            return Carbon::createFromFormat('Y-m-d H:i:s', "{$date} {$time}")->toDateTimeString();
         } catch (\Exception $e) {
-            throw new \InvalidArgumentException('El campo recorded_at contiene una fecha u hora inválida.');
+            throw new \InvalidArgumentException('Los campos recorded_date y recorded_time no forman un timestamp válido.');
         }
     }
 }
