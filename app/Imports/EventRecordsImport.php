@@ -50,7 +50,10 @@ class EventRecordsImport implements OnEachRow, WithHeadingRow, WithValidation, S
             '*.category' => ['required', 'string', 'max:120'],
             '*.description' => ['required', 'string'],
             '*.notes' => ['nullable', 'string'],
-            '*.recorded_at' => ['required'],
+            '*.recorded_at' => [
+                'required',
+                'regex:/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', // Valida el formato YYYY-MM-DD HH:MM:SS
+            ],
         ];
     }
 
@@ -61,6 +64,7 @@ class EventRecordsImport implements OnEachRow, WithHeadingRow, WithValidation, S
             '*.category.required' => 'Debes indicar la categoría.',
             '*.description.required' => 'La descripción es obligatoria.',
             '*.recorded_at.required' => 'El campo recorded_at es obligatorio.',
+            '*.recorded_at.regex' => 'El campo recorded_at debe estar en el formato "YYYY-MM-DD HH:MM:SS" e incluir una hora válida.',
         ];
     }
 
@@ -115,14 +119,18 @@ class EventRecordsImport implements OnEachRow, WithHeadingRow, WithValidation, S
     private function parseTimestamp(mixed $value): string
     {
         if ($value === null || $value === '') {
-            throw new \InvalidArgumentException('Timestamp inválido.');
+            throw new \InvalidArgumentException('El campo recorded_at no puede estar vacío.');
         }
 
-        if (is_numeric($value)) {
-            $timestamp = Carbon::createFromTimestampUTC(((float) $value - 25569) * 86400);
-            return $timestamp->toDateTimeString();
+        // Verificar si el formato es correcto
+        if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', (string) $value)) {
+            throw new \InvalidArgumentException('El campo recorded_at debe estar en el formato "YYYY-MM-DD HH:MM:SS".');
         }
 
-        return Carbon::parse((string) $value)->toDateTimeString();
+        try {
+            return Carbon::parse((string) $value)->toDateTimeString();
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException('El campo recorded_at contiene una fecha u hora inválida.');
+        }
     }
 }
