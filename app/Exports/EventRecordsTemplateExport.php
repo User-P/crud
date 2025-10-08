@@ -4,24 +4,20 @@ namespace App\Exports;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class EventRecordsTemplateExport implements FromCollection, WithHeadings, WithStyles, WithColumnWidths
+class EventRecordsTemplateExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithEvents
 {
     public function collection(): Collection
     {
-        return collect([
-            [
-                'Sensor A',
-                'temperature',
-                'Describe el evento aquí',
-                'Notas opcionales',
-                '2025-10-03 09:15:00',
-            ],
-        ]);
+        return collect([[]]);
     }
 
     public function headings(): array
@@ -35,21 +31,71 @@ class EventRecordsTemplateExport implements FromCollection, WithHeadings, WithSt
         ];
     }
 
+    public function registerEvents(): array {
+
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+
+                $dropdown_cell = 'A';
+                $dropdown_range = 'A2:A' . ($event->sheet->getHighestRow() + 1);
+                $options = [
+                    'si',
+                    'no',
+                ];
+                $this->getDataValidation($event, $dropdown_cell, $options, $dropdown_range, false);
+
+                $dropdown_cell = 'B';
+                $dropdown_range = 'B2:B' . ($event->sheet->getHighestRow() + 1);
+                $options = [
+                    'lorem ipsum 1',
+                    'lorem ipsum 2',
+                    'lorem ipsum 3',
+                    'lorem ipsum 4',
+                    'lorem ipsum 5',
+                    'texto grande para hacer pruebas de como se ve en el excel 1',
+                    'texto grande para hacer pruebas de como se ve en el excel 2',
+                    'texto grande para hacer pruebas de como se ve en el excel 3',
+                    'texto grande para hacer pruebas de como se ve en el excel 4',
+                    'texto grande para hacer pruebas de como se ve en el excel 5',
+                    'pruerba con acentos áéíóú 1',
+                    'prueba con acentos áéíóú 2',
+                    'prueba con acentos áéíóú 3',
+                    'prueba con acentos áéíóú 4',
+                    'prueba con acentos áéíóú 5',
+                ];
+                $this->getDataValidation($event, $dropdown_cell, $options, $dropdown_range, false);
+            },
+        ];
+    }
+
+    public function getDataValidation(AfterSheet $event, string $dropdown_cell, array $options, string $dropdown_range, bool $type, string $nameSheet = null): DataValidation
+    {
+        $validation = $event->sheet->getCell("{$dropdown_cell}7")->getDataValidation();
+        $validation->setType(DataValidation::TYPE_LIST);
+        $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+        $validation->setAllowBlank(false);
+        $validation->setShowInputMessage(true);
+        $validation->setShowErrorMessage(true);
+        $validation->setShowDropDown(true);
+        $validation->setErrorTitle('Error!');
+        $validation->setError('El valor especificado no se encuentra en la lista, debes seleccionar un valor de la lista.');
+        $validation->setPromptTitle('Selecciona un valor de la lista');
+        $validation->setPrompt('Por favor selecciona un valor de la lista.');
+        if (!$type) {
+            $validation->setFormula1('"' . implode(',', $options) . '"');
+        } else {
+            $count = count($options);
+            $validation->setFormula1($nameSheet . '!$A$2:$A$' . ($count + 1));
+        }
+
+        $event->sheet->setDataValidation($dropdown_range, $validation);
+        return $validation;
+    }
+
     public function styles(Worksheet $sheet): array
     {
         return [
             1 => ['font' => ['bold' => true]],
-        ];
-    }
-
-    public function columnWidths(): array
-    {
-        return [
-            'A' => 20,
-            'B' => 18,
-            'C' => 45,
-            'D' => 28,
-            'E' => 24,
         ];
     }
 }
