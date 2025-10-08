@@ -5,7 +5,6 @@ namespace App\Exports;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -15,6 +14,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EventRecordsTemplateExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithEvents
 {
+    private const SOURCE_OPTIONS = [
+        'si',
+        'no',
+    ];
+
     public function collection(): Collection
     {
         return collect([[]]);
@@ -38,16 +42,19 @@ class EventRecordsTemplateExport implements FromCollection, WithHeadings, WithSt
 
                 $dropdown_cell = 'A';
                 $dropdown_range = 'A2:A' . ($event->sheet->getHighestRow() + 1);
-                $options = [
-                    'si',
-                    'no',
-                ];
-                $this->getDataValidation($event, $dropdown_cell, $options, $dropdown_range, false);
+                $this->getDataValidation($event, $dropdown_cell, self::SOURCE_OPTIONS, $dropdown_range, false);
 
                 $dropdown_cell = 'B';
                 $dropdown_range = 'B2:B' . ($event->sheet->getHighestRow() + 1);
-
-                $this->getDataValidation($event, $dropdown_cell, [], $dropdown_range, false);
+                $categorySheet = new CategorySheet();
+                $this->getDataValidation(
+                    $event,
+                    $dropdown_cell,
+                    CategorySheet::CATEGORIES,
+                    $dropdown_range,
+                    true,
+                    $categorySheet->title()
+                );
             },
         ];
     }
@@ -69,7 +76,8 @@ class EventRecordsTemplateExport implements FromCollection, WithHeadings, WithSt
             $validation->setFormula1('"' . implode(',', $options) . '"');
         } else {
             $count = count($options);
-            $validation->setFormula1($nameSheet . '!$A$2:$A$' . ($count + 1));
+            $sheetName = str_replace("'", "''", (string) $nameSheet);
+            $validation->setFormula1(sprintf("'%s'!\$A\$1:\$A\$%d", $sheetName, $count));
         }
 
         $event->sheet->setDataValidation($dropdown_range, $validation);
