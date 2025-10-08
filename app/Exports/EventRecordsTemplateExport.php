@@ -46,24 +46,8 @@ class EventRecordsTemplateExport implements FromCollection, WithHeadings, WithSt
 
                 $dropdown_cell = 'B';
                 $dropdown_range = 'B2:B' . ($event->sheet->getHighestRow() + 1);
-                $options = [
-                    'lorem ipsum 1',
-                    'lorem ipsum 2',
-                    'lorem ipsum 3',
-                    'lorem ipsum 4',
-                    'lorem ipsum 5',
-                    'texto grande para hacer pruebas de como se ve en el excel 1',
-                    'texto grande para hacer pruebas de como se ve en el excel 2',
-                    'texto grande para hacer pruebas de como se ve en el excel 3',
-                    'texto grande para hacer pruebas de como se ve en el excel 4',
-                    'texto grande para hacer pruebas de como se ve en el excel 5',
-                    'pruerba con acentos áéíóú 1',
-                    'prueba con acentos áéíóú 2',
-                    'prueba con acentos áéíóú 3',
-                    'prueba con acentos áéíóú 4',
-                    'prueba con acentos áéíóú 5',
-                ];
-                $this->getDataValidation($event, $dropdown_cell, $options, $dropdown_range, false);
+
+                $this->getDataValidation($event, $dropdown_cell, [], $dropdown_range, false);
             },
         ];
     }
