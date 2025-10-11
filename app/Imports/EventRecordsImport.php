@@ -57,12 +57,13 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
         try {
             $data = $this->prepareRow($raw);
         } catch (Throwable $exception) {
-            dd("Error en la fila {$this->currentRow}: " . $exception->getMessage());
+            $this->onFailure(new Failure($this->currentRow, 'fecha', [$exception->getMessage()], $raw));
+            return;
         }
 
 
         if (in_array(null, $data, true)) {
-            //Ningún campo puede ser nulo
+            $this->onFailure(new Failure($this->currentRow, 'general', ['Datos incompletos'], $raw));
             return;
         }
 
@@ -70,7 +71,7 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
             return;
         }
 
-        EventRecord::create($data);
+        EventRecord::insert($data);
         $this->created++;
     }
 
@@ -123,13 +124,27 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
 
     private function validateFormateDate(string $date): string
     {
+        // Limpiar la fecha: eliminar espacios múltiples y formato AM/PM
+        $cleanDate = trim($date);
+        // Reemplazar espacios múltiples por un solo espacio
+        $cleanDate = preg_replace('/\s+/', ' ', $cleanDate);
+        // Eliminar a.m., p.m., AM, PM (con o sin puntos)
+        $cleanDate = preg_replace('/\s*(a\.m\.|p\.m\.|am|pm)\.?/i', '', $cleanDate);
 
+        // Intentar parsear la fecha limpia con Carbon
         try {
-            $d = Carbon::createFromFormat($this->dateFormat, $date);
+            // Primero intentar con el formato esperado
+            $d = Carbon::createFromFormat($this->dateFormat, $cleanDate);
+            return $d->format($this->dateFormat);
         } catch (Throwable $exception) {
-            throw new \Exception("La fecha '$date' no tiene el formato esperado ({$this->dateFormat})");
+            // Si falla, intentar parsear con formato flexible
+            try {
+                // Carbon::parse puede manejar múltiples formatos automáticamente
+                $d = Carbon::parse($cleanDate);
+                return $d->format($this->dateFormat);
+            } catch (Throwable $e) {
+                throw new \Exception("La fecha '$date' no pudo ser procesada. Formato esperado: {$this->dateFormat}");
+            }
         }
-
-        return $date;
     }
 }

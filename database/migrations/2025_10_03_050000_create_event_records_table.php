@@ -15,7 +15,7 @@ return new class extends Migration
             $table->timestamp('fecha');
             $table->string('que_se_encontro');
             $table->string('en_donde');
-            $table->string('actividad_relevante');
+            $table->text('actividad_relevante');
             $table->string('tipo_de_actividad');
             $table->boolean('es_actividad_anomala');
         });
