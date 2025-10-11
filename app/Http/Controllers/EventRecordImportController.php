@@ -17,31 +17,29 @@ class EventRecordImportController extends Controller
         return view('records.import');
     }
 
-    public function store(EventRecordImportRequest $request): JsonResponse
+    public function store(EventRecordImportRequest $request)
     {
         $import = new EventRecordsImport();
 
         try {
             Excel::import($import, $request->file('records_file'));
         } catch (Throwable $exception) {
-            Log::error('Error al importar registros', [
-                'message' => $exception->getMessage(),
-                'trace' => $exception->getTraceAsString(),
-            ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'No fue posible procesar el archivo. Revisa los logs.',
-            ], 500);
+            dd($exception);
+            // return response()->json([
+            //     'success' => false,
+            //     'message' => 'No fue posible procesar el archivo. Revisa los logs.',
+            // ], 500);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Registros importados correctamente.',
-            'data' => [
-                'summary' => $import->getSummary(),
-                'failures' => $import->getFormattedFailures(),
-            ],
-        ]);
+        dd($import->getSummary(), $import->failures());
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Registros importados correctamente.',
+        //     'data' => [
+        //         'summary' => $import->getSummary(),
+        //         'failures' => $import->getFormattedFailures(),
+        //     ],
+        // ]);
     }
 }
