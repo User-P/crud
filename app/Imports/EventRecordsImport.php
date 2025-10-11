@@ -12,7 +12,6 @@ use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Validators\Failure;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
@@ -29,9 +28,9 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
     private int $created = 0;
     private int $duplicates = 0;
 
-    //Date para guardar en base timestamp
     private string $dateFormat = 'Y/m/d H:i:s';
     private string $cell = 'A';
+    private int $currentRow = 1;
 
 
     public function bindValue(Cell $cell, $value)
@@ -53,17 +52,26 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
 
     public function onRow(Row $row): void
     {
+        $this->currentRow = $row->getIndex();
         $raw = $row->toArray();
 
         try {
             $data = $this->prepareRow($raw);
         } catch (Throwable $exception) {
-            dd($exception, $raw);
+            // Registrar el error como Failure
+            $this->failures()->add(new Failure(
+                $this->currentRow,
+                'fecha',
+                ['Error al procesar la fecha: ' . $exception->getMessage()],
+                $raw
+            ));
+
             return;
         }
 
+
         if (in_array(null, $data, true)) {
-            //
+            //Ningún campo puede ser nulo
             return;
         }
 
@@ -104,9 +112,13 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
         ];
     }
 
+    public function getAllFailures(): array
+    {
+        return array_merge($this->failures()->toArray());
+    }
+
     private function prepareRow(array $row): array
     {
-
         $date = $this->formatDate((string) Arr::get($row, 'fecha'));
         return [
             'fecha' => $date,
@@ -120,6 +132,13 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
 
     private function formatDate(string $date): string
     {
+        $formats = [
+            'Y/m/d H:i:s',           // 2025/10/08 13:35:00
+            'd/m/Y H:i:s',           // 08/10/2025 13:35:00
+            'd/m/Y g:i:s a',         // 08/10/2025 1:35:00 pm
+            'd/m/Y h:i:s a',         // 08/10/2025 01:35:00 pm
+        ];
+
         return $date;
     }
 }
