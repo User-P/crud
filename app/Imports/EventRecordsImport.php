@@ -54,19 +54,10 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
     {
         $this->currentRow = $row->getIndex();
         $raw = $row->toArray();
-
         try {
             $data = $this->prepareRow($raw);
         } catch (Throwable $exception) {
-            // Registrar el error como Failure
-            $this->failures()->add(new Failure(
-                $this->currentRow,
-                'fecha',
-                ['Error al procesar la fecha: ' . $exception->getMessage()],
-                $raw
-            ));
-
-            return;
+            dd("Error en la fila {$this->currentRow}: " . $exception->getMessage());
         }
 
 
@@ -119,7 +110,7 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
 
     private function prepareRow(array $row): array
     {
-        $date = $this->formatDate((string) Arr::get($row, 'fecha'));
+        $date = $this->validateFormateDate((string) Arr::get($row, 'fecha'));
         return [
             'fecha' => $date,
             'que_se_encontro' => trim((string) Arr::get($row, 'que_se_encontro')),
@@ -130,14 +121,14 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
         ];
     }
 
-    private function formatDate(string $date): string
+    private function validateFormateDate(string $date): string
     {
-        $formats = [
-            'Y/m/d H:i:s',           // 2025/10/08 13:35:00
-            'd/m/Y H:i:s',           // 08/10/2025 13:35:00
-            'd/m/Y g:i:s a',         // 08/10/2025 1:35:00 pm
-            'd/m/Y h:i:s a',         // 08/10/2025 01:35:00 pm
-        ];
+
+        try {
+            $d = Carbon::createFromFormat($this->dateFormat, $date);
+        } catch (Throwable $exception) {
+            throw new \Exception("La fecha '$date' no tiene el formato esperado ({$this->dateFormat})");
+        }
 
         return $date;
     }

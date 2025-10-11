@@ -38,6 +38,6 @@ class EventRecordsMainImport implements WithMultipleSheets
 
     public function failures()
     {
-        return $this->sheetImport->failures();
+        return $this->sheetImport;
     }
 }
