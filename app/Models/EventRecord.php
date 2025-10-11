@@ -11,13 +11,7 @@ class EventRecord extends Model
 
     public $timestamps = false;
 
-    protected $fillable = [
-        'source',
-        'category',
-        'description',
-        'notes',
-        'recorded_at',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'recorded_at' => 'datetime',
