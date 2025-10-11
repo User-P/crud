@@ -112,12 +112,19 @@ class EventRecordsImport extends DefaultValueBinder implements OnEachRow, WithHe
     private function prepareRow(array $row): array
     {
         $date = $this->validateFormateDate((string) Arr::get($row, 'fecha'));
+
+        // Helper para limpiar y validar campos de texto
+        $cleanField = function ($value) {
+            $cleaned = trim((string) $value);
+            return $cleaned === '' ? null : $cleaned;
+        };
+
         return [
             'fecha' => $date,
-            'que_se_encontro' => trim((string) Arr::get($row, 'que_se_encontro')),
-            'en_donde' => trim((string) Arr::get($row, 'en_donde')),
-            'actividad_relevante' => trim((string) Arr::get($row, 'actividad_relevante')),
-            'tipo_de_actividad' => trim((string) Arr::get($row, 'tipo_de_actividad')),
+            'que_se_encontro' => $cleanField(Arr::get($row, 'que_se_encontro')),
+            'en_donde' => $cleanField(Arr::get($row, 'en_donde')),
+            'actividad_relevante' => $cleanField(Arr::get($row, 'actividad_relevante')),
+            'tipo_de_actividad' => $cleanField(Arr::get($row, 'tipo_de_actividad')),
             'es_actividad_anomala' => (bool) Arr::get($row, 'es_actividad_anomala'),
         ];
     }
