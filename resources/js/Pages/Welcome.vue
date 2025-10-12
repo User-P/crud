@@ -1,26 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-6">
     <div class="max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-8">
-      <div class="text-center mb-8">
-        <h1 class="text-5xl font-bold text-gray-800 mb-4">
-          🎉 ¡Inertia.js + Vue 3 está funcionando!
-        </h1>
-        <p class="text-xl text-gray-600">
-          Laravel {{ laravelVersion }} con Inertia y Vue 3
-        </p>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-6 mb-8">
-        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-          <h2 class="text-2xl font-bold mb-2">🚀 Backend</h2>
-          <p class="text-purple-100">Laravel + Inertia.js</p>
-        </div>
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <h2 class="text-2xl font-bold mb-2">⚡ Frontend</h2>
-          <p class="text-blue-100">Vue 3 + Vite</p>
-        </div>
-      </div>
-
       <div class="bg-gray-50 rounded-xl p-6">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">✅ Próximos pasos:</h3>
         <ul class="space-y-3 text-gray-700">
@@ -50,14 +30,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-
-// Props desde Laravel
-interface Props {
-  laravelVersion?: string
-}
-
-defineProps<Props>()
-
 // Estado reactivo de Vue
 const counter = ref<number>(0)
 
