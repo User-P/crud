@@ -12,6 +12,18 @@ Route::get('/welcome', function () {
     ]);
 })->name('welcome');
 
+// Ruta de ejemplo con TypeScript
+Route::get('/typescript-example', function () {
+    return Inertia::render('TypeScriptExample', [
+        'initialCount' => 10,
+        'user' => [
+            'name' => 'María García',
+            'email' => 'maria@example.com',
+            'age' => 25
+        ]
+    ]);
+})->name('typescript.example');
+
 Route::get('/', [EventRecordImportController::class, 'create'])
     ->name('records.import.form');
 

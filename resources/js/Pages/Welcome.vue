@@ -29,16 +29,8 @@
             <span>Crea tus componentes Vue en <code class="bg-gray-200 px-2 py-1 rounded">resources/js/Pages/</code></span>
           </li>
           <li class="flex items-start">
-            <span class="text-2xl mr-3">🎨</span>
-            <span>Agrega Tailwind CSS (opcional pero recomendado)</span>
-          </li>
-          <li class="flex items-start">
             <span class="text-2xl mr-3">🔄</span>
             <span>Usa <code class="bg-gray-200 px-2 py-1 rounded">Inertia::render('ComponentName')</code> en tus controladores</span>
-          </li>
-          <li class="flex items-start">
-            <span class="text-2xl mr-3">⚡</span>
-            <span>Ejecuta <code class="bg-gray-200 px-2 py-1 rounded">npm run dev</code> para desarrollo en vivo</span>
           </li>
         </ul>
       </div>
@@ -56,21 +48,20 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
 // Props desde Laravel
-defineProps({
-  laravelVersion: {
-    type: String,
-    default: '11.x'
-  }
-})
+interface Props {
+  laravelVersion?: string
+}
+
+defineProps<Props>()
 
 // Estado reactivo de Vue
-const counter = ref(0)
+const counter = ref<number>(0)
 
-const incrementCounter = () => {
+const incrementCounter = (): void => {
   counter.value++
 }
 </script>
