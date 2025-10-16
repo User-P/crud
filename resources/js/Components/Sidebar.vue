@@ -112,6 +112,7 @@ interface NavigationItem {
 
 const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Chat', href: '/welcome', icon: HomeIcon },
   { name: 'Usuarios', href: '/users', icon: UsersIcon },
   { name: 'Países', href: '/countries', icon: FolderIcon },
   { name: 'Eventos', href: '/events', icon: CalendarIcon },
