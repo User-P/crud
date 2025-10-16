@@ -24,6 +24,31 @@ Route::get('/typescript-example', function () {
     ]);
 })->name('typescript.example');
 
+// ============ Admin Panel Routes ============
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->name('dashboard');
+
+Route::get('/users', function () {
+    return Inertia::render('Users/Index');
+})->name('users.index');
+
+Route::get('/countries', function () {
+    return Inertia::render('Countries/Index');
+})->name('countries.index');
+
+Route::get('/events', function () {
+    return Inertia::render('Events/Index');
+})->name('events.index');
+
+Route::get('/statistics', function () {
+    return Inertia::render('Statistics/Index');
+})->name('statistics.index');
+
+Route::get('/settings', function () {
+    return Inertia::render('Settings/Index');
+})->name('settings.index');
+
 Route::get('/', [EventRecordImportController::class, 'create'])
     ->name('records.import.form');
 
