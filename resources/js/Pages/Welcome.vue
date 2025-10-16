@@ -1,16 +1,22 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-6">
-   <!-- mostrar quotes con vfor -->
-    <ol class="space-y-4 max-w-2xl bg-white p-6 rounded-xl shadow-lg">
-      <li v-for="(item, index) in quotes" :key="index" class="border-b pb-4 last:border-0 last:pb-0">
-        <p class="text-gray-800 italic">"{{ item.quote }}"</p>
-        <p class="text-gray-600 text-right mt-2">- {{ item.author }}</p>
-      </li>
-    </ol>
-  </div>
+  <AdminLayout
+   title="Welcome"
+    subtitle="Bienvenido a tu panel de administración"
+    :breadcrumbs="[{ name: 'test' }]">
+      <div class="bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-6">
+          <!-- mostrar quotes con vfor -->
+          <ol class="space-y-4 max-w-2xl bg-white p-6 rounded-xl shadow-lg">
+              <li v-for="(item, index) in quotes" :key="index" class="border-b pb-4 last:border-0 last:pb-0">
+                  <p class="text-gray-800 italic">"{{ item.quote }}"</p>
+                  <p class="text-gray-600 text-right mt-2">- {{ item.author }}</p>
+                </li>
+            </ol>
+        </div>
+    </AdminLayout>
 </template>
 
 <script setup lang="ts">
+import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const quotes = [
     { quote: 'The night is darkest just before the dawn. And I promise you, the dawn is coming.', author: 'Harvey Dent, The Dark Knight' },
