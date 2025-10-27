@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Ruta de ejemplo con Inertia
-Route::get('/welcome', function () {
-    return Inertia::render('Welcome', [
+Route::get('/chat', function () {
+    return Inertia::render('Chat/Index', [
         'laravelVersion' => app()->version(),
     ]);
 })->name('welcome');
