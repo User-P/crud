@@ -26,9 +26,11 @@
 
         <!-- User Profile -->
         <div class="border-t border-gray-800 p-4">
-            <Menu as="div" class="relative">
-                <MenuButton
-                    class="flex w-full items-center gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+            <div class="relative">
+                <button
+                    class="flex w-full items-center gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+                    type="button"
+                    @click="toggleProfileMenu">
                     <img class="h-8 w-8 rounded-full bg-gray-800"
                         src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff"
                         alt="User avatar" />
@@ -37,45 +39,17 @@
                         <span class="block text-xs text-gray-500">{{ user?.email || 'admin@example.com' }}</span>
                     </span>
                     <ChevronUpDownIcon class="h-5 w-5" aria-hidden="true" />
-                </MenuButton>
-                <transition enter-active-class="transition ease-out duration-100"
-                    enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
-                    leave-active-class="transition ease-in duration-75"
-                    leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                    <MenuItems
-                        class="absolute bottom-full left-0 mb-2 w-full origin-bottom rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <MenuItem v-slot="{ active }">
-                        <a href="/profile"
-                            :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                            @click.prevent="navigate('/profile')">
-                            Tu Perfil
-                        </a>
-                        </MenuItem>
-                        <MenuItem v-slot="{ active }">
-                        <a href="/settings"
-                            :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                            @click.prevent="navigate('/settings')">
-                            Configuración
-                        </a>
-                        </MenuItem>
-                        <MenuItem v-slot="{ active }">
-                        <a href="/logout"
-                            :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                            @click.prevent="logout">
-                            Cerrar Sesión
-                        </a>
-                        </MenuItem>
-                    </MenuItems>
-                </transition>
-            </Menu>
+                </button>
+                <PrimeMenu ref="profileMenu" :model="profileMenuItems" popup />
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+import PrimeMenu, { type MenuMethods } from 'primevue/menu'
 import {
     HomeIcon,
     UsersIcon,
@@ -104,6 +78,18 @@ const navigation: NavigationItem[] = [
 
 const page = usePage<{ auth?: { user: any } }>()
 const user = computed(() => page.props.auth?.user)
+
+const profileMenu = ref<MenuMethods | null>(null)
+const profileMenuItems = [
+    { label: 'Tu Perfil', icon: 'pi pi-user', command: () => navigate('/profile') },
+    { label: 'Configuración', icon: 'pi pi-cog', command: () => navigate('/settings') },
+    { separator: true },
+    { label: 'Cerrar Sesión', icon: 'pi pi-sign-out', command: () => logout() },
+]
+
+const toggleProfileMenu = (event: MouseEvent): void => {
+    profileMenu.value?.toggle(event)
+}
 
 const isCurrentRoute = (href: string): boolean => {
     return window.location.pathname === href

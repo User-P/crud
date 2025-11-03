@@ -47,8 +47,8 @@
         />
 
         <!-- Profile dropdown -->
-        <Menu as="div" class="relative">
-          <MenuButton class="-m-1.5 flex items-center p-1.5">
+        <div class="relative">
+          <button class="-m-1.5 flex items-center p-1.5" type="button" @click="toggleProfileMenu">
             <span class="sr-only">Abrir menú de usuario</span>
             <img
               class="h-8 w-8 rounded-full bg-gray-50"
@@ -67,54 +67,18 @@
                 aria-hidden="true"
               />
             </span>
-          </MenuButton>
-          <transition
-            enter-active-class="transition ease-out duration-100"
-            enter-from-class="transform opacity-0 scale-95"
-            enter-to-class="transform opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-75"
-            leave-from-class="transform opacity-100 scale-100"
-            leave-to-class="transform opacity-0 scale-95"
-          >
-            <MenuItems
-              class="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none"
-            >
-              <MenuItem v-slot="{ active }">
-                <a
-                  href="/profile"
-                  :class="[
-                    active ? 'bg-gray-50' : '',
-                    'block px-3 py-1 text-sm leading-6 text-gray-900',
-                  ]"
-                  @click.prevent="navigate('/profile')"
-                >
-                  Tu Perfil
-                </a>
-              </MenuItem>
-              <MenuItem v-slot="{ active }">
-                <a
-                  href="/logout"
-                  :class="[
-                    active ? 'bg-gray-50' : '',
-                    'block px-3 py-1 text-sm leading-6 text-gray-900',
-                  ]"
-                  @click.prevent="logout"
-                >
-                  Cerrar Sesión
-                </a>
-              </MenuItem>
-            </MenuItems>
-          </transition>
-        </Menu>
+          </button>
+          <PrimeMenu ref="profileMenu" :model="profileMenuItems" popup />
+        </div>
       </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
+import PrimeMenu, { type MenuMethods } from 'primevue/menu'
 import {
   Bars3Icon,
   BellIcon,
@@ -128,6 +92,17 @@ defineEmits<{
 
 const page = usePage<{ auth?: { user: any } }>()
 const user = computed(() => page.props.auth?.user)
+
+const profileMenu = ref<MenuMethods | null>(null)
+const profileMenuItems = [
+  { label: 'Tu Perfil', icon: 'pi pi-user', command: () => navigate('/profile') },
+  { separator: true },
+  { label: 'Cerrar Sesión', icon: 'pi pi-sign-out', command: () => logout() },
+]
+
+const toggleProfileMenu = (event: MouseEvent): void => {
+  profileMenu.value?.toggle(event)
+}
 
 const navigate = (href: string): void => {
   router.visit(href)
