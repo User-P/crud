@@ -4,8 +4,8 @@
             <div class="bg-blue-500 p-4 text-white flex justify-between items-center">
                 <span>La mera mera</span>
             </div>
-            <ChatMessages />
-            <MessageBox />
+            <ChatMessages :messages="messages" />
+            <MessageBox @send-message="onMessage" />
         </div>
     </AdminLayout>
 </template>
@@ -13,7 +13,31 @@
 <script setup lang="ts">
 import ChatMessages from '@/Components/ChatMessages.vue';
 import MessageBox from '@/Components/MessageBox.vue';
+import { ChatMessage } from '@/interfaces/chat-message.interface';
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import { ref } from 'vue';
+
+const messages = ref<ChatMessage[]>([{
+    id: new Date().getTime(),
+    message: 'hola mundo',
+    itsMine: true
+}, {
+    id: new Date().getTime(),
+    message: 'hola mundo',
+    itsMine: false
+}, {
+    id: new Date().getTime(),
+    message: 'hola mundo',
+    itsMine: true
+}])
+
+const onMessage = (text: string) => {
+    messages.value.push({
+        id: new Date().getTime(),
+        itsMine: true,
+        message: text
+    })
+}
 
 </script>
 
