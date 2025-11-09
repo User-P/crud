@@ -45,6 +45,10 @@ class RegisterRequest extends FormRequest
                 'confirmed',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/',
             ],
+            'enable_two_factor' => [
+                'nullable',
+                'boolean',
+            ],
         ];
     }
 

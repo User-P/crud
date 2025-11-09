@@ -20,6 +20,12 @@ Route::middleware('guest')->group(function () {
         ->name('register');
 
     Route::post('/register', [RegisteredUserController::class, 'store']);
+
+    Route::post('/register/confirm-two-factor', [RegisteredUserController::class, 'confirmTwoFactor'])
+        ->name('register.two-factor.confirm');
+
+    Route::delete('/register/pending-two-factor', [RegisteredUserController::class, 'destroyPending'])
+        ->name('register.two-factor.cancel');
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])

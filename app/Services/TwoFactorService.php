@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -39,10 +38,10 @@ class TwoFactorService
     /**
      * Build the otpauth URL that authenticator apps understand (used for QR codes).
      */
-    public function qrCodeUrl(User $user, string $secret): string
+    public function qrCodeUrl(string $email, string $secret): string
     {
         $issuer = rawurlencode(config('app.name', 'Laravel'));
-        $email = rawurlencode($user->email);
+        $email = rawurlencode($email);
 
         return sprintf('otpauth://totp/%s:%s?secret=%s&issuer=%s', $issuer, $email, $secret, $issuer);
     }
