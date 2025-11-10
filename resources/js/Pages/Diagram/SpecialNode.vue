@@ -1,6 +1,8 @@
 <template>
     <div v-if="data?.variant === 'sidebar'" :class="['diagram-node', 'diagram-node--sidebar']">
         <span class="diagram-node__sidebar">{{ data?.title }}</span>
+        <span v-if="data?.showCoords" class="diagram-node__coords">{{ coordsLabel }}</span>
+        <Handle v-for="handle in handles" :key="handle.id" v-bind="handle" />
     </div>
     <div v-else :class="wrapperClasses">
         <span v-if="data?.badge" :class="badgeClasses">
@@ -18,12 +20,15 @@
         </p>
         <p v-if="data?.description" class="diagram-node__description" v-html="data?.description"></p>
         <p v-if="data?.footer" class="diagram-node__footer" v-html="data?.footer"></p>
+        <span v-if="data?.showCoords" class="diagram-node__coords">{{ coordsLabel }}</span>
+        <Handle v-for="handle in handles" :key="handle.id" v-bind="handle" />
     </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { NodeProps } from '@vue-flow/core'
+import { Handle } from '@vue-flow/core'
+import type { HandleType, NodeProps, Position } from '@vue-flow/core'
 
 type DiagramNodeData = {
     variant?: 'header' | 'primary' | 'sidebar' | 'model' | 'detail'
@@ -35,11 +40,23 @@ type DiagramNodeData = {
     badge?: string
     badgeTone?: 'green' | 'blue'
     accent?: string
+    showCoords?: boolean
+    handles?: DiagramHandle[]
+}
+
+type DiagramHandle = {
+    id: string
+    type: HandleType
+    position: Position
+    class?: string
+    style?: Record<string, string | number>
 }
 
 const props = defineProps<NodeProps<DiagramNodeData>>()
 
 const data = computed(() => props.data ?? {})
+const handles = computed(() => data.value.handles ?? [])
+const coordsLabel = computed(() => `${Math.round(props.position.x)}, ${Math.round(props.position.y)}`)
 
 const wrapperClasses = computed(() => [
     'diagram-node',
@@ -166,5 +183,29 @@ const badgeClasses = computed(() => [
 .diagram-node--header .diagram-node__subtitle,
 .diagram-node--header .diagram-node__footer {
     color: #0d3962;
+}
+
+.diagram-node__coords {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.diagram-node--header .diagram-node__coords,
+.diagram-node--sidebar .diagram-node__coords {
+    color: #0d3962;
+}
+
+.diagram-node__handle {
+    width: 14px;
+    height: 14px;
+    background: transparent;
+    border: none;
+    opacity: 0;
+    pointer-events: none;
 }
 </style>

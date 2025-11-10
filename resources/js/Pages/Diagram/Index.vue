@@ -1,14 +1,7 @@
 <template>
     <div class="diagram-wrapper h-[80vh] w-full border-2 border-dark rounded-xl overflow-hidden">
-        <VueFlow
-            :nodes="nodes"
-            :edges="edges"
-            :fit-view-on-init="true"
-            :pan-on-drag="false"
-            :zoom-on-scroll="false"
-            :default-edge-options="defaultEdgeOptions"
-            class="diagram-flow"
-        >
+        <VueFlow :nodes="nodes" :edges="edges" :fit-view-on-init="true" :pan-on-drag="false" :zoom-on-scroll="false"
+            :default-edge-options="defaultEdgeOptions" class="diagram-flow">
             <template #node-card="nodeProps">
                 <SpecialNode v-bind="nodeProps" />
             </template>
@@ -17,9 +10,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, type CSSProperties } from 'vue'
 import { MarkerType, Position, VueFlow } from '@vue-flow/core'
-import type { Edge, Node } from '@vue-flow/core'
+import type { Edge, HandleType, Node } from '@vue-flow/core'
 import SpecialNode from './SpecialNode.vue'
 
 type DiagramNodeData = {
@@ -32,6 +25,8 @@ type DiagramNodeData = {
     badge?: string
     badgeTone?: 'green' | 'blue'
     accent?: string
+    showCoords?: boolean
+    handles?: DiagramHandle[]
 }
 
 type RowDefinition = {
@@ -42,12 +37,35 @@ type RowDefinition = {
     outcome: DiagramNodeData
 }
 
+type DiagramHandle = {
+    id: string
+    type: HandleType
+    position: Position
+    class?: string
+    style?: CSSProperties
+}
+
+type HandleConfig = Omit<DiagramHandle, 'id'> & { key: string }
+
 type NodePlacementOptions = {
     sourcePosition?: Position
     targetPosition?: Position
 }
 
 const baseNodeStyle = { width: '260px' }
+
+const SHOW_COORDS = true
+
+const handleId = (nodeId: string, key: string) => `${nodeId}-${key}`
+
+const createHandles = (nodeId: string, configs: HandleConfig[] = []): DiagramHandle[] =>
+    configs.map((config) => ({
+        id: handleId(nodeId, config.key),
+        type: config.type,
+        position: config.position,
+        class: config.class ?? 'diagram-node__handle',
+        style: config.style
+    }))
 
 const createNode = (
     id: string,
@@ -60,7 +78,7 @@ const createNode = (
     type: 'card',
     position,
     data,
-    draggable: false,
+    draggable: true,
     selectable: false,
     connectable: false,
     focusable: false,
@@ -68,18 +86,25 @@ const createNode = (
     ...options
 })
 
-const createEdge = (id: string, source: string, target: string): Edge => ({
+const createEdge = (id: string, source: string, target: string, options: Partial<Edge> = {}): Edge => ({
     id,
     source,
     target,
-    type: 'smoothstep'
+    type: 'smoothstep',
+    ...options
 })
 
 const staticNodes: Node<DiagramNodeData>[] = [
     createNode(
         'header',
         { x: 420, y: -60 },
-        { variant: 'header', title: 'Datalake i3', subtitle: 'Modelos de Información' },
+        {
+            variant: 'header',
+            title: 'Datalake i3',
+            subtitle: 'Modelos de Información',
+            showCoords: SHOW_COORDS,
+            handles: createHandles('header', [{ key: 'bottom', type: 'source', position: Position.Bottom }])
+        },
         { width: '460px', height: '120px' },
         { sourcePosition: Position.Bottom }
     ),
@@ -93,7 +118,12 @@ const staticNodes: Node<DiagramNodeData>[] = [
             value: '32,795 / 1,425',
             description: 'Prom del 15 al 19',
             footer:
-                'Plantilla | DLP | CASB | Cyberark | Colas Impresión<br/>Políticas DLP – 10 | Reglas DLP – 27'
+                'Plantilla | DLP | CASB | Cyberark | Colas Impresión<br/>Políticas DLP – 10 | Reglas DLP – 27',
+            showCoords: SHOW_COORDS,
+            handles: createHandles('general', [
+                { key: 'top', type: 'target', position: Position.Top },
+                { key: 'left', type: 'target', position: Position.Left }
+            ])
         },
         { width: '360px' },
         { targetPosition: Position.Top }
@@ -107,7 +137,12 @@ const staticNodes: Node<DiagramNodeData>[] = [
             subtitle: 'Usuarios Monitoreados',
             value: '173 / 4',
             description: 'Prom del 15 al 19',
-            footer: 'Modelo General<br/>Políticas DLP – 3 | Reglas DLP – 3'
+            footer: 'Modelo General<br/>Políticas DLP – 3 | Reglas DLP – 3',
+            showCoords: SHOW_COORDS,
+            handles: createHandles('infinite', [
+                { key: 'top', type: 'target', position: Position.Top },
+                { key: 'left', type: 'target', position: Position.Left }
+            ])
         },
         { width: '360px' },
         { targetPosition: Position.Top }
@@ -115,7 +150,13 @@ const staticNodes: Node<DiagramNodeData>[] = [
     createNode(
         'score',
         { x: 150, y: 40 },
-        { variant: 'model', title: 'Score Infractores DLP', badge: 'COMPLETADO' },
+        {
+            variant: 'model',
+            title: 'Score Infractores DLP',
+            badge: 'COMPLETADO',
+            showCoords: SHOW_COORDS,
+            handles: createHandles('score', [{ key: 'right', type: 'source', position: Position.Right }])
+        },
         {},
         { sourcePosition: Position.Right }
     ),
@@ -124,7 +165,8 @@ const staticNodes: Node<DiagramNodeData>[] = [
         { x: -120, y: 210 },
         {
             variant: 'sidebar',
-            title: 'MODELOS DE ML'
+            title: 'MODELOS DE ML',
+            showCoords: SHOW_COORDS
         },
         { width: '120px', height: '500px' }
     )
@@ -218,46 +260,99 @@ const rowEdges: Edge[] = []
 
 rows.forEach((row, index) => {
     const y = rowStartY + index * rowGap
+    const modelId = `${row.key}-model`
+    const usersId = `${row.key}-users`
+    const sourcesId = `${row.key}-sources`
+    const outcomeId = `${row.key}-outcome`
 
     rowNodes.push(
-        createNode(`${row.key}-model`, { x: 150, y }, row.model, {}, { sourcePosition: Position.Right }),
         createNode(
-            `${row.key}-users`,
+            modelId,
+            { x: 150, y },
+            {
+                ...row.model,
+                showCoords: SHOW_COORDS,
+                handles: createHandles(modelId, [{ key: 'right', type: 'source', position: Position.Right }])
+            },
+            {},
+            { sourcePosition: Position.Right }
+        ),
+        createNode(
+            usersId,
             { x: 520, y },
-            row.users,
+            {
+                ...row.users,
+                showCoords: SHOW_COORDS,
+                handles: createHandles(usersId, [
+                    { key: 'left', type: 'target', position: Position.Left },
+                    { key: 'right', type: 'source', position: Position.Right }
+                ])
+            },
             {},
             { targetPosition: Position.Left, sourcePosition: Position.Right }
         ),
         createNode(
-            `${row.key}-sources`,
+            sourcesId,
             { x: 840, y },
-            row.sources,
+            {
+                ...row.sources,
+                showCoords: SHOW_COORDS,
+                handles: createHandles(sourcesId, [
+                    { key: 'left', type: 'target', position: Position.Left },
+                    { key: 'right', type: 'source', position: Position.Right }
+                ])
+            },
             {},
             { targetPosition: Position.Left, sourcePosition: Position.Right }
         ),
         createNode(
-            `${row.key}-outcome`,
+            outcomeId,
             { x: 1150, y },
-            row.outcome,
+            {
+                ...row.outcome,
+                showCoords: SHOW_COORDS,
+                handles: createHandles(outcomeId, [{ key: 'left', type: 'target', position: Position.Left }])
+            },
             {},
             { targetPosition: Position.Left }
         )
     )
 
     rowEdges.push(
-        createEdge(`e-${row.key}-model-users`, `${row.key}-model`, `${row.key}-users`),
-        createEdge(`e-${row.key}-users-sources`, `${row.key}-users`, `${row.key}-sources`),
-        createEdge(`e-${row.key}-sources-outcome`, `${row.key}-sources`, `${row.key}-outcome`)
+        createEdge(`e-${row.key}-model-users`, modelId, usersId, {
+            sourceHandle: handleId(modelId, 'right'),
+            targetHandle: handleId(usersId, 'left')
+        }),
+        createEdge(`e-${row.key}-users-sources`, usersId, sourcesId, {
+            sourceHandle: handleId(usersId, 'right'),
+            targetHandle: handleId(sourcesId, 'left')
+        }),
+        createEdge(`e-${row.key}-sources-outcome`, sourcesId, outcomeId, {
+            sourceHandle: handleId(sourcesId, 'right'),
+            targetHandle: handleId(outcomeId, 'left')
+        })
     )
 })
 
 const nodes = ref<Node<DiagramNodeData>[]>([...staticNodes, ...rowNodes])
 
 const edges = ref<Edge[]>([
-    createEdge('e-header-general', 'header', 'general'),
-    createEdge('e-header-infinite', 'header', 'infinite'),
-    createEdge('e-score-general', 'score', 'general'),
-    createEdge('e-score-infinite', 'score', 'infinite'),
+    createEdge('e-header-general', 'header', 'general', {
+        sourceHandle: handleId('header', 'bottom'),
+        targetHandle: handleId('general', 'top')
+    }),
+    createEdge('e-header-infinite', 'header', 'infinite', {
+        sourceHandle: handleId('header', 'bottom'),
+        targetHandle: handleId('infinite', 'top')
+    }),
+    createEdge('e-score-general', 'score', 'general', {
+        sourceHandle: handleId('score', 'right'),
+        targetHandle: handleId('general', 'left')
+    }),
+    createEdge('e-score-infinite', 'score', 'infinite', {
+        sourceHandle: handleId('score', 'right'),
+        targetHandle: handleId('infinite', 'left')
+    }),
     ...rowEdges
 ])
 
