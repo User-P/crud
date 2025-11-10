@@ -69,6 +69,8 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Users/Index');
     })->name('users.index');
 
+
+
     Route::get('/countries', function () {
         return Inertia::render('Countries/Index');
     })->name('countries.index');
@@ -77,13 +79,13 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Events/Index');
     })->name('events.index');
 
-    // Route::get('/diagram', function () {
-    //     return Inertia::render('Diagram/Index');
-    // })->name('diagram.index');
-
     Route::get('/diagram', function () {
         return Inertia::render('Diagram/Index');
     });
+
+    Route::get('/statistics', function () {
+        return Inertia::render('Statistics/Index');
+    })->name('users.index');
 
     Route::get('/settings', SettingsController::class)
         ->name('settings.index');
