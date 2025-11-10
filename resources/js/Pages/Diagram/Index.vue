@@ -103,7 +103,6 @@ const staticNodes: Node<DiagramNodeData>[] = [
             title: 'Datalake i3',
             subtitle: 'Modelos de Información',
             showCoords: SHOW_COORDS,
-            handles: createHandles('header', [{ key: 'bottom', type: 'source', position: Position.Bottom }])
         },
         { width: '460px', height: '120px' },
         { sourcePosition: Position.Bottom }
@@ -337,17 +336,10 @@ rows.forEach((row, index) => {
 const nodes = ref<Node<DiagramNodeData>[]>([...staticNodes, ...rowNodes])
 
 const edges = ref<Edge[]>([
-    createEdge('e-header-general', 'header', 'general', {
-        sourceHandle: handleId('header', 'bottom'),
-        targetHandle: handleId('general', 'top')
-    }),
-    createEdge('e-header-infinite', 'header', 'infinite', {
-        sourceHandle: handleId('header', 'bottom'),
-        targetHandle: handleId('infinite', 'top')
-    }),
+
     createEdge('e-score-general', 'score', 'general', {
         sourceHandle: handleId('score', 'right'),
-        targetHandle: handleId('general', 'left')
+        targetHandle: handleId('general', 'top')
     }),
     createEdge('e-score-infinite', 'score', 'infinite', {
         sourceHandle: handleId('score', 'right'),
