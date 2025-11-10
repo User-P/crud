@@ -28,29 +28,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Handle } from '@vue-flow/core'
-import type { HandleType, NodeProps, Position } from '@vue-flow/core'
-
-type DiagramNodeData = {
-    variant?: 'header' | 'primary' | 'sidebar' | 'model' | 'detail'
-    title?: string
-    subtitle?: string
-    value?: string
-    description?: string
-    footer?: string
-    badge?: string
-    badgeTone?: 'green' | 'blue'
-    accent?: string
-    showCoords?: boolean
-    handles?: DiagramHandle[]
-}
-
-type DiagramHandle = {
-    id: string
-    type: HandleType
-    position: Position
-    class?: string
-    style?: Record<string, string | number>
-}
+import type { NodeProps } from '@vue-flow/core'
+import type { DiagramNodeData } from './composables/useDiagramNodes'
 
 const props = defineProps<NodeProps<DiagramNodeData>>()
 
