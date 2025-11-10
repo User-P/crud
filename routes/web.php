@@ -77,9 +77,13 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Events/Index');
     })->name('events.index');
 
-    Route::get('/statistics', function () {
-        return Inertia::render('Statistics/Index');
-    })->name('statistics.index');
+    // Route::get('/diagram', function () {
+    //     return Inertia::render('Diagram/Index');
+    // })->name('diagram.index');
+
+    Route::get('/diagram', function () {
+        return Inertia::render('Diagram/Index');
+    });
 
     Route::get('/settings', SettingsController::class)
         ->name('settings.index');
