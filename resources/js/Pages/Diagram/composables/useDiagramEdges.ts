@@ -1,6 +1,6 @@
-import { ref } from 'vue'
+import { computed, type Ref } from 'vue'
 import type { Edge } from '@vue-flow/core'
-import { diagramRowConnections, handleId } from './useDiagramNodes'
+import { handleId, type RowConnection } from './useDiagramNodes'
 
 type EdgeDescriptor = {
     id: string
@@ -50,8 +50,11 @@ const createEdge = (descriptor: EdgeDescriptor): Edge => ({
     targetHandle: descriptor.targetHandle
 })
 
-const edges = ref<Edge[]>([...staticEdges, ...diagramRowConnections].map(createEdge))
+export function useDiagramEdges(rowConnections: Ref<RowConnection[]>) {
+    const edges = computed<Edge[]>(() => [
+        ...staticEdges.map(createEdge),
+        ...rowConnections.value.map(createEdge)
+    ])
 
-export function useDiagramEdges() {
     return { edges }
 }

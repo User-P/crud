@@ -29,7 +29,7 @@
 import { computed } from 'vue'
 import { Handle } from '@vue-flow/core'
 import type { NodeProps } from '@vue-flow/core'
-import type { DiagramNodeData } from './composables/useDiagramNodes'
+import type { DiagramNodeData } from './types'
 
 const props = defineProps<NodeProps<DiagramNodeData>>()
 

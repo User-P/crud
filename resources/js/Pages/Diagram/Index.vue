@@ -10,13 +10,21 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { MarkerType, VueFlow } from '@vue-flow/core'
 import SpecialNode from './SpecialNode.vue'
 import { useDiagramEdges } from './composables/useDiagramEdges'
 import { useDiagramNodes } from './composables/useDiagramNodes'
+import { fetchDiagramData, type DiagramApiResponse } from './services/diagram.service'
 
-const { nodes } = useDiagramNodes()
-const { edges } = useDiagramEdges()
+const apiData = ref<DiagramApiResponse | null>(null)
+
+const { nodes, rowConnections } = useDiagramNodes(apiData)
+const { edges } = useDiagramEdges(rowConnections)
+
+onMounted(async () => {
+    apiData.value = await fetchDiagramData()
+})
 
 const defaultEdgeOptions = {
     type: 'smoothstep',
