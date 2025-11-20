@@ -51,9 +51,9 @@
           <button class="-m-1.5 flex items-center p-1.5" type="button" @click="toggleProfileMenu">
             <span class="sr-only">Abrir menú de usuario</span>
             <img
-              class="h-8 w-8 rounded-full bg-gray-50"
-              src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff"
-              alt=""
+              class="h-8 w-8 rounded-full bg-gray-50 object-cover"
+              :src="userAvatar"
+              :alt="user?.name || 'Usuario'"
             />
             <span class="hidden lg:flex lg:items-center">
               <span
@@ -92,6 +92,14 @@ defineEmits<{
 
 const page = usePage<{ auth?: { user: any } }>()
 const user = computed(() => page.props.auth?.user)
+const userAvatar = computed(() => {
+  if (user.value?.profile_photo_url) {
+    return user.value.profile_photo_url
+  }
+
+  const initials = encodeURIComponent(user.value?.name || 'Usuario')
+  return `https://ui-avatars.com/api/?name=${initials}&background=4f46e5&color=fff`
+})
 
 const profileMenu = ref<MenuMethods | null>(null)
 const profileMenuItems = [
