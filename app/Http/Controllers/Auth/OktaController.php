@@ -94,12 +94,12 @@ class OktaController extends Controller
             'state' => $state,
         ];
 
-        return sprintf('%s/oauth2/%s/v1/authorize?%s', $this->oktaBaseUrl(), $this->authorizationServer(), http_build_query($params));
+        return $this->authorizeEndpoint() . '?' . http_build_query($params);
     }
 
     protected function swapCodeForTokens(string $code): array
     {
-        $response = Http::asForm()->post(sprintf('%s/oauth2/%s/v1/token', $this->oktaBaseUrl(), $this->authorizationServer()), [
+        $response = Http::asForm()->post($this->tokenEndpoint(), [
             'grant_type' => 'authorization_code',
             'client_id' => config('services.okta.client_id'),
             'client_secret' => config('services.okta.client_secret'),
@@ -116,7 +116,7 @@ class OktaController extends Controller
 
     protected function fetchUserInfo(string $accessToken): array
     {
-        $response = Http::withToken($accessToken)->get(sprintf('%s/oauth2/%s/v1/userinfo', $this->oktaBaseUrl(), $this->authorizationServer()));
+        $response = Http::withToken($accessToken)->get($this->userInfoEndpoint());
 
         if (! $response->successful()) {
             throw new \RuntimeException('Userinfo request failed: '.$response->body());
@@ -169,5 +169,37 @@ class OktaController extends Controller
     protected function authorizationServer(): string
     {
         return config('services.okta.authorization_server', 'default');
+    }
+
+    protected function authorizeEndpoint(): string
+    {
+        if ($this->usesAuth0()) {
+            return $this->oktaBaseUrl() . '/authorize';
+        }
+
+        return sprintf('%s/oauth2/%s/v1/authorize', $this->oktaBaseUrl(), $this->authorizationServer());
+    }
+
+    protected function tokenEndpoint(): string
+    {
+        if ($this->usesAuth0()) {
+            return $this->oktaBaseUrl() . '/oauth/token';
+        }
+
+        return sprintf('%s/oauth2/%s/v1/token', $this->oktaBaseUrl(), $this->authorizationServer());
+    }
+
+    protected function userInfoEndpoint(): string
+    {
+        if ($this->usesAuth0()) {
+            return $this->oktaBaseUrl() . '/userinfo';
+        }
+
+        return sprintf('%s/oauth2/%s/v1/userinfo', $this->oktaBaseUrl(), $this->authorizationServer());
+    }
+
+    protected function usesAuth0(): bool
+    {
+        return strtolower((string) config('services.okta.provider', 'okta')) === 'auth0';
     }
 }
