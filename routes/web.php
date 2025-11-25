@@ -69,6 +69,10 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Statistics/Index');
     })->name('users.index');
 
+    Route::get('/organization-chart', function () {
+        return Inertia::render('OrganizationChart/Index');
+    })->name('organization-chart.index');
+
     Route::get('/settings', SettingsController::class)
         ->name('settings.index');
 
@@ -80,4 +84,45 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/records/template', TemplateDownloadController::class)
         ->name('records.template');
+
+    // Ruta de prueba para el componente de organization chart
+    Route::get('api/organization-data/endpoints', function () {
+        $data = [
+            [
+                'main' => false,
+                'name' => 'AXEL RAMIREZ CHAVEZ',
+                'cve' => '19057479',
+                'devices' => [],
+            ],
+            [
+                'main' => true,
+                'name' => 'LUIS ALBERTO VALENTE ROMERO',
+                'cve' => '1140594',
+                'devices' => [
+                    [
+                        'uuid' => '89e72a4d-cc2a-4d72-89a8-0fdbd85f6919',
+                        'name' => 'GS3000069D01LE',
+                    ],
+                    [
+                        'uuid' => 'a7056fba-68e1-4bbc-a580-34fa68ab4d28',
+                        'name' => 'EKT1231783LAP',
+                    ],
+                    [
+                        'uuid' => 'bc224d19-9f32-4a2a-94e0-208ae800e6aa',
+                        'name' => 'GS1814117D01LP',
+                    ],
+                    [
+                        'uuid' => '96097c86-2e6d-4b1c-879e-2bab517b6a5d',
+                        'name' => 'GS0082579D01LE',
+                    ],
+                    [
+                        'uuid' => 'eb1cd067-8cc1-4782-b215-af7fb571df31',
+                        'name' => 'GS0082567D01LE',
+                    ],
+                ],
+            ],
+        ];
+
+        return response()->json($data);
+    })->name('organization.data');
 });
