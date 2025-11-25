@@ -27,6 +27,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'okta_id' => (string) Str::uuid(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => 'user', // Por defecto usuarios normales
             'remember_token' => Str::random(10),

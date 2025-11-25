@@ -31,4 +31,13 @@ return [
         ],
     ],
 
+    'okta' => [
+        'domain' => env('OKTA_DOMAIN', 'https://example.okta.com'),
+        'client_id' => env('OKTA_CLIENT_ID'),
+        'client_secret' => env('OKTA_CLIENT_SECRET'),
+        'authorization_server' => env('OKTA_AUTHORIZATION_SERVER', 'default'),
+        'scopes' => env('OKTA_SCOPES', 'openid profile email'),
+        'provider' => env('OKTA_PROVIDER', 'okta'), // okta|auth0
+    ],
+
 ];

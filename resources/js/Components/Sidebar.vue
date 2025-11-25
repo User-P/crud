@@ -31,9 +31,9 @@
                     class="flex w-full items-center gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
                     type="button"
                     @click="toggleProfileMenu">
-                    <img class="h-8 w-8 rounded-full bg-gray-800"
-                        src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff"
-                        alt="User avatar" />
+                    <img class="h-8 w-8 rounded-full bg-gray-800 object-cover"
+                        :src="userAvatar"
+                        :alt="user?.name || 'Usuario'" />
                     <span class="flex-1 text-left">
                         <span class="block">{{ user?.name || 'Usuario' }}</span>
                         <span class="block text-xs text-gray-500">{{ user?.email || 'admin@example.com' }}</span>
@@ -78,6 +78,14 @@ const navigation: NavigationItem[] = [
 
 const page = usePage<{ auth?: { user: any } }>()
 const user = computed(() => page.props.auth?.user)
+const userAvatar = computed(() => {
+    if (user.value?.profile_photo_url) {
+        return user.value.profile_photo_url
+    }
+
+    const initials = encodeURIComponent(user.value?.name || 'Usuario')
+    return `https://ui-avatars.com/api/?name=${initials}&background=4f46e5&color=fff`
+})
 
 const profileMenu = ref<MenuMethods | null>(null)
 const profileMenuItems = [

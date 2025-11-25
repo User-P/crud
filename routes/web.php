@@ -1,9 +1,6 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\TwoFactorChallengeController;
-use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\Auth\OktaController;
 use App\Http\Controllers\EventRecordImportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateDownloadController;
@@ -11,34 +8,19 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthenticatedSessionController::class, 'create'])
+    Route::get('/login', [OktaController::class, 'login'])
         ->name('login');
 
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    Route::get('/auth/redirect', [OktaController::class, 'redirect'])
+        ->name('okta.redirect');
 
-    Route::get('/register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('/register', [RegisteredUserController::class, 'store']);
-
-    Route::post('/register/confirm-two-factor', [RegisteredUserController::class, 'confirmTwoFactor'])
-        ->name('register.two-factor.confirm');
-
-    Route::delete('/register/pending-two-factor', [RegisteredUserController::class, 'destroyPending'])
-        ->name('register.two-factor.cancel');
+    Route::get('/auth/callback', [OktaController::class, 'callback'])
+        ->name('okta.callback');
 });
 
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+Route::post('/logout', [OktaController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
-
-Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])
-    ->middleware('guest')
-    ->name('two-factor.challenge');
-
-Route::post('/two-factor-challenge', [TwoFactorChallengeController::class, 'store'])
-    ->middleware('guest')
-    ->name('two-factor.challenge.store');
 
 Route::middleware('auth')->group(function () {
     // Ruta de ejemplo con Inertia
@@ -89,18 +71,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/settings', SettingsController::class)
         ->name('settings.index');
-
-    Route::post('/two-factor', [TwoFactorController::class, 'store'])
-        ->name('two-factor.enable');
-
-    Route::post('/two-factor/confirm', [TwoFactorController::class, 'confirm'])
-        ->name('two-factor.confirm');
-
-    Route::delete('/two-factor', [TwoFactorController::class, 'destroy'])
-        ->name('two-factor.disable');
-
-    Route::post('/two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])
-        ->name('two-factor.recovery-codes');
 
     Route::get('/', [EventRecordImportController::class, 'create'])
         ->name('records.import.form');
