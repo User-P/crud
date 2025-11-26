@@ -3,6 +3,8 @@
         { name: 'Dashboard', href: '/dashboard' },
         { name: 'Estadísticas' },
     ]">
+
+    
         <section class="space-y-8">
             <div>
                 <h3 class="text-base font-semibold text-gray-900">Resumen general</h3>
