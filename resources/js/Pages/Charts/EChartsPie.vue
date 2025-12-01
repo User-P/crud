@@ -19,104 +19,29 @@
             </div>
 
             <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <div ref="chartRef" class="h-96 w-full"></div>
+                <div class="h-96 w-full">
+                    <PieChart
+                        :data="data"
+                        :title="title || 'Distribución por categoría'"
+                        legend-position="left"
+                    />
+                </div>
             </div>
         </div>
     </AdminLayout>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
-import type { ComposeOption, EChartsType } from "echarts/core";
-import * as echarts from "echarts/core";
-import { PieChart, type PieSeriesOption } from "echarts/charts";
-import {
-    LegendComponent,
-    TitleComponent,
-    TooltipComponent,
-    type LegendComponentOption,
-    type TitleComponentOption,
-    type TooltipComponentOption,
-} from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-
-type PieOption = ComposeOption<
-    TitleComponentOption | TooltipComponentOption | LegendComponentOption | PieSeriesOption
->;
+import PieChart from "@/Components/Charts/PieChart.vue";
 
 type Slice = {
     value: number;
     name: string;
 };
 
-const props = defineProps<{
+defineProps<{
     data: Slice[];
     title?: string;
 }>();
-
-echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
-
-const chartRef = ref<HTMLDivElement | null>(null);
-let chart: EChartsType | null = null;
-
-const resize = () => chart?.resize();
-
-const renderChart = () => {
-    if (!chartRef.value) return;
-
-    if (!chart) {
-        chart = echarts.init(chartRef.value);
-        window.addEventListener("resize", resize);
-    }
-
-    const option: PieOption = {
-        title: {
-            text: props.title ?? "Distribucion por categoria",
-            left: "center",
-            textStyle: {
-                fontWeight: "600",
-            },
-        },
-        tooltip: {
-            trigger: "item",
-            formatter: "{b}: {c} ({d}%)",
-        },
-        legend: {
-            orient: "vertical",
-            left: "left",
-        },
-        series: [
-            {
-                name: "Categorias",
-                type: "pie",
-                radius: "60%",
-                data: props.data,
-                emphasis: {
-                    itemStyle: {
-                        shadowBlur: 8,
-                        shadowOffsetX: 0,
-                        shadowColor: "rgba(0, 0, 0, 0.2)",
-                    },
-                },
-            },
-        ],
-    };
-
-    chart.setOption(option);
-};
-
-onMounted(renderChart);
-
-watch(
-    () => props.data,
-    () => renderChart(),
-    { deep: true }
-);
-
-onBeforeUnmount(() => {
-    window.removeEventListener("resize", resize);
-    chart?.dispose();
-    chart = null;
-});
 </script>

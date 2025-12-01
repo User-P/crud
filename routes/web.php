@@ -88,7 +88,7 @@ Route::middleware('auth')->group(function () {
                 ['value' => 484, 'name' => 'Referidos'],
                 ['value' => 300, 'name' => 'Directo'],
             ],
-            'months' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            'test' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
             'lineSeries' => [
                 ['name' => 'Tráfico web', 'data' => [120, 132, 101, 134, 90, 230, 210, 240, 260, 230, 250, 270]],
                 ['name' => 'App móvil', 'data' => [80, 110, 95, 120, 130, 150, 170, 180, 200, 210, 190, 220]],
