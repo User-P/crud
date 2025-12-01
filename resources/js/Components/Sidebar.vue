@@ -56,6 +56,7 @@ import {
     FolderIcon,
     CalendarIcon,
     ChartBarIcon,
+    ChartPieIcon,
     Cog6ToothIcon,
     ChevronUpDownIcon,
 } from '@heroicons/vue/24/outline'
@@ -73,6 +74,8 @@ const navigation: NavigationItem[] = [
     { name: 'Países', href: '/countries', icon: FolderIcon },
     { name: 'Eventos', href: '/events', icon: CalendarIcon },
     { name: 'Estadísticas', href: '/statistics', icon: ChartBarIcon },
+    { name: 'Charts', href: '/charts', icon: ChartPieIcon },
+    { name: 'Charts (Pie)', href: '/charts/echarts-pie', icon: ChartBarIcon },
     { name: 'Configuración', href: '/settings', icon: Cog6ToothIcon },
 ]
 

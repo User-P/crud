@@ -1,7 +1,8 @@
 <template>
-    <AdminLayout title="Estadísticas" subtitle="Visualiza las estadísticas del sistema" :breadcrumbs="[
+    <AdminLayout title="Gráfica de pastel" subtitle="Ejemplo sencillo de Apache ECharts" :breadcrumbs="[
         { name: 'Dashboard', href: '/dashboard' },
-        { name: 'Estadísticas' },
+        { name: 'Charts', href: '/charts' },
+        { name: 'Pie' },
     ]">
         <div class="mx-auto max-w-5xl space-y-4 p-6">
             <div class="flex items-center justify-between gap-4">

@@ -79,6 +79,40 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Statistics/Index');
     })->name('users.index');
 
+    Route::get('/charts', function () {
+        return Inertia::render('Charts/Index', [
+            'pieData' => [
+                ['value' => 1048, 'name' => 'Búsquedas'],
+                ['value' => 735, 'name' => 'Redes'],
+                ['value' => 580, 'name' => 'Email'],
+                ['value' => 484, 'name' => 'Referidos'],
+                ['value' => 300, 'name' => 'Directo'],
+            ],
+            'months' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            'lineSeries' => [
+                ['name' => 'Tráfico web', 'data' => [120, 132, 101, 134, 90, 230, 210, 240, 260, 230, 250, 270]],
+                ['name' => 'App móvil', 'data' => [80, 110, 95, 120, 130, 150, 170, 180, 200, 210, 190, 220]],
+            ],
+            'barCategories' => ['Q1', 'Q2', 'Q3', 'Q4'],
+            'barSeries' => [
+                ['name' => 'Ventas', 'data' => [320, 432, 501, 434]],
+                ['name' => 'Objetivo', 'data' => [380, 410, 460, 480]],
+            ],
+            'radarIndicators' => [
+                ['name' => 'Disponibilidad', 'max' => 100],
+                ['name' => 'Latencia', 'max' => 100],
+                ['name' => 'Seguridad', 'max' => 100],
+                ['name' => 'Satisfacción', 'max' => 100],
+                ['name' => 'Entrega', 'max' => 100],
+            ],
+            'radarData' => [
+                ['name' => 'Planta Norte', 'value' => [92, 85, 78, 88, 82]],
+                ['name' => 'Planta Sur', 'value' => [88, 80, 90, 84, 79]],
+            ],
+            'gaugeValue' => 94.5,
+        ]);
+    })->name('charts.index');
+
     Route::get('/charts/echarts-pie', function () {
         return Inertia::render('Charts/EChartsPie', [
             'title' => 'Origen de trafico',
