@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\OktaController;
+use App\Http\Controllers\Auth\SamlController;
 use App\Http\Controllers\EventRecordImportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateDownloadController;
@@ -17,6 +18,15 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/callback', [OktaController::class, 'callback'])
         ->name('okta.callback');
 });
+
+if (config('saml2_settings.enabled')) {
+    Route::prefix('saml')->group(function () {
+        Route::get('/login', [SamlController::class, 'login'])->name('saml.login');
+        Route::post('/acs', [SamlController::class, 'acs'])->name('saml.acs');
+        Route::get('/metadata', [SamlController::class, 'metadata'])->name('saml.metadata');
+        Route::get('/sls', [SamlController::class, 'sls'])->name('saml.sls');
+    });
+}
 
 Route::post('/logout', [OktaController::class, 'logout'])
     ->middleware('auth')

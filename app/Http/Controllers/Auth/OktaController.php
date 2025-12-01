@@ -108,7 +108,7 @@ class OktaController extends Controller
         ]);
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Token request failed: '.$response->body());
+            throw new \RuntimeException('Token request failed: ' . $response->body());
         }
 
         return $response->json();
@@ -119,7 +119,7 @@ class OktaController extends Controller
         $response = Http::withToken($accessToken)->get($this->userInfoEndpoint());
 
         if (! $response->successful()) {
-            throw new \RuntimeException('Userinfo request failed: '.$response->body());
+            throw new \RuntimeException('Userinfo request failed: ' . $response->body());
         }
 
         return $response->json();
@@ -128,7 +128,7 @@ class OktaController extends Controller
     protected function findOrCreateLocalUser(array $profile): User
     {
         $email = $profile['email'] ?? ($profile['preferred_username'] ?? null);
-        $email ??= ($profile['sub'] ?? Str::uuid()).'@no-email.local';
+        $email ??= ($profile['sub'] ?? Str::uuid()) . '@no-email.local';
         $displayName = $profile['name'] ?? ($profile['preferred_username'] ?? $email);
 
         /** @var User|null $user */
