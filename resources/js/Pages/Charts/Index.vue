@@ -6,28 +6,27 @@
         <div class="space-y-6">
 
             <div class="grid gap-6 lg:grid-cols-2">
-                <div class="bg-white border-2 border-gray-950 rounded-md">
+                <div class="bg-white border-2 border-gray-950 rounded-md" style="height: 400px;">
                     <LineChart :labels="months" :series="lineSeries" title="Visitas por mes" :area="true" />
                 </div>
 
-                <div class="bg-white border-2 border-gray-950 rounded-md">
-
+                <div class="bg-white border-2 border-gray-950 rounded-md" style="height: 400px;">
                     <BarChart :categories="barCategories" :series="barSeries" title="Ventas vs objetivo"
                         :stacked="true" />
                 </div>
 
-                <div class="bg-white border-2 border-gray-950 rounded-md">
+                <div class="bg-white border-2 border-gray-950 rounded-md" style="height: 400px;">
                     <PieChart :data="pieData" title="Participación de canales" legend-position="left" />
                 </div>
-                <div class="bg-white border-2 border-gray-950 rounded-md">
+                <div class="bg-white border-2 border-gray-950 rounded-md" style="height: 400px;">
                     <RadarChart :indicators="radarIndicators" :data="radarData" title="Rendimiento por planta" />
                 </div>
 
-                <div class="bg-white border-2 border-gray-950 rounded-md">
+                <div class="bg-white border-2 border-gray-950 rounded-md" style="height: 400px;">
                     <RadarChart :indicators="radarIndicators" :data="radarData" title="KPIs operativos" />
                 </div>
 
-                <div class="bg-white border-2 border-gray-950 rounded-md">
+                <div class="bg-white border-2 border-gray-950 rounded-md" style="height: 400px;">
                     <GaugeChart :value="gaugeValue" :min="80" :max="100" title="Disponibilidad" />
                 </div>
             </div>
