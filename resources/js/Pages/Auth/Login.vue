@@ -29,22 +29,35 @@
             <div class="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/60 p-4 text-sm text-indigo-900">
               <p class="font-semibold mb-2">¿Cómo funciona?</p>
               <ol class="list-decimal space-y-1 pl-5 text-indigo-900/80">
-                <li>Serás redirigido al portal de inicio de sesión de Okta.</li>
+                <li v-if="isSaml">Serás redirigido al IdP de Okta usando SAML 2.0.</li>
+                <li v-else>Serás redirigido al portal de inicio de sesión de Okta (OIDC).</li>
                 <li>Completa el proceso de autenticación configurado por tu organización.</li>
                 <li>Volverás automáticamente al dashboard cuando la sesión se valide.</li>
               </ol>
             </div>
 
+            <div v-if="isSaml" class="rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-xs text-indigo-900 shadow-sm">
+              <div class="font-semibold text-indigo-700 mb-2">Detalles SAML</div>
+              <div class="space-y-1 text-indigo-900/80">
+                <div><span class="font-semibold">ACS:</span> {{ samlAcs }}</div>
+                <div><span class="font-semibold">Entity ID (SP):</span> {{ samlEntityId }}</div>
+                <div><span class="font-semibold">IdP SSO:</span> {{ samlSso }}</div>
+                <div v-if="metadataUrl">
+                  <a :href="metadataUrl" class="text-indigo-700 font-semibold hover:underline">Ver metadata</a>
+                </div>
+              </div>
+            </div>
+
             <Button
               type="button"
-              label="Iniciar sesión con Okta"
+              :label="isSaml ? 'Iniciar sesión con Okta (SAML)' : 'Iniciar sesión con Okta'"
               icon="pi pi-external-link"
               class="w-full !bg-indigo-600 !border-indigo-600"
-              @click="redirectToOkta"
+              @click="redirectToProvider"
             />
 
             <p class="text-center text-xs text-gray-400">
-              Versión {{ laravelVersion }} • Dominio Okta: {{ oktaDomain }}
+              Versión {{ laravelVersion }} • {{ isSaml ? 'Flujo SAML activado' : `Dominio Okta: ${oidcDomain}` }}
             </p>
           </div>
         </template>
@@ -66,17 +79,45 @@ interface PageProps {
     success?: string | null
     error?: string | null
   }
-  okta?: {
-    authorize_url: string
+  auth?: {
+    driver: 'saml' | 'oidc'
+    login_url: string
+    metadata_url?: string | null
     domain?: string | null
+    sp?: {
+      entity_id?: string | null
+      acs?: string | null
+      sls?: string | null
+    }
+    idp?: {
+      entity_id?: string | null
+      sso?: string | null
+      slo?: string | null
+    }
   }
 }
 
-const page = usePage<LoginPageProps>()
+const page = usePage<PageProps>()
 const flashSuccess = computed(() => page.props.flash?.success ?? null)
 const flashError = computed(() => page.props.flash?.error ?? null)
-const oktaDomain = computed(() => page.props.okta?.domain ?? 'N/D')
-const redirectToOkta = (): void => {
-  window.location.href = page.props.okta?.authorize_url ?? '/auth/redirect'
+
+const auth = computed(
+  () =>
+    page.props.auth ?? {
+      driver: 'oidc',
+      login_url: '/auth/redirect',
+      domain: 'N/D'
+    }
+)
+
+const isSaml = computed(() => auth.value.driver === 'saml')
+const oidcDomain = computed(() => auth.value.domain ?? 'N/D')
+const samlAcs = computed(() => auth.value.sp?.acs ?? 'N/D')
+const samlEntityId = computed(() => auth.value.sp?.entity_id ?? 'N/D')
+const samlSso = computed(() => auth.value.idp?.sso ?? 'N/D')
+const metadataUrl = computed(() => auth.value.metadata_url ?? null)
+
+const redirectToProvider = (): void => {
+  window.location.href = auth.value.login_url ?? '/auth/redirect'
 }
 </script>

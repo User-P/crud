@@ -23,6 +23,30 @@ Agrega/ajusta en `.env` (todas deben ser HTTPS/TLS 1.2+):
 
 `config/saml2_settings.php` y `config/saml2/okta_idp_settings.php` usan estas variables y generan metadata en `/saml/metadata`.
 
+Ejemplo rápido tomando los datos del screenshot de Okta (ajusta las URLs a tu dominio real):
+
+```env
+APP_URL=https://portal-uba.cdd.dsi.des
+SAML_ENABLED=true
+SAML_IDP_NAME=okta
+SAML_SP_ENTITY_ID=laravel-saml
+SAML_SP_ACS=${APP_URL}/saml/acs
+SAML_SP_SLS=${APP_URL}/saml/sls
+SAML_IDP_SSO_URL=<Okta SSO / SingleSignOnService del metadata>
+SAML_IDP_SLO_URL=<Okta SLO / SingleLogoutService del metadata>
+SAML_IDP_ENTITY_ID=<entityID del IdP>
+SAML_IDP_CERT="-----BEGIN CERTIFICATE-----...PEGA EL CERT PUBLICO DEL IDP...-----END CERTIFICATE-----"
+SAML_SIGN_REQUESTS=true
+SAML_WANT_MESSAGES_SIGNED=true
+SAML_WANT_ASSERTIONS_ENCRYPTED=true
+SAML_WANT_ASSERTIONS_SIGNED=true
+```
+
+Notas:
+- El `Single Sign On URL`, `Recipient URL` y `Destination URL` del screenshot de Okta apuntan a tu ACS (`/saml/acs`). El `Audience Restriction` corresponde al `SAML_SP_ENTITY_ID` (`laravel-saml` en el ejemplo).
+- El certificado que subiste en Okta para cifrado de aserciones debe ser el de `SAML_SP_CERT` y su llave privada en `SAML_SP_PRIVATE_KEY` (formato PEM).
+- El certificado público del IdP que expone Okta va en `SAML_IDP_CERT`.
+
 ## 3. Rutas disponibles (solo si `SAML_ENABLED=true`)
 
 - `GET /saml/login` → redirige a Okta (IdP).

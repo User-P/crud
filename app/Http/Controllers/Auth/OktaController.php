@@ -18,17 +18,39 @@ class OktaController extends Controller
 {
     public function login(): Response
     {
+        $useSaml = (bool) config('saml2_settings.enabled', false);
+        $idpName = config('saml2_settings.idpNames.0', 'okta');
+        $samlConfig = $useSaml ? config('saml2.' . $idpName . '_idp_settings', []) : [];
+        $sp = $samlConfig['sp'] ?? [];
+        $idp = $samlConfig['idp'] ?? [];
+
         return Inertia::render('Auth/Login', [
             'laravelVersion' => app()->version(),
-            'okta' => [
-                'authorize_url' => route('okta.redirect'),
-                'domain' => config('services.okta.domain'),
+            'auth' => [
+                'driver' => $useSaml ? 'saml' : 'oidc',
+                'login_url' => $useSaml ? route('saml.login') : route('okta.redirect'),
+                'metadata_url' => $useSaml ? route('saml.metadata') : null,
+                'domain' => $useSaml ? null : config('services.okta.domain'),
+                'sp' => [
+                    'entity_id' => $sp['entityId'] ?? null,
+                    'acs' => $sp['assertionConsumerService']['url'] ?? null,
+                    'sls' => $sp['singleLogoutService']['url'] ?? null,
+                ],
+                'idp' => [
+                    'entity_id' => $idp['entityId'] ?? null,
+                    'sso' => $idp['singleSignOnService']['url'] ?? null,
+                    'slo' => $idp['singleLogoutService']['url'] ?? null,
+                ],
             ],
         ]);
     }
 
     public function redirect(): RedirectResponse
     {
+        if (config('saml2_settings.enabled')) {
+            return redirect()->route('saml.login');
+        }
+
         $authorizeUrl = $this->buildAuthorizeUrl();
 
         return redirect()->away($authorizeUrl);
@@ -36,6 +58,10 @@ class OktaController extends Controller
 
     public function callback(Request $request): RedirectResponse
     {
+        if (config('saml2_settings.enabled')) {
+            return redirect()->route('login');
+        }
+
         $expectedState = $request->session()->pull('okta_state');
         $state = $request->string('state')->toString();
 
