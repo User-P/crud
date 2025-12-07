@@ -29,14 +29,13 @@
             <div class="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/60 p-4 text-sm text-indigo-900">
               <p class="font-semibold mb-2">¿Cómo funciona?</p>
               <ol class="list-decimal space-y-1 pl-5 text-indigo-900/80">
-                <li v-if="isSaml">Serás redirigido al IdP de Okta usando SAML 2.0.</li>
-                <li v-else>Serás redirigido al portal de inicio de sesión de Okta (OIDC).</li>
+                <li>Serás redirigido al IdP de Okta usando SAML 2.0.</li>
                 <li>Completa el proceso de autenticación configurado por tu organización.</li>
                 <li>Volverás automáticamente al dashboard cuando la sesión se valide.</li>
               </ol>
             </div>
 
-            <div v-if="isSaml" class="rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-xs text-indigo-900 shadow-sm">
+            <div class="rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-xs text-indigo-900 shadow-sm">
               <div class="font-semibold text-indigo-700 mb-2">Detalles SAML</div>
               <div class="space-y-1 text-indigo-900/80">
                 <div><span class="font-semibold">ACS:</span> {{ samlAcs }}</div>
@@ -50,14 +49,14 @@
 
             <Button
               type="button"
-              :label="isSaml ? 'Iniciar sesión con Okta (SAML)' : 'Iniciar sesión con Okta'"
+              label="Iniciar sesión con Okta (SAML)"
               icon="pi pi-external-link"
               class="w-full !bg-indigo-600 !border-indigo-600"
               @click="redirectToProvider"
             />
 
             <p class="text-center text-xs text-gray-400">
-              Versión {{ laravelVersion }} • {{ isSaml ? 'Flujo SAML activado' : `Dominio Okta: ${oidcDomain}` }}
+              Versión {{ laravelVersion }} • Flujo SAML activado
             </p>
           </div>
         </template>
@@ -80,10 +79,8 @@ interface PageProps {
     error?: string | null
   }
   auth?: {
-    driver: 'saml' | 'oidc'
     login_url: string
     metadata_url?: string | null
-    domain?: string | null
     sp?: {
       entity_id?: string | null
       acs?: string | null
@@ -101,23 +98,13 @@ const page = usePage<PageProps>()
 const flashSuccess = computed(() => page.props.flash?.success ?? null)
 const flashError = computed(() => page.props.flash?.error ?? null)
 
-const auth = computed(
-  () =>
-    page.props.auth ?? {
-      driver: 'oidc',
-      login_url: '/auth/redirect',
-      domain: 'N/D'
-    }
-)
-
-const isSaml = computed(() => auth.value.driver === 'saml')
-const oidcDomain = computed(() => auth.value.domain ?? 'N/D')
+const auth = computed(() => page.props.auth ?? { login_url: '/saml/login' })
 const samlAcs = computed(() => auth.value.sp?.acs ?? 'N/D')
 const samlEntityId = computed(() => auth.value.sp?.entity_id ?? 'N/D')
 const samlSso = computed(() => auth.value.idp?.sso ?? 'N/D')
 const metadataUrl = computed(() => auth.value.metadata_url ?? null)
 
 const redirectToProvider = (): void => {
-  window.location.href = auth.value.login_url ?? '/auth/redirect'
+  window.location.href = auth.value.login_url ?? '/saml/login'
 }
 </script>

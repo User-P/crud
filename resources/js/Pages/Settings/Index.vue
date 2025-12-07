@@ -50,13 +50,23 @@
 
           <div class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
             <p>
-              <strong>Dominio:</strong> {{ authProvider.domain ?? 'No configurado' }}
+              <strong>SP Entity ID:</strong> {{ authProvider.sp.entity_id ?? 'N/D' }}
             </p>
             <p>
-              <strong>Scopes solicitados:</strong> {{ authProvider.scopes }}
+              <strong>ACS:</strong> {{ authProvider.sp.acs ?? 'N/D' }}
+            </p>
+            <p>
+              <strong>IdP Entity ID:</strong> {{ authProvider.idp.entity_id ?? 'N/D' }}
+            </p>
+            <p>
+              <strong>IdP SSO:</strong> {{ authProvider.idp.sso ?? 'N/D' }}
+            </p>
+            <p v-if="authProvider.metadata_url">
+              <strong>Metadata:</strong>
+              <a :href="authProvider.metadata_url" class="text-indigo-700 font-semibold hover:underline">Descargar XML</a>
             </p>
             <p class="text-xs text-gray-500">
-              Para modificar políticas de acceso, contacta al administrador del tenant en Okta.
+              El cifrado/firma de aserciones se gestiona en Okta. Si cambias certificados, actualiza también el SP.
             </p>
           </div>
         </div>
@@ -71,8 +81,17 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 interface AuthProvider {
   name: string
-  domain?: string | null
-  scopes: string
+  metadata_url?: string | null
+  sp: {
+    entity_id?: string | null
+    acs?: string | null
+    sls?: string | null
+  }
+  idp: {
+    entity_id?: string | null
+    sso?: string | null
+    slo?: string | null
+  }
 }
 
 interface SettingsProps {

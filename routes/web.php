@@ -10,12 +10,6 @@ use Inertia\Inertia;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [OktaController::class, 'login'])
         ->name('login');
-
-    Route::get('/auth/redirect', [OktaController::class, 'redirect'])
-        ->name('okta.redirect');
-
-    Route::get('/auth/callback', [OktaController::class, 'callback'])
-        ->name('okta.callback');
 });
 
 if (config('saml2_settings.enabled')) {
