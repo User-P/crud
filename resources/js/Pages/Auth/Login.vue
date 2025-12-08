@@ -29,13 +29,14 @@
             <div class="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/60 p-4 text-sm text-indigo-900">
               <p class="font-semibold mb-2">¿Cómo funciona?</p>
               <ol class="list-decimal space-y-1 pl-5 text-indigo-900/80">
-                <li>Serás redirigido al IdP de Okta usando SAML 2.0.</li>
+                <li v-if="isSaml">Serás redirigido al IdP de Okta usando SAML 2.0.</li>
+                <li v-else>Inicia sesión con tus credenciales locales.</li>
                 <li>Completa el proceso de autenticación configurado por tu organización.</li>
                 <li>Volverás automáticamente al dashboard cuando la sesión se valide.</li>
               </ol>
             </div>
 
-            <div class="rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-xs text-indigo-900 shadow-sm">
+            <div v-if="isSaml" class="rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-xs text-indigo-900 shadow-sm">
               <div class="font-semibold text-indigo-700 mb-2">Detalles SAML</div>
               <div class="space-y-1 text-indigo-900/80">
                 <div><span class="font-semibold">ACS:</span> {{ samlAcs }}</div>
@@ -47,7 +48,43 @@
               </div>
             </div>
 
+            <form v-else @submit.prevent="submitLocal" class="space-y-3">
+              <div class="space-y-2">
+                <label for="email" class="text-xs uppercase tracking-wide text-indigo-700 font-semibold">Correo</label>
+                <input
+                  id="email"
+                  v-model="form.email"
+                  type="email"
+                  autocomplete="email"
+                  class="w-full rounded-lg border border-indigo-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  required
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="password" class="text-xs uppercase tracking-wide text-indigo-700 font-semibold">Contraseña</label>
+                <input
+                  id="password"
+                  v-model="form.password"
+                  type="password"
+                  autocomplete="current-password"
+                  class="w-full rounded-lg border border-indigo-200 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  required
+                />
+              </div>
+              <div v-if="form.errors.email" class="text-xs text-red-600 font-semibold">
+                {{ form.errors.email }}
+              </div>
+              <Button
+                type="submit"
+                label="Ingresar"
+                icon="pi pi-sign-in"
+                class="w-full !bg-indigo-600 !border-indigo-600"
+                :loading="form.processing"
+              />
+            </form>
+
             <Button
+              v-if="isSaml"
               type="button"
               label="Iniciar sesión con Okta (SAML)"
               icon="pi pi-external-link"
@@ -56,7 +93,7 @@
             />
 
             <p class="text-center text-xs text-gray-400">
-              Versión {{ laravelVersion }} • Flujo SAML activado
+              Versión {{ laravelVersion }} • {{ isSaml ? 'Flujo SAML activado' : 'Login local habilitado' }}
             </p>
           </div>
         </template>
@@ -67,7 +104,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { useForm, usePage } from '@inertiajs/vue3'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
@@ -79,6 +116,7 @@ interface PageProps {
     error?: string | null
   }
   auth?: {
+    driver: 'saml' | 'local'
     login_url: string
     metadata_url?: string | null
     sp?: {
@@ -98,13 +136,25 @@ const page = usePage<PageProps>()
 const flashSuccess = computed(() => page.props.flash?.success ?? null)
 const flashError = computed(() => page.props.flash?.error ?? null)
 
-const auth = computed(() => page.props.auth ?? { login_url: '/saml/login' })
+const auth = computed(() => page.props.auth ?? { login_url: '/saml/login', driver: 'saml' })
+const isSaml = computed(() => auth.value.driver === 'saml')
 const samlAcs = computed(() => auth.value.sp?.acs ?? 'N/D')
 const samlEntityId = computed(() => auth.value.sp?.entity_id ?? 'N/D')
 const samlSso = computed(() => auth.value.idp?.sso ?? 'N/D')
 const metadataUrl = computed(() => auth.value.metadata_url ?? null)
 
+const form = useForm({
+  email: '',
+  password: '',
+})
+
 const redirectToProvider = (): void => {
   window.location.href = auth.value.login_url ?? '/saml/login'
+}
+
+const submitLocal = (): void => {
+  form.post(auth.value.login_url ?? '/login', {
+    preserveScroll: true,
+  })
 }
 </script>

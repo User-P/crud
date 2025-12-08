@@ -13,10 +13,6 @@ class OktaController extends Controller
 {
     public function login(): Response
     {
-        if (! config('saml2_settings.enabled')) {
-            abort(503, 'SAML no está habilitado en este entorno. Define SAML_ENABLED=true.');
-        }
-
         $idpName = config('saml2_settings.idpNames.0', 'okta');
         $settings = config('saml2.' . $idpName . '_idp_settings', []);
         $sp = $settings['sp'] ?? [];
@@ -25,9 +21,9 @@ class OktaController extends Controller
         return Inertia::render('Auth/Login', [
             'laravelVersion' => app()->version(),
             'auth' => [
-                'driver' => 'saml',
-                'login_url' => route('saml.login'),
-                'metadata_url' => route('saml.metadata'),
+                'driver' => $this->samlEnabled() ? 'saml' : 'local',
+                'login_url' => $this->samlEnabled() ? route('saml.login') : route('login.perform'),
+                'metadata_url' => $this->samlEnabled() ? route('saml.metadata') : null,
                 'sp' => [
                     'entity_id' => $sp['entityId'] ?? null,
                     'acs' => $sp['assertionConsumerService']['url'] ?? null,
@@ -49,5 +45,32 @@ class OktaController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    public function authenticate(Request $request): RedirectResponse
+    {
+        if ($this->samlEnabled()) {
+            return redirect()->route('saml.login');
+        }
+
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        if (! Auth::attempt($credentials, true)) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Credenciales inválidas o usuario no autorizado.']);
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
+    }
+
+    protected function samlEnabled(): bool
+    {
+        return (bool) config('saml2_settings.enabled', false);
     }
 }

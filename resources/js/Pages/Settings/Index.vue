@@ -81,6 +81,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 interface AuthProvider {
   name: string
+  driver: 'saml' | 'local'
   metadata_url?: string | null
   sp: {
     entity_id?: string | null

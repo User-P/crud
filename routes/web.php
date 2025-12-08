@@ -10,6 +10,9 @@ use Inertia\Inertia;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [OktaController::class, 'login'])
         ->name('login');
+
+    Route::post('/login', [OktaController::class, 'authenticate'])
+        ->name('login.perform');
 });
 
 if (config('saml2_settings.enabled')) {
