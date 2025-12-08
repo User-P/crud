@@ -81,6 +81,17 @@
                 class="w-full !bg-indigo-600 !border-indigo-600"
                 :loading="form.processing"
               />
+
+              <Button
+                v-if="registerEnabled && registerUrl"
+                type="button"
+                label="Crear cuenta"
+                icon="pi pi-user-plus"
+                class="w-full !bg-white !text-indigo-700 !border-indigo-200"
+                severity="secondary"
+                outlined
+                @click="goToRegister"
+              />
             </form>
 
             <Button
@@ -118,6 +129,8 @@ interface PageProps {
   auth?: {
     driver: 'saml' | 'local'
     login_url: string
+    register_url?: string | null
+    registration_enabled?: boolean
     metadata_url?: string | null
     sp?: {
       entity_id?: string | null
@@ -142,6 +155,8 @@ const samlAcs = computed(() => auth.value.sp?.acs ?? 'N/D')
 const samlEntityId = computed(() => auth.value.sp?.entity_id ?? 'N/D')
 const samlSso = computed(() => auth.value.idp?.sso ?? 'N/D')
 const metadataUrl = computed(() => auth.value.metadata_url ?? null)
+const registerUrl = computed(() => auth.value.register_url ?? null)
+const registerEnabled = computed(() => auth.value.registration_enabled ?? false)
 
 const form = useForm({
   email: '',
@@ -156,5 +171,11 @@ const submitLocal = (): void => {
   form.post(auth.value.login_url ?? '/login', {
     preserveScroll: true,
   })
+}
+
+const goToRegister = (): void => {
+  if (registerUrl.value) {
+    window.location.href = registerUrl.value
+  }
 }
 </script>
