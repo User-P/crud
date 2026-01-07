@@ -5,7 +5,6 @@ $appUrl = rtrim(env('APP_URL', 'http://localhost'), '/');
 return [
     'strict' => true,
     'debug' => env('APP_DEBUG', false),
-
     'sp' => [
         'entityId' => env('SAML_SP_ENTITY_ID', $appUrl . '/saml/metadata'),
         'assertionConsumerService' => [

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\OktaController;
 use App\Http\Controllers\Auth\SamlController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateDownloadController;
 use Illuminate\Support\Facades\Route;
@@ -10,17 +11,9 @@ use Inertia\Inertia;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [OktaController::class, 'login'])
         ->name('login');
-
     Route::post('/login', [OktaController::class, 'authenticate'])
         ->name('login.perform');
-
-    Route::get('/register', [OktaController::class, 'showRegister'])
-        ->middleware('saml.disabled')
-        ->name('register');
-
-    Route::post('/register', [OktaController::class, 'register'])
-        ->middleware('saml.disabled')
-        ->name('register.perform');
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
 if (config('saml2_settings.enabled')) {
@@ -32,11 +25,10 @@ if (config('saml2_settings.enabled')) {
     });
 }
 
-Route::post('/logout', [OktaController::class, 'logout'])
-    ->middleware('auth')
-    ->name('logout');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/logout', [OktaController::class, 'logout'])
+        ->name('logout');
     Route::get('/chat', function () {
         return Inertia::render('Chat/Index', [
             'laravelVersion' => app()->version(),

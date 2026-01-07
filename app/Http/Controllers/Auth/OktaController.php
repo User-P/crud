@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,29 +16,12 @@ class OktaController extends Controller
     public function login(): Response
     {
         $samlEnabled = $this->samlEnabled();
-        $idpName = config('saml2_settings.idpNames.0', 'okta');
-        $settings = config('saml2.' . $idpName . '_idp_settings', []);
-        $sp = $settings['sp'] ?? [];
-        $idp = $settings['idp'] ?? [];
 
         return Inertia::render('Auth/Login', [
-            'laravelVersion' => app()->version(),
             'auth' => [
                 'driver' => $samlEnabled ? 'saml' : 'local',
                 'login_url' => $samlEnabled ? route('saml.login') : route('login.perform'),
                 'metadata_url' => $samlEnabled ? route('saml.metadata') : null,
-                'sp' => [
-                    'entity_id' => $sp['entityId'] ?? null,
-                    'acs' => $sp['assertionConsumerService']['url'] ?? null,
-                    'sls' => $sp['singleLogoutService']['url'] ?? null,
-                ],
-                'idp' => [
-                    'entity_id' => $idp['entityId'] ?? null,
-                    'sso' => $idp['singleSignOnService']['url'] ?? null,
-                    'slo' => $idp['singleLogoutService']['url'] ?? null,
-                ],
-                'register_url' => $samlEnabled ? null : route('register'),
-                'registration_enabled' => ! $samlEnabled,
             ],
         ]);
     }
@@ -52,7 +35,7 @@ class OktaController extends Controller
         return redirect()->route('login');
     }
 
-    public function authenticate(Request $request): RedirectResponse
+    public function authenticate(Request $request)
     {
         if ($this->samlEnabled()) {
             return redirect()->route('saml.login');
@@ -63,63 +46,47 @@ class OktaController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials, true)) {
-            return back()
-                ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Credenciales inválidas o usuario no autorizado.']);
+
+        // Intenta autenticar al usuario
+        if (!Auth::attempt($credentials)) {
+            throw ValidationException::withMessages([
+                'email' => 'Usuario o contraseña incorrectos',
+            ]);
         }
 
-        $request->session()->regenerate();
+        $user = Auth::user()->load('roles.permisos');
 
-        return redirect()->intended('/dashboard');
+        if ($user->estatus_usuario !== 1 && $user->estatus_usuario_visualizador !== 1) {
+            Auth::logout();
+            $request->session()->invalidate();
+
+            throw ValidationException::withMessages([
+                'email' => 'Tu cuenta está inactiva, por favor contacta al administrador',
+            ]);
+        }
+
+        session(['login_time' => Carbon::now()->format('Y-m-d H:i:s')]);
+
+        $roles = $user->roles;
+
+        $rol = $roles->where('id_aplicacion', 1)->first();
+
+        if ($user->estatus_usuario && !empty($rol)) {
+            $redirectUrl = ($rol->rol == "Analista Investigador") ? '/seguimientos' : '/seleccion';
+        } else {
+            $redirectUrl = '/visualizador/indicadores-i3';
+        }
+        return redirect()->intended($redirectUrl);
     }
 
     public function showRegister(): Response|RedirectResponse
     {
-        if ($this->samlEnabled()) {
-            return redirect()->route('login')->with('error', 'El registro local está deshabilitado mientras Okta (SAML) esté activo.');
-        }
-
         return Inertia::render('Auth/Register', [
-            'laravelVersion' => app()->version(),
             'auth' => [
                 'register_url' => route('register.perform'),
                 'login_url' => route('login'),
             ],
         ]);
-    }
-
-    public function register(Request $request): RedirectResponse
-    {
-        if ($this->samlEnabled()) {
-            return redirect()->route('login')->with('error', 'El registro local está deshabilitado mientras Okta (SAML) esté activo.');
-        }
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'employee_number' => ['nullable', 'string', 'max:255', 'unique:users,employee_number'],
-            'password' => ['required', 'string', 'confirmed', Password::min(8)],
-        ]);
-
-        $employeeNumber = $data['employee_number'] ?? null;
-        if ($employeeNumber === '') {
-            $employeeNumber = null;
-        }
-
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'employee_number' => $employeeNumber,
-            'password' => $data['password'],
-            'role' => 'user',
-            'email_verified_at' => now(),
-        ]);
-
-        Auth::login($user, true);
-        $request->session()->regenerate();
-
-        return redirect()->intended('/dashboard')->with('success', 'Cuenta creada y sesión iniciada correctamente.');
     }
 
     protected function samlEnabled(): bool
