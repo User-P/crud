@@ -71,6 +71,8 @@ class SamlController extends Controller
 
         Auth::login($user, true);
         $request->session()->regenerate();
+        $request->session()->put('saml_name_id', $samlUser->getNameId());
+        $request->session()->put('saml_session_index', $samlUser->getSessionIndex());
 
         return redirect()->intended($request->session()->pull('saml_intended', '/dashboard'));
     }
@@ -84,10 +86,24 @@ class SamlController extends Controller
         return response($metadata, 200, ['Content-Type' => 'application/xml']);
     }
 
-    public function sls(): RedirectResponse
+    public function logout(Request $request): RedirectResponse
     {
         $this->ensurePackageInstalled();
 
+        $nameId = $request->session()->get('saml_name_id');
+        $sessionIndex = $request->session()->get('saml_session_index');
+        $returnTo = route('login');
+
+        $request->session()->put('saml_logout_redirect', $returnTo);
+
+        return $this->saml()->logout($returnTo, [], $nameId, $sessionIndex);
+    }
+
+    public function sls(Request $request): RedirectResponse
+    {
+        $this->ensurePackageInstalled();
+
+        $redirectTo = $request->session()->pull('saml_logout_redirect', route('login'));
         $saml2Auth = $this->saml();
         $errors = $saml2Auth->sls($this->idpName());
 
@@ -96,10 +112,11 @@ class SamlController extends Controller
         }
 
         Auth::logout();
-        session()->invalidate();
-        session()->regenerateToken();
+        $request->session()->forget(['saml_name_id', 'saml_session_index']);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->to($redirectTo);
     }
 
     protected function resolveLocalUser(string $employeeNumber, array $attributes): User

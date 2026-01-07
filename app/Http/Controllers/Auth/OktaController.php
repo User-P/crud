@@ -28,6 +28,10 @@ class OktaController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        if ($this->samlEnabled()) {
+            return app(SamlController::class)->logout($request);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

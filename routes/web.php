@@ -21,7 +21,7 @@ if (config('saml2_settings.enabled')) {
         Route::get('/login', [SamlController::class, 'login'])->name('saml.login');
         Route::post('/acs', [SamlController::class, 'acs'])->name('saml.acs');
         Route::get('/metadata', [SamlController::class, 'metadata'])->name('saml.metadata');
-        Route::get('/sls', [SamlController::class, 'sls'])->name('saml.sls');
+        Route::match(['get', 'post'], '/sls', [SamlController::class, 'sls'])->name('saml.sls');
     });
 }
 
