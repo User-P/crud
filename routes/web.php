@@ -50,7 +50,6 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('typescript.example');
 
-    // ============ Admin Panel Routes ============
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
