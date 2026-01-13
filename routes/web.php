@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Auth\OktaController;
 use App\Http\Controllers\Auth\SamlController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateDownloadController;
 use Illuminate\Support\Facades\Route;
@@ -13,7 +12,12 @@ Route::middleware('guest')->group(function () {
         ->name('login');
     Route::post('/login', [OktaController::class, 'authenticate'])
         ->name('login.perform');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/register', [OktaController::class, 'showRegister'])
+        ->middleware('saml.disabled')
+        ->name('register');
+    Route::post('/register', [OktaController::class, 'register'])
+        ->middleware('saml.disabled')
+        ->name('register.perform');
 });
 
 if (config('saml2_settings.enabled')) {
@@ -35,7 +39,6 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('welcome');
 
-    // Ruta de ejemplo con TypeScript
     Route::get('/typescript-example', function () {
         return Inertia::render('TypeScriptExample', [
             'initialCount' => 10,
@@ -72,7 +75,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/statistics', function () {
         return Inertia::render('Statistics/Index');
-    })->name('users.index');
+    })->name('statistics.index');
 
     Route::get('/charts', function () {
         return Inertia::render('Charts/Index', [
