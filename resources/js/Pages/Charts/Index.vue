@@ -11,8 +11,8 @@
                         { name: 'Steppe', data: [220, 182, 191, 234, 290] },
                         { name: 'Desert', data: [150, 232, 201, 154, 190] },
                         { name: 'Wetland', data: [98, 77, 101, 99, 40] },
-                    ]" show-value-labels label-position="insideBottom" :label-distance="15"
-                        label-formatter="{c}  {name|{a}}" :label-rich="{ name: { fontWeight: 600 } }" :bar-gap="0" />
+                    ]" show-value-labels label-formatter="{c}  {name|{a}}"
+                        :label-rich="{ name: { fontWeight: 600 } }" />
                 </div>
             </div>
         </div>
