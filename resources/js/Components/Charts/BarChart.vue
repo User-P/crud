@@ -35,20 +35,25 @@ const props = withDefaults(defineProps<{
 
 const chartRef = ref<any>(null);
 
-// 1. Estado que rastrea el tipo de gráfico actual (empieza como bar o según props)
 const currentChartType = ref<'bar' | 'line'>('bar');
+const isUserStacked = ref<boolean>(false);
 
-// 2. Escuchar el Toolbox de ECharts para actualizar el estado automáticamente
 onMounted(async () => {
     await nextTick();
     const instance = chartRef.value?.getChart();
     if (instance) {
         instance.on('magictypechanged', (params: any) => {
-            // params.currentType devuelve 'bar', 'line' o 'stack'
-            if (params.currentType === 'line' || params.currentType === 'bar') {
-                currentChartType.value = params.currentType;
-            } else if (params.currentType === 'stack') {
-                currentChartType.value = 'bar'; // Stack usualmente implica barras
+            const type = params.currentType;
+
+            if (type === 'line') {
+                currentChartType.value = 'line';
+                isUserStacked.value = false;
+            } else if (type === 'bar') {
+                currentChartType.value = 'bar';
+                isUserStacked.value = false;
+            } else if (type === 'stack') {
+                currentChartType.value = 'bar';
+                isUserStacked.value = true;
             }
         });
     }
@@ -70,11 +75,8 @@ const filteredData = computed(() => {
     const categories = props.categories || [];
     const series = props.series || [];
     if (!props.filterZeroCategories || categories.length === 0) return { categories, series };
-
     const threshold = props.zeroThreshold ?? 0;
-    const keep = categories.map((_, idx) =>
-        series.some((s) => Math.abs(Number(s?.data?.[idx] ?? 0)) > threshold)
-    );
+    const keep = categories.map((_, idx) => series.some((s) => Math.abs(Number(s?.data?.[idx] ?? 0)) > threshold));
     return {
         categories: categories.filter((_, idx) => keep[idx]),
         series: series.map((s) => ({ ...s, data: (s.data ?? []).filter((_, idx) => keep[idx]) }))
@@ -84,7 +86,9 @@ const filteredData = computed(() => {
 const chartOption = computed(() => {
     const { categories, series } = filteredData.value;
 
-    const isBar = currentChartType.value === 'bar';
+    // REGLA: Solo rotar si es BARRA y NO está en modo STACK
+    // Si es LINE o es STACK -> Horizontal (0)
+    const shouldRotate = currentChartType.value === 'bar' && !isUserStacked.value && !props.stacked;
 
     return {
         title: props.title ? { text: props.title, subtext: props.subtitle, left: 'center' } : undefined,
@@ -102,12 +106,13 @@ const chartOption = computed(() => {
         yAxis: { type: 'value', show: false },
         series: (series ?? []).map((s) => ({
             name: s.name,
-            type: currentChartType.value, // Mantiene el tipo elegido en el toolbox
-            stack: props.stacked ? 'total' : undefined,
+            type: currentChartType.value,
+            // Si el usuario activó stack en toolbox O vino por props
+            stack: (isUserStacked.value || props.stacked) ? 'total' : undefined,
             label: props.showValueLabels ? {
                 show: true,
-                rotate: isBar ? 90 : 0,
-                position: isBar ? 'inside' : 'top',
+                rotate: shouldRotate ? 90 : 0,
+                position: shouldRotate ? 'inside' : 'top',
                 formatter: resolveFormatter(props.labelFormatter),
                 rich: props.labelRich,
             } : undefined,
