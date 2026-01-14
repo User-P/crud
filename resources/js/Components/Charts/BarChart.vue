@@ -1,13 +1,21 @@
 <template>
-    <BaseEChart :option="chartOption" />
+    <div class="w-full h-full">
+        <div class="mb-2 flex gap-2">
+            <Button v-if="showRotationToggle" type="button" @click="toggleRotate" size="small">
+                {{ axisRotate === 90 ? 'Label Horizontal' : 'Label Vertical (90°)' }}
+            </Button>
+        </div>
+        <BaseEChart ref="chartRef" :option="chartOption" />
+    </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import * as echarts from 'echarts/core';
 import { BarChart as EBarChart, LineChart as ELineChart } from 'echarts/charts';
 import { GridComponent, LegendComponent, TooltipComponent, ToolboxComponent, TitleComponent } from 'echarts/components';
 import BaseEChart from './BaseEChart.vue';
+import Button from 'primevue/button';
 
 echarts.use([EBarChart, ELineChart, GridComponent, LegendComponent, TooltipComponent, ToolboxComponent, TitleComponent]);
 
@@ -22,6 +30,7 @@ const props = withDefaults(defineProps<{
     labelFormatter?: string | ((params: any) => string);
     labelRich?: Record<string, any>;
     axisLabelRotate?: number;
+    showRotationToggle?: boolean; // Nueva prop para controlar el botón
     filterZeroCategories?: boolean;
     zeroThreshold?: number;
 }>(), {
@@ -29,10 +38,36 @@ const props = withDefaults(defineProps<{
     showToolbox: false,
     showValueLabels: false,
     axisLabelRotate: 0,
+    showRotationToggle: true,
     filterZeroCategories: true,
     zeroThreshold: 0,
 });
 
+const emit = defineEmits(['update:axisLabelRotate', 'rotation-changed']);
+
+const chartRef = ref<any>(null);
+const axisRotate = ref<number>(props.axisLabelRotate ?? 0);
+const currentChartType = ref<'bar' | 'line'>(props.stacked ? 'bar' : 'bar');
+
+const toggleRotate = () => {
+    axisRotate.value = axisRotate.value === 90 ? 0 : 90;
+    emit('update:axisLabelRotate', axisRotate.value);
+    emit('rotation-changed', axisRotate.value);
+};
+
+onMounted(async () => {
+    await nextTick();
+    const instance = chartRef.value?.getChart();
+    if (instance) {
+        instance.on('magictypechanged', (params: any) => {
+            if (params.currentType === 'line' || params.currentType === 'bar') {
+                currentChartType.value = params.currentType;
+            }
+        });
+    }
+});
+
+// (Tus funciones formatValue, resolveFormatter y filteredData se mantienen igual...)
 const formatValue = (raw: unknown) => {
     const n = Number(raw);
     if (!Number.isFinite(n)) return raw == null ? '' : String(raw);
@@ -53,24 +88,18 @@ const resolveFormatter = (formatter?: typeof props.labelFormatter) => {
 const filteredData = computed(() => {
     const categories = Array.isArray(props.categories) ? props.categories : [];
     const series = Array.isArray(props.series) ? props.series : [];
-
-    if (!props.filterZeroCategories || categories.length === 0) {
-        return { categories, series };
-    }
-
+    if (!props.filterZeroCategories || categories.length === 0) return { categories, series };
     const threshold = typeof props.zeroThreshold === 'number' ? props.zeroThreshold : 0;
     const keep = categories.map((_, idx) =>
         series.some((s) => {
             const v = Number(s?.data?.[idx] ?? 0);
-            if (!Number.isFinite(v)) return false;
-            return Math.abs(v) > threshold;
+            return Number.isFinite(v) && Math.abs(v) > threshold;
         })
     );
-
-    const filteredCategories = categories.filter((_, idx) => keep[idx]);
-    const filteredSeries = series.map((s) => ({ ...s, data: (s.data ?? []).filter((_, idx) => keep[idx]) }));
-
-    return { categories: filteredCategories, series: filteredSeries };
+    return {
+        categories: categories.filter((_, idx) => keep[idx]),
+        series: series.map((s) => ({ ...s, data: (s.data ?? []).filter((_, idx) => keep[idx]) }))
+    };
 });
 
 const chartOption = computed(() => {
@@ -91,13 +120,19 @@ const chartOption = computed(() => {
             }
             : undefined,
         grid: { left: 40, right: 20, bottom: 60, top: props.title ? 60 : 30, containLabel: true },
-        xAxis: { type: 'category', data: categories, axisLabel: { rotate: props.axisLabelRotate } },
+        xAxis: { type: 'category', data: categories },
         yAxis: { type: 'value', show: false },
         series: (series ?? []).map((s) => ({
             name: s.name,
-            type: 'bar',
+            type: currentChartType.value,
             stack: props.stacked ? 'total' : undefined,
-            label: props.showValueLabels ? { show: true, formatter: resolveFormatter(props.labelFormatter), rich: props.labelRich } : undefined,
+            label: props.showValueLabels ? {
+                show: true,
+                formatter: resolveFormatter(props.labelFormatter),
+                rich: props.labelRich,
+                rotate: axisRotate.value,
+                position: axisRotate.value === 90 ? 'inside' : 'top'
+            } : undefined,
             emphasis: { focus: 'series' },
             data: s.data,
         })),
