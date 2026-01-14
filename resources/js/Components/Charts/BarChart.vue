@@ -22,11 +22,15 @@ const props = withDefaults(defineProps<{
     labelFormatter?: string | ((params: any) => string);
     labelRich?: Record<string, any>;
     axisLabelRotate?: number;
+    filterZeroCategories?: boolean;
+    zeroThreshold?: number;
 }>(), {
     stacked: false,
     showToolbox: false,
     showValueLabels: false,
     axisLabelRotate: 0,
+    filterZeroCategories: true,
+    zeroThreshold: 0,
 });
 
 const formatValue = (raw: unknown) => {
@@ -46,8 +50,32 @@ const resolveFormatter = (formatter?: typeof props.labelFormatter) => {
     };
 };
 
+const filteredData = computed(() => {
+    const categories = Array.isArray(props.categories) ? props.categories : [];
+    const series = Array.isArray(props.series) ? props.series : [];
+
+    if (!props.filterZeroCategories || categories.length === 0) {
+        return { categories, series };
+    }
+
+    const threshold = typeof props.zeroThreshold === 'number' ? props.zeroThreshold : 0;
+    const keep = categories.map((_, idx) =>
+        series.some((s) => {
+            const v = Number(s?.data?.[idx] ?? 0);
+            if (!Number.isFinite(v)) return false;
+            return Math.abs(v) > threshold;
+        })
+    );
+
+    const filteredCategories = categories.filter((_, idx) => keep[idx]);
+    const filteredSeries = series.map((s) => ({ ...s, data: (s.data ?? []).filter((_, idx) => keep[idx]) }));
+
+    return { categories: filteredCategories, series: filteredSeries };
+});
+
 const chartOption = computed(() => {
-    const legendVisible = (props.series?.length ?? 0) > 0;
+    const { categories, series } = filteredData.value;
+    const legendVisible = (series?.length ?? 0) > 0;
 
     return {
         title: props.title ? { text: props.title, subtext: props.subtitle, left: 'center' } : undefined,
@@ -63,9 +91,9 @@ const chartOption = computed(() => {
             }
             : undefined,
         grid: { left: 40, right: 20, bottom: 60, top: props.title ? 60 : 30, containLabel: true },
-        xAxis: { type: 'category', data: props.categories, axisLabel: { rotate: props.axisLabelRotate } },
+        xAxis: { type: 'category', data: categories, axisLabel: { rotate: props.axisLabelRotate } },
         yAxis: { type: 'value', show: false },
-        series: (props.series ?? []).map((s) => ({
+        series: (series ?? []).map((s) => ({
             name: s.name,
             type: 'bar',
             stack: props.stacked ? 'total' : undefined,
