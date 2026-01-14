@@ -29,10 +29,8 @@
             <div class="relative">
                 <button
                     class="flex w-full items-center gap-x-3 rounded-md p-2 text-sm font-semibold text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
-                    type="button"
-                    @click="toggleProfileMenu">
-                    <img class="h-8 w-8 rounded-full bg-gray-800 object-cover"
-                        :src="userAvatar"
+                    type="button" @click="toggleProfileMenu">
+                    <img class="h-8 w-8 rounded-full bg-gray-800 object-cover" :src="userAvatar"
                         :alt="user?.name || 'Usuario'" />
                     <span class="flex-1 text-left">
                         <span class="block">{{ user?.name || 'Usuario' }}</span>
@@ -75,7 +73,6 @@ const navigation: NavigationItem[] = [
     { name: 'Eventos', href: '/events', icon: CalendarIcon },
     { name: 'Estadísticas', href: '/statistics', icon: ChartBarIcon },
     { name: 'Charts', href: '/charts', icon: ChartPieIcon },
-    { name: 'Charts (Pie)', href: '/charts/echarts-pie', icon: ChartBarIcon },
     { name: 'Configuración', href: '/settings', icon: Cog6ToothIcon },
 ]
 

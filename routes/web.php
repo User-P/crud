@@ -79,19 +79,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/charts', ChartsController::class)->name('charts.index');
 
-    Route::get('/charts/echarts-pie', function () {
-        return Inertia::render('Charts/EChartsPie', [
-            'title' => 'Origen de trafico',
-            'data' => [
-                ['value' => 1048, 'name' => 'Busquedas'],
-                ['value' => 735, 'name' => 'Redes'],
-                ['value' => 580, 'name' => 'Email'],
-                ['value' => 484, 'name' => 'Referidos'],
-                ['value' => 300, 'name' => 'Directo'],
-            ],
-        ]);
-    })->name('charts.echarts.pie');
-
     Route::get('/organization-chart', function () {
         return Inertia::render('OrganizationChart/Index');
     })->name('organization-chart.index');
