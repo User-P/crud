@@ -71,7 +71,7 @@ interface Props {
     yAxisMin?: number | 'dataMin';
     yAxisMax?: number | 'dataMax';
     connectNulls?: boolean;
-    step?: boolean | 'start' | 'middle' | 'end';
+    step?:  'start' | 'middle' | 'end';
     extendOption?: Partial<Option>;
 }
 
