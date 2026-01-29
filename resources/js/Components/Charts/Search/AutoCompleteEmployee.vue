@@ -1,8 +1,8 @@
 <template>
     <div class="relative w-96">
         <AutoComplete v-model="model" :suggestions="employees" @complete="onComplete" @item-select="onSelect"
-            optionLabel="name" :loading="loading" :placeholder="placeholder" class="w-full" :inputClass="inputClass"
-            scrollHeight="600px" appendTo="body" :forceSelection="forceSelection">
+            @focus="onFocus" optionLabel="name" :loading="loading" :placeholder="placeholder" class="w-full"
+            :inputClass="inputClass" scrollHeight="600px" appendTo="body" :forceSelection="forceSelection">
             <template #option="slotProps">
                 <div class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer">
                     <div
@@ -11,7 +11,7 @@
                     </div>
                     <span class="text-gray-800">{{
                         slotProps.option.name
-                    }}</span>
+                        }}</span>
                 </div>
             </template>
             <template #empty>
@@ -39,6 +39,11 @@ const props = withDefaults(
         debounceMs?: number;
         inputClass?: string;
         forceSelection?: boolean;
+        // memoria de recientes
+        recentMax?: number; // cantidad máxima de recientes a guardar
+        recentTtlDays?: number; // caducidad en días
+        memoryEnabled?: boolean; // activar/desactivar memoria
+        memoryKey?: string; // clave de localStorage
     }>(),
     {
         placeholder: "Buscar empleado...",
@@ -47,6 +52,10 @@ const props = withDefaults(
         debounceMs: 700,
         inputClass: "w-full pl-4 pr-10 py-3 text-base",
         forceSelection: false,
+        recentMax: 5,
+        recentTtlDays: 7,
+        memoryEnabled: true,
+        memoryKey: "recentEmployees",
     },
 );
 const emit = defineEmits<{
@@ -55,21 +64,42 @@ const emit = defineEmits<{
     (e: "update:modelValue", value: Employee | string | null): void;
 }>();
 const model = ref<Employee | string | null>(null);
-const { employees, loading, search, clearEmployees } = useEmployeeSearch({
+const { employees, loading, search, clearEmployees, addRecent } = useEmployeeSearch({
     minChars: props.minChars,
     debounceMs: props.debounceMs,
+    memory: {
+        enabled: props.memoryEnabled,
+        key: props.memoryKey,
+        max: props.recentMax,
+        ttlMs: (props.recentTtlDays ?? 0) * 24 * 60 * 60 * 1000,
+    },
 });
+
 const onComplete = (event: { query: string }) => {
     search(event.query);
 };
+
+const onFocus = () => {
+    // When focused, show recent employees automatically
+    search("");
+};
+
 const onSelect = (event: { value: Employee }) => {
+    // add selection to recent memory
+    try {
+        addRecent(event.value);
+    } catch (e) {
+        // ignore
+    }
     emit("select", event.value);
 };
+
 const clearInput = () => {
     model.value = null;
     clearEmployees();
     emit("clear");
 };
+
 watch(model, (val) => {
     emit("update:modelValue", val);
     if (!val) emit("clear");
