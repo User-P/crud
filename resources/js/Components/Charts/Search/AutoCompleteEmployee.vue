@@ -1,8 +1,15 @@
 <template>
     <div class="relative w-96">
-        <AutoComplete v-model="model" :suggestions="employees" @complete="onComplete" @item-select="onSelect"
+        <AutoComplete ref="ac" v-model="model" :suggestions="employees" @complete="onComplete" @item-select="onSelect"
             @focus="onFocus" optionLabel="name" :loading="loading" :placeholder="placeholder" class="w-full"
             :inputClass="inputClass" scrollHeight="600px" appendTo="body" :forceSelection="forceSelection">
+            <template #header v-if="isShowingRecent && employees.length > 0">
+                <div class="flex items-center justify-between px-3 py-2 text-sm text-gray-600">
+                    <span class="font-medium">Recientes</span>
+                    <button type="button" class="text-xs text-blue-500 hover:underline"
+                        @click.stop="clearRecents">Limpiar</button>
+                </div>
+            </template>
             <template #option="slotProps">
                 <div class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer">
                     <div
@@ -27,7 +34,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, nextTick } from "vue";
 import AutoComplete from "primevue/autocomplete";
 import { useEmployeeSearch, type Employee } from "@/composables/useEmployeeSearch";
 
@@ -64,7 +71,7 @@ const emit = defineEmits<{
     (e: "update:modelValue", value: Employee | string | null): void;
 }>();
 const model = ref<Employee | string | null>(null);
-const { employees, loading, search, clearEmployees, addRecent } = useEmployeeSearch({
+const { employees, loading, search, clearEmployees, addRecent, clearRecent } = useEmployeeSearch({
     minChars: props.minChars,
     debounceMs: props.debounceMs,
     memory: {
@@ -75,13 +82,27 @@ const { employees, loading, search, clearEmployees, addRecent } = useEmployeeSea
     },
 });
 
+
+const ac = ref<any | null>(null);
+const isShowingRecent = ref(false);
+
 const onComplete = (event: { query: string }) => {
+    // when user types, switch off the recent view
+    isShowingRecent.value = false;
     search(event.query);
 };
 
-const onFocus = () => {
+const onFocus = async () => {
     // When focused, show recent employees automatically
+    isShowingRecent.value = true;
     search("");
+    await nextTick();
+    try {
+        // call component method to force overlay open (PrimeVue AutoComplete exposes show())
+        ac.value?.show?.();
+    } catch (e) {
+        // ignore if method not available
+    }
 };
 
 const onSelect = (event: { value: Employee }) => {
@@ -91,7 +112,33 @@ const onSelect = (event: { value: Employee }) => {
     } catch (e) {
         // ignore
     }
+    // hide recent view after select
+    isShowingRecent.value = false;
+    // clear suggestions and try to hide the overlay
+    clearEmployees();
+    try {
+        ac.value?.hide?.();
+        // attempt to blur the input to ensure overlay closes
+        ac.value?.inputEl?.blur?.();
+    } catch (e) {
+        // ignore if methods/properties not present
+    }
     emit("select", event.value);
+};
+
+const clearRecents = () => {
+    try {
+        clearRecent();
+    } catch (e) {
+        // ignore
+    }
+    clearEmployees();
+    isShowingRecent.value = false;
+    try {
+        ac.value?.hide?.();
+    } catch (e) {
+        // ignore
+    }
 };
 
 const clearInput = () => {
