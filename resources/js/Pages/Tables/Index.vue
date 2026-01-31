@@ -3,8 +3,8 @@
         <TanStackTable :data="data" :columns="columns" :loading="loading" enable-sorting enable-pagination
             enable-global-filter enable-column-filters selectable :page-size="10" show-sticky-header>
             <template #toolbar="{ table }">
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center gap-2">
+                <div class="flex flex-col gap-3 w-full min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
                         <Button type="button" class="p-button-sm p-button-secondary" label="Regenerar datos"
                             @click="regenerate" />
                         <Button type="button" class="p-button-sm p-button-info" label="Log Seleccionados"

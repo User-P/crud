@@ -1,43 +1,45 @@
 <template>
-    <div class="w-full">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+    <div class="w-full min-w-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             <div v-for="column in filterableColumns" :key="column.id" class="flex flex-col gap-1 min-w-0">
-                <label class="text-xs font-medium text-gray-600">{{ getColumnLabel(column) }}</label>
+                <label class="text-xs font-medium text-gray-600 truncate">{{ getColumnLabel(column) }}</label>
 
                 <template v-if="getFilterType(column) === 'select'">
                     <Select :model-value="getSelectValue(column)" :options="getSelectOptions(column)"
-                        option-label="label" option-value="value" class="w-full" placeholder="Todos" show-clear
+                        option-label="label" option-value="value" class="w-full min-w-0" placeholder="Todos" show-clear
                         @update:model-value="(v) => updateSelectValue(column, v)" />
                 </template>
 
                 <template v-else-if="getFilterType(column) === 'numberRange'">
-                    <div class="grid grid-cols-2 gap-2">
-                        <InputNumber class="w-full" input-class="w-full" :placeholder="getMinPlaceholder(column)"
+                    <div class="grid grid-cols-2 gap-1.5 sm:gap-2 min-w-0">
+                        <InputNumber class="w-full min-w-0" input-class="w-full min-w-0"
+                            :placeholder="getMinPlaceholder(column)"
                             :model-value="getNumberRangeValue(column).min ?? null"
                             @update:model-value="(v) => updateNumberRange(column, { min: v })" />
-                        <InputNumber class="w-full" input-class="w-full" :placeholder="getMaxPlaceholder(column)"
+                        <InputNumber class="w-full min-w-0" input-class="w-full min-w-0"
+                            :placeholder="getMaxPlaceholder(column)"
                             :model-value="getNumberRangeValue(column).max ?? null"
                             @update:model-value="(v) => updateNumberRange(column, { max: v })" />
                     </div>
                 </template>
 
                 <template v-else-if="getFilterType(column) === 'dateRange'">
-                    <DatePicker :model-value="getDateRangeForPicker(column)" class="w-full" input-class="w-full"
-                        selection-mode="range" date-format="yy-mm-dd" show-clear
+                    <DatePicker :model-value="getDateRangeForPicker(column)" class="w-full min-w-0"
+                        input-class="w-full min-w-0" selection-mode="range" date-format="yy-mm-dd" show-clear
                         :placeholder="getRangePlaceholder(column)"
                         @update:model-value="(v: Date | Date[] | (Date | null)[] | null | undefined) => onDateRangeChange(column, v)" />
                 </template>
 
                 <template v-else>
-                    <InputText type="search" class="w-full" :placeholder="getColumnPlaceholder(column)"
+                    <InputText type="search" class="w-full min-w-0" :placeholder="getColumnPlaceholder(column)"
                         :model-value="String(column.getFilterValue() ?? '')"
                         @update:model-value="(v) => column.setFilterValue(v || undefined)" />
                 </template>
             </div>
         </div>
 
-        <div v-if="filterableColumns.length > 0" class="mt-3 flex justify-end">
-            <Button type="button" class="p-button-sm p-button-secondary" label="Limpiar filtros"
+        <div v-if="filterableColumns.length > 0" class="mt-2 sm:mt-3 flex justify-end">
+            <Button type="button" class="p-button-sm p-button-secondary w-full sm:w-auto" label="Limpiar filtros"
                 :disabled="!hasActiveFilters" @click="clearAll" />
         </div>
     </div>

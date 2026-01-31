@@ -1,32 +1,33 @@
 <template>
-    <div class="text-slate-900">
+    <div class="text-slate-900 w-full min-w-0">
         <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-col gap-3 w-full sm:flex-row sm:items-center sm:w-auto">
-                <div class="flex items-center gap-2 w-full sm:w-auto">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 w-full min-w-0 sm:w-auto">
+                <div class="flex flex-wrap items-center gap-2 w-full min-w-0 sm:w-auto">
                     <slot name="toolbar" :table="table" />
                 </div>
-                <div v-if="enableGlobalFilter" class="hidden sm:flex items-center gap-3 ml-2 text-sm text-gray-600">
-                    <span class="text-gray-500">Resultados: <span class="font-medium">{{ filteredTotal }}</span></span>
+                <div v-if="enableGlobalFilter" class="flex items-center gap-2 sm:ml-0 text-sm text-gray-600 shrink-0">
+                    <span class="text-gray-500 whitespace-nowrap">Resultados: <span class="font-medium">{{ filteredTotal
+                            }}</span></span>
                 </div>
             </div>
-            <div class="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:w-auto">
+            <div class="flex flex-col gap-2 w-full min-w-0 sm:flex-row sm:items-center sm:w-auto sm:shrink-0">
                 <template v-if="enableGlobalFilter">
                     <label for="table-search" class="sr-only">Buscar</label>
-                    <InputText id="table-search" v-model="globalSearch" type="search" class="w-full sm:w-64"
-                        placeholder="Buscar..." />
+                    <InputText id="table-search" v-model="globalSearch" type="search"
+                        class="w-full min-w-0 sm:w-52 lg:w-64" placeholder="Buscar..." />
                 </template>
                 <template v-if="selectable">
-                    <span class="text-sm text-gray-600">{{ selectedCount }} seleccionados</span>
+                    <span class="text-sm text-gray-600 whitespace-nowrap">{{ selectedCount }} seleccionados</span>
                 </template>
             </div>
         </div>
 
-        <div class="overflow-auto overflow-x-auto overflow-y-auto bg-white rounded-md shadow-sm border border-gray-200/80"
+        <div class="overflow-auto overflow-x-auto overflow-y-auto bg-white rounded-md shadow-sm border border-gray-200/80 -mx-1 px-1 sm:mx-0 sm:px-0 touch-pan-x touch-pan-y"
             :style="scrollMaxHeight ? { maxHeight: scrollMaxHeight } : undefined">
             <table class="min-w-full table-auto divide-y divide-gray-200" role="table" :aria-busy="loading">
                 <thead class="relative">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
-                        <th v-if="selectable" class="py-3 px-3 text-left w-12"
+                        <th v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 text-left w-10 sm:w-12 shrink-0"
                             :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
                             <Checkbox :model-value="table.getIsAllPageRowsSelected()" binary
                                 :indeterminate="table.getIsSomePageRowsSelected()"
@@ -35,7 +36,8 @@
                                 @update:model-value="(v) => table.toggleAllPageRowsSelected(!!v)" />
                         </th>
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
-                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap" :class="[
+                            class="py-2 px-2 sm:py-3 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap min-w-0"
+                            :class="[
                                 header.column.getCanSort() ? 'cursor-pointer select-none' : '',
                                 showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : '',
                             ]" @click="onHeaderClick(header)">
@@ -47,7 +49,7 @@
                             </div>
                         </th>
                         <th v-if="hasRowActions && headerGroupIndex === table.getHeaderGroups().length - 1"
-                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 w-28"
+                            class="py-2 px-2 sm:py-3 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 w-20 sm:w-28 shrink-0"
                             :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
                             {{ rowActionsLabel }}
                         </th>
@@ -56,28 +58,29 @@
                 <tbody class="bg-white divide-y divide-gray-100">
                     <tr v-if="loading">
                         <td :colspan="table.getAllLeafColumns().length + extraColumns"
-                            class="py-8 px-4 text-center text-sm text-gray-500">
+                            class="py-6 sm:py-8 px-3 sm:px-4 text-center text-xs sm:text-sm text-gray-500">
                             Cargando...
                         </td>
                     </tr>
                     <tr v-else-if="table.getRowModel().rows.length === 0">
                         <td :colspan="table.getAllLeafColumns().length + extraColumns"
-                            class="py-8 px-4 text-center text-sm text-gray-500">
+                            class="py-6 sm:py-8 px-3 sm:px-4 text-center text-xs sm:text-sm text-gray-500">
                             <slot name="empty">{{ emptyText }}</slot>
                         </td>
                     </tr>
                     <tr v-for="row in table.getRowModel().rows" :key="row.id"
                         class="hover:bg-gray-50 transition-colors">
-                        <td v-if="selectable" class="py-3 px-3 align-top">
+                        <td v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 align-top shrink-0">
                             <Checkbox :model-value="row.getIsSelected()" binary :disabled="loading"
                                 :aria-label="`Seleccionar fila ${row.id}`"
                                 @update:model-value="(v) => row.toggleSelected(!!v)" />
                         </td>
                         <td v-for="cell in row.getVisibleCells()" :key="cell.id"
-                            class="py-3 px-4 align-top text-sm text-gray-700">
+                            class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 min-w-0 max-w-[160px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-normal">
                             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                         </td>
-                        <td v-if="hasRowActions" class="py-3 px-4 align-top text-sm text-gray-700">
+                        <td v-if="hasRowActions"
+                            class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 shrink-0">
                             <slot name="row-actions" :row="row" :original="row.original" :table="table" />
                         </td>
                     </tr>

@@ -1,54 +1,40 @@
 <template>
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="flex items-center gap-2 flex-wrap">
-            <Button
-                type="button"
-                class="p-button-sm"
-                label="Primera"
-                aria-label="Primera página"
-                :disabled="!table.getCanPreviousPage()"
-                @click="table.setPageIndex(0)"
-            />
-            <Button
-                type="button"
-                class="p-button-sm"
-                label="Anterior"
-                aria-label="Anterior"
-                :disabled="!table.getCanPreviousPage()"
-                @click="table.previousPage()"
-            />
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
+        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
+            <Button type="button" class="p-button-sm p-button-outlined min-w-[2.5rem]" aria-label="Primera página"
+                :disabled="!table.getCanPreviousPage()" @click="table.setPageIndex(0)">
+                <span class="sm:hidden">1ª</span>
+                <span class="hidden sm:inline">Primera</span>
+            </Button>
+            <Button type="button" class="p-button-sm p-button-outlined min-w-[2.5rem]" aria-label="Anterior"
+                :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">
+                <span class="sm:hidden">‹</span>
+                <span class="hidden sm:inline">Anterior</span>
+            </Button>
 
-            <span class="text-sm text-gray-600">Página {{ pageIndex + 1 }} / {{ pageCount }}</span>
+            <span class="text-xs sm:text-sm text-gray-600 px-2 shrink-0 whitespace-nowrap">
+                {{ pageIndex + 1 }} / {{ pageCount }}
+            </span>
 
-            <Button
-                type="button"
-                class="p-button-sm"
-                label="Siguiente"
-                aria-label="Siguiente"
-                :disabled="!table.getCanNextPage()"
-                @click="table.nextPage()"
-            />
-            <Button
-                type="button"
-                class="p-button-sm"
-                label="Última"
-                aria-label="Última página"
-                :disabled="!table.getCanNextPage()"
-                @click="table.setPageIndex(lastPageIndex)"
-            />
+            <Button type="button" class="p-button-sm p-button-outlined min-w-[2.5rem]" aria-label="Siguiente"
+                :disabled="!table.getCanNextPage()" @click="table.nextPage()">
+                <span class="sm:hidden">›</span>
+                <span class="hidden sm:inline">Siguiente</span>
+            </Button>
+            <Button type="button" class="p-button-sm p-button-outlined min-w-[2.5rem]" aria-label="Última página"
+                :disabled="!table.getCanNextPage()" @click="table.setPageIndex(lastPageIndex)">
+                <span class="sm:hidden">Últ.</span>
+                <span class="hidden sm:inline">Última</span>
+            </Button>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-            <label class="text-sm text-gray-600">Mostrar</label>
-            <Select
-                v-model="pageSize"
-                :options="pageSizeOptions"
-                class="w-full sm:w-28"
-                aria-label="Tamaño de página"
-            />
-            <span class="text-sm text-gray-600">
-                Mostrando {{ rangeStart }}–{{ rangeEnd }} de {{ filteredTotal }}
-                <template v-if="filteredTotal !== totalRows"> (total {{ totalRows }})</template>
+        <div class="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-3 min-w-0">
+            <label class="text-xs sm:text-sm text-gray-600 shrink-0">Mostrar</label>
+            <Select v-model="pageSize" :options="pageSizeOptions" class="w-20 sm:w-28 shrink-0"
+                aria-label="Tamaño de página" />
+            <span class="text-xs sm:text-sm text-gray-600 shrink-0 whitespace-nowrap">
+                {{ rangeStart }}–{{ rangeEnd }} de {{ filteredTotal }}
+                <template v-if="filteredTotal !== totalRows"> ({{ totalRows }})</template>
             </span>
         </div>
     </div>
