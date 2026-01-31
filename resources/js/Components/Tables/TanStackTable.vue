@@ -1,16 +1,26 @@
 <template>
-    <div class="text-black">
-        <!-- Toolbar: custom slot or default global search + summary -->
-        <div class="mb-3 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <slot name="toolbar" :table="table">
-                    <!-- default: nothing, keep slot if provided by parent -->
-                </slot>
+    <div class="text-slate-900">
+        <!-- Toolbar: stacks on small screens -->
+        <div class="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <slot name="toolbar" :table="table">
+                        <!-- default slot left intentionally blank -->
+                    </slot>
+                </div>
+                <div class="hidden sm:flex items-center gap-3 ml-2 text-sm text-gray-600">
+                    <div v-if="props.enableGlobalFilter">
+                        <div class="text-sm text-gray-500">Resultados: <span class="font-medium">{{ filteredTotal
+                                }}</span></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
                 <template v-if="props.enableGlobalFilter">
-                    <input v-model="globalFilter" type="search" class="rounded border px-2 py-1 text-sm"
+                    <label for="table-search" class="sr-only">Buscar</label>
+                    <input id="table-search" v-model="globalFilter" type="search"
+                        class="w-full sm:w-64 rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Buscar..." />
                 </template>
 
@@ -20,11 +30,11 @@
             </div>
         </div>
 
-        <div class="overflow-auto">
-            <table class="min-w-full border-collapse" :aria-busy="loading">
-                <thead :class="props.showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-sm' : ''">
+        <div class="overflow-auto bg-white rounded-md shadow-sm">
+            <table class="min-w-full table-auto divide-y divide-gray-200" role="table" :aria-busy="loading">
+                <thead :class="props.showStickyHeader ? 'sticky top-0 z-10 bg-white/95 backdrop-blur-sm' : ''">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
-                        <th v-if="props.selectable" class="py-2 px-3">
+                        <th v-if="props.selectable" class="py-3 px-3 text-left w-12">
                             <input type="checkbox" :checked="table.getIsAllPageRowsSelected()"
                                 :indeterminate.prop="table.getIsSomePageRowsSelected()"
                                 @change="table.toggleAllPageRowsSelected()"
@@ -33,43 +43,42 @@
                         </th>
 
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
-                            class="py-2 px-3 text-left text-sm font-semibold text-gray-900 select-none"
+                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap"
                             :class="header.column.getCanSort() ? 'cursor-pointer' : ''" @click="onHeaderClick(header)">
-                            <span v-if="!header.isPlaceholder">
+                            <div class="flex items-center gap-2">
                                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-                                <span v-if="header.column.getCanSort()" class="ml-2 text-xs text-gray-500">{{
+                                <span v-if="header.column.getCanSort()" class="ml-1 text-xs text-gray-400">{{
                                     sortIndicator(header.column.getIsSorted()) }}</span>
-                            </span>
+                            </div>
                         </th>
 
                         <th v-if="hasRowActions && headerGroupIndex === table.getHeaderGroups().length - 1"
-                            class="py-2 px-3 text-left text-sm font-semibold text-gray-900">
+                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 w-28">
                             {{ rowActionsLabel }}
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white">
                     <tr v-if="loading">
                         <td :colspan="table.getAllLeafColumns().length + extraColumns"
-                            class="py-4 px-3 text-center text-sm text-gray-500">
-                            Cargando...
-                        </td>
+                            class="py-6 px-4 text-center text-sm text-gray-500">Cargando...</td>
                     </tr>
                     <tr v-else-if="table.getRowModel().rows.length === 0">
                         <td :colspan="table.getAllLeafColumns().length + extraColumns"
-                            class="py-4 px-3 text-center text-sm text-gray-500">
+                            class="py-6 px-4 text-center text-sm text-gray-500">
                             <slot name="empty">{{ emptyText }}</slot>
                         </td>
                     </tr>
                     <tr v-for="row in table.getRowModel().rows" :key="row.id" class="hover:bg-gray-50">
-                        <td v-if="props.selectable" class="py-2 px-3">
+                        <td v-if="props.selectable" class="py-3 px-3 align-top">
                             <input type="checkbox" :checked="row.getIsSelected()" @change="row.toggleSelected()"
                                 :aria-label="`Seleccionar fila ${row.id}`" :disabled="loading" />
                         </td>
-                        <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="py-2 px-3 align-top">
+                        <td v-for="cell in row.getVisibleCells()" :key="cell.id"
+                            class="py-3 px-4 align-top text-sm text-gray-700">
                             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                         </td>
-                        <td v-if="hasRowActions" class="py-2 px-3 align-top">
+                        <td v-if="hasRowActions" class="py-3 px-4 align-top text-sm text-gray-700">
                             <slot name="row-actions" :row="row" :original="row.original" :table="table" />
                         </td>
                     </tr>
@@ -77,7 +86,9 @@
             </table>
         </div>
 
-        <slot name="pagination" :table="table" />
+        <div class="mt-3">
+            <slot name="pagination" :table="table" />
+        </div>
     </div>
 </template>
 
@@ -98,6 +109,12 @@ import {
     useVueTable,
 } from '@tanstack/vue-table'
 
+/**
+ * TanStackTable: responsive, accessible table wrapper for TanStack Vue Table
+ * - Responsive toolbar and table container
+ * - Sticky header support
+ * - Selection, global & column filters, sorting, pagination
+ */
 interface Props<TData> {
     data: TData[]
     columns: ColumnDef<TData, any>[]
@@ -129,11 +146,9 @@ const props = withDefaults(defineProps<Props<TData>>(), {
 
 const slots = useSlots()
 
+// Local reactive state used by useVueTable
 const sorting = ref<SortingState>([])
-const pagination = ref<PaginationState>({
-    pageIndex: 0,
-    pageSize: props.pageSize,
-})
+const pagination = ref<PaginationState>({ pageIndex: 0, pageSize: props.pageSize })
 const columnFilters = ref<ColumnFiltersState>([])
 const globalFilter = ref('')
 const rowSelection = ref<RowSelectionState>({})
@@ -187,6 +202,7 @@ const table = useVueTable({
     enableRowSelection: props.selectable,
 })
 
+// Helpers / computed values for UI
 const loading = computed(() => props.loading)
 const emptyText = computed(() => props.emptyText)
 const rowActionsLabel = computed(() => props.rowActionsLabel)
@@ -195,6 +211,9 @@ const hasRowActions = computed(() => !!slots['row-actions'])
 const extraColumns = computed(() => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0))
 
 const selectedCount = computed(() => Object.values(rowSelection.value).filter(Boolean).length)
+
+const totalRows = computed(() => table.getPreFilteredRowModel().rows.length)
+const filteredTotal = computed(() => table.getFilteredRowModel().rows.length)
 
 const onHeaderClick = (header: Header<TData, unknown>) => {
     if (!props.enableSorting || !header.column.getCanSort()) return
@@ -210,10 +229,9 @@ const sortIndicator = (state: false | 'asc' | 'desc') => {
 // Apply initial page size and reset to first page when it changes
 watch(
     () => props.pageSize,
-    (v, oldV) => {
+    (v) => {
         if (typeof v === 'number' && table.getState().pagination.pageSize !== v) {
             table.setPageSize?.(v)
-            // When the page size changes, move back to the first page to avoid invalid page indexes
             table.setPageIndex?.(0)
         }
     },
@@ -250,5 +268,7 @@ watch(
 defineExpose({
     table,
     selectedCount,
+    totalRows,
+    filteredTotal,
 })
 </script>

@@ -1,18 +1,17 @@
 <template>
-    <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
-            <button class="px-2 py-1 rounded border" type="button" :disabled="!table.getCanPreviousPage()"
-                @click="table.setPageIndex(0)">Primera</button>
-            <button class="px-2 py-1 rounded border" type="button" :disabled="!table.getCanPreviousPage()"
-                @click="table.previousPage()">Anterior</button>
-            <button class="px-2 py-1 rounded border" type="button" :disabled="!table.getCanNextPage()"
-                @click="table.nextPage()">Siguiente</button>
-            <button class="px-2 py-1 rounded border" type="button" :disabled="!table.getCanNextPage()"
-                @click="table.setPageIndex(lastPageIndex)">Última</button>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="flex items-center gap-2 flex-wrap">
+            <button aria-label="Primera página" class="px-2 py-1 rounded border" type="button"
+                :disabled="!table.getCanPreviousPage()" @click="table.setPageIndex(0)">Primera</button>
+            <button aria-label="Anterior" class="px-2 py-1 rounded border" type="button"
+                :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">Anterior</button>
 
-            <span class="text-sm text-gray-600">
-                Página {{ pageIndex + 1 }} / {{ pageCount }}
-            </span>
+            <span class="text-sm text-gray-600">Página {{ pageIndex + 1 }} / {{ pageCount }}</span>
+
+            <button aria-label="Siguiente" class="px-2 py-1 rounded border" type="button"
+                :disabled="!table.getCanNextPage()" @click="table.nextPage()">Siguiente</button>
+            <button aria-label="Última página" class="px-2 py-1 rounded border" type="button"
+                :disabled="!table.getCanNextPage()" @click="table.setPageIndex(lastPageIndex)">Última</button>
         </div>
 
         <div class="flex items-center gap-3">
