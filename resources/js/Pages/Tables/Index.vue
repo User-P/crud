@@ -1,6 +1,6 @@
 <template>
     <AdminLayout title="Tablas" subtitle="Prueba de TanStack Table (base reutilizable)">
-        <BaseTable
+        <TanStackTable
             :data="data"
             :columns="columns"
             :loading="loading"
@@ -34,14 +34,14 @@
                     <button type="button" class="px-2 py-1 rounded border" @click="deleteRow(original)">Eliminar</button>
                 </div>
             </template>
-        </BaseTable>
+        </TanStackTable>
     </AdminLayout>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import BaseTable from '@/Components/Tables/BaseTable.vue'
+import TanStackTable from '@/Components/Tables/TanStackTable.vue'
 import TablePagination from '@/Components/Tables/TablePagination.vue'
 import TableFilters from '@/Components/Tables/TableFilters.vue'
 import { faker } from '@faker-js/faker'
@@ -60,7 +60,7 @@ const makeFakeRows = (count = 10): BasicRow[] =>
         email: faker.internet.email(),
     }))
 
-const data = ref<BasicRow[]>(makeFakeRows(100))
+const data = ref<BasicRow[]>(makeFakeRows(0))
 const loading = ref(false)
 
 const regenerate = async () => {
