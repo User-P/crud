@@ -11,12 +11,12 @@
                 <Sidebar />
             </PrimeSidebar>
 
-            <!-- Contenido principal -->
-            <div class="lg:pl-72 flex-1">
+            <!-- Contenido principal: min-w-0 evita que crezca con la tabla y overflow-x-hidden evita que se vea bajo la sidebar -->
+            <div class="lg:pl-72 flex-1 min-w-0 overflow-x-hidden">
                 <Navbar @toggle-sidebar="sidebarOpen = true" />
 
-                <main class="py-10">
-                    <div class="px-4 sm:px-6 lg:px-8">
+                <main class="py-10 min-w-0">
+                    <div class="px-4 sm:px-6 lg:px-8 min-w-0">
                         <!-- Breadcrumbs (opcional) -->
                         <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="mb-6" aria-label="Breadcrumb">
                             <ol role="list" class="flex items-center space-x-2">

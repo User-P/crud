@@ -22,9 +22,10 @@
             </div>
         </div>
 
-        <div class="overflow-auto overflow-x-auto overflow-y-auto bg-white rounded-md shadow-sm border border-gray-200/80 -mx-1 px-1 sm:mx-0 sm:px-0 touch-pan-x touch-pan-y"
-            :style="scrollMaxHeight ? { maxHeight: scrollMaxHeight } : undefined">
-            <table class="min-w-full table-auto divide-y divide-gray-200" role="table" :aria-busy="loading">
+        <div class="w-full min-w-0 overflow-auto rounded-md shadow-sm border border-gray-200/80 bg-white touch-pan-x touch-pan-y"
+            :style="scrollWrapperStyle">
+            <table class="table-auto divide-y divide-gray-200 border-collapse w-full" role="table" :aria-busy="loading"
+                style="min-width: max(100%, max-content)">
                 <thead class="relative">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
                         <th v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 text-left w-10 sm:w-12 shrink-0"
@@ -36,7 +37,7 @@
                                 @update:model-value="(v) => table.toggleAllPageRowsSelected(!!v)" />
                         </th>
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
-                            class="py-2 px-2 sm:py-3 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap min-w-0"
+                            class="py-2 px-2 sm:py-3 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap"
                             :class="[
                                 header.column.getCanSort() ? 'cursor-pointer select-none' : '',
                                 showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : '',
@@ -76,7 +77,7 @@
                                 @update:model-value="(v) => row.toggleSelected(!!v)" />
                         </td>
                         <td v-for="cell in row.getVisibleCells()" :key="cell.id"
-                            class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 min-w-0 max-w-[160px] sm:max-w-none truncate sm:overflow-visible sm:whitespace-normal">
+                            class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap">
                             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                         </td>
                         <td v-if="hasRowActions"
@@ -277,6 +278,11 @@ const hasRowActions = computed(() => !!slots['row-actions'])
 const extraColumns = computed(() => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0))
 const selectedCount = computed(() => Object.values(rowSelection.value).filter(Boolean).length)
 const filteredTotal = computed(() => table.getFilteredRowModel().rows.length)
+
+const scrollWrapperStyle = computed(() => ({
+    WebkitOverflowScrolling: 'touch' as const,
+    ...(props.scrollMaxHeight ? { maxHeight: props.scrollMaxHeight } : {}),
+}))
 
 function onHeaderClick(header: Header<TData, unknown>) {
     if (!props.enableSorting || !header.column.getCanSort()) return
