@@ -1,22 +1,46 @@
 <template>
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div class="flex items-center gap-2 flex-wrap">
-            <button aria-label="Primera página" class="px-2 py-1 rounded border" type="button"
-                :disabled="!table.getCanPreviousPage()" @click="table.setPageIndex(0)">Primera</button>
-            <button aria-label="Anterior" class="px-2 py-1 rounded border" type="button"
-                :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">Anterior</button>
+            <Button
+                type="button"
+                class="p-button-sm"
+                label="Primera"
+                aria-label="Primera página"
+                :disabled="!table.getCanPreviousPage()"
+                @click="table.setPageIndex(0)"
+            />
+            <Button
+                type="button"
+                class="p-button-sm"
+                label="Anterior"
+                aria-label="Anterior"
+                :disabled="!table.getCanPreviousPage()"
+                @click="table.previousPage()"
+            />
 
             <span class="text-sm text-gray-600">Página {{ pageIndex + 1 }} / {{ pageCount }}</span>
 
-            <button aria-label="Siguiente" class="px-2 py-1 rounded border" type="button"
-                :disabled="!table.getCanNextPage()" @click="table.nextPage()">Siguiente</button>
-            <button aria-label="Última página" class="px-2 py-1 rounded border" type="button"
-                :disabled="!table.getCanNextPage()" @click="table.setPageIndex(lastPageIndex)">Última</button>
+            <Button
+                type="button"
+                class="p-button-sm"
+                label="Siguiente"
+                aria-label="Siguiente"
+                :disabled="!table.getCanNextPage()"
+                @click="table.nextPage()"
+            />
+            <Button
+                type="button"
+                class="p-button-sm"
+                label="Última"
+                aria-label="Última página"
+                :disabled="!table.getCanNextPage()"
+                @click="table.setPageIndex(lastPageIndex)"
+            />
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
             <label class="text-sm text-gray-600">Mostrar</label>
-            <select class="border rounded px-2 py-1" v-model.number="pageSize">
+            <select class="border rounded px-2 py-1 text-sm" v-model.number="pageSize">
                 <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
             <span class="text-sm text-gray-600">
@@ -30,6 +54,7 @@
 <script setup lang="ts" generic="TData extends Record<string, any>">
 import { computed, watch } from 'vue'
 import type { Table } from '@tanstack/vue-table'
+import Button from 'primevue/button'
 
 interface Props<TData> {
     table: Table<TData>

@@ -8,6 +8,14 @@ Este folder contiene la tabla reutilizable basada en TanStack Table y componente
 - `TablePagination.vue`: paginación simple con primera/última página y rango mostrado.
 - `TableFilters.vue`: filtros por columna (inputs por columna filtrable).
 
+## Dependencias UI
+
+- Se usan componentes PrimeVue en los helpers:
+  - `TanStackTable.vue` (InputText para filtro global).
+  - `TableFilters.vue` (InputText + Button).
+  - `TablePagination.vue` (Button).
+- Asegúrate de tener PrimeVue y sus estilos cargados en el proyecto.
+
 ## Uso básico
 
 ```vue
@@ -18,6 +26,7 @@ import { type ColumnDef } from '@tanstack/vue-table'
 import TanStackTable from '@/Components/Tables/TanStackTable.vue'
 import TablePagination from '@/Components/Tables/TablePagination.vue'
 import TableFilters from '@/Components/Tables/TableFilters.vue'
+import Button from 'primevue/button'
 
 type Row = { id: string; name: string; email: string }
 
@@ -78,7 +87,7 @@ const columns: ColumnDef<Row>[] = [
     </template>
 
     <template #row-actions="{ original }">
-      <button type="button">Editar {{ original.name }}</button>
+      <Button type="button" class="p-button-sm" label="Editar" />
     </template>
   </TanStackTable>
 </template>
@@ -113,22 +122,28 @@ const columns: ColumnDef<Row>[] = [
 
 - `table`: instancia de TanStack.
 - `selectedCount`: cantidad de filas seleccionadas.
+- `totalRows`: total de filas antes de filtros.
+- `filteredTotal`: total de filas después de filtros.
 
 ### Notas de comportamiento
 
 - Al cambiar `data`, se reinicia la selección y vuelve a la página 1.
 - Al cambiar el filtro global, vuelve a la página 1.
+- Si los filtros reducen el total de páginas, se ajusta el `pageIndex` automáticamente.
 - El filtro global usa `includesString`.
+ - El input del filtro global usa PrimeVue `InputText`.
 
 ## TableFilters.vue
 
-- Renderiza inputs para columnas con `enableColumnFilter: true`.
+- Renderiza inputs (PrimeVue `InputText`) para columnas con `enableColumnFilter: true`.
 - Usa `columnDef.meta.filterPlaceholder` si existe.
 - Limpia todos los filtros con `resetColumnFilters()`.
+- El botón de limpiar se desactiva si no hay filtros activos.
+- Si el input queda vacío, el filtro se elimina (`undefined`).
 
 ## TablePagination.vue
 
-- Controles: primera/anterior/siguiente/última.
+- Controles (PrimeVue `Button`): primera/anterior/siguiente/última.
 - Selector de tamaño de página.
 - Muestra rango y total filtrado vs total real.
 

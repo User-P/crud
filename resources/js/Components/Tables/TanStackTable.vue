@@ -1,8 +1,8 @@
 <template>
     <div class="text-slate-900">
         <!-- Toolbar: stacks on small screens -->
-        <div class="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+        <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-3 w-full sm:flex-row sm:items-center sm:w-auto">
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <slot name="toolbar" :table="table">
                         <!-- default slot left intentionally blank -->
@@ -16,12 +16,16 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:w-auto">
                 <template v-if="props.enableGlobalFilter">
                     <label for="table-search" class="sr-only">Buscar</label>
-                    <input id="table-search" v-model="globalFilter" type="search"
-                        class="w-full sm:w-64 rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Buscar..." />
+                    <InputText
+                        id="table-search"
+                        v-model="globalFilter"
+                        type="search"
+                        class="w-full sm:w-64"
+                        placeholder="Buscar..."
+                    />
                 </template>
 
                 <template v-if="props.selectable">
@@ -94,6 +98,7 @@
 
 <script setup lang="ts" generic="TData extends Record<string, any>">
 import { computed, ref, watch, useSlots } from 'vue'
+import InputText from 'primevue/inputtext'
 import {
     type ColumnDef,
     type Header,
