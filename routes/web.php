@@ -77,6 +77,10 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Statistics/Index');
     })->name('statistics.index');
 
+    Route::get('/tables', function () {
+        return Inertia::render('Tables/Index');
+    })->name('tables.index');
+
     Route::get('/charts', ChartsController::class)->name('charts.index');
 
     Route::get('/organization-chart', function () {

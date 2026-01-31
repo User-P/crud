@@ -72,6 +72,7 @@ const navigation: NavigationItem[] = [
     { name: 'Países', href: '/countries', icon: FolderIcon },
     { name: 'Eventos', href: '/events', icon: CalendarIcon },
     { name: 'Estadísticas', href: '/statistics', icon: ChartBarIcon },
+    { name: 'Tablas', href: '/tables', icon: FolderIcon },
     { name: 'Charts', href: '/charts', icon: ChartPieIcon },
     { name: 'Configuración', href: '/settings', icon: Cog6ToothIcon },
 ]
