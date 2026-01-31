@@ -10,10 +10,7 @@
 
             <div class="flex items-center gap-3">
                 <template v-if="props.enableGlobalFilter">
-                    <input
-                        v-model="globalFilter"
-                        type="search"
-                        class="rounded border px-2 py-1 text-sm"
+                    <input v-model="globalFilter" type="search" class="rounded border px-2 py-1 text-sm"
                         placeholder="Buscar..." />
                 </template>
 
@@ -28,20 +25,16 @@
                 <thead :class="props.showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-sm' : ''">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
                         <th v-if="props.selectable" class="py-2 px-3">
-                            <input
-                                type="checkbox"
-                                :checked="table.getIsAllPageRowsSelected()"
+                            <input type="checkbox" :checked="table.getIsAllPageRowsSelected()"
                                 :indeterminate.prop="table.getIsSomePageRowsSelected()"
                                 @change="table.toggleAllPageRowsSelected()"
                                 aria-label="Seleccionar todas las filas visibles"
-                                :disabled="loading || table.getRowModel().rows.length === 0"
-                            />
+                                :disabled="loading || table.getRowModel().rows.length === 0" />
                         </th>
 
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
                             class="py-2 px-3 text-left text-sm font-semibold text-gray-900 select-none"
-                            :class="header.column.getCanSort() ? 'cursor-pointer' : ''"
-                            @click="onHeaderClick(header)">
+                            :class="header.column.getCanSort() ? 'cursor-pointer' : ''" @click="onHeaderClick(header)">
                             <span v-if="!header.isPlaceholder">
                                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
                                 <span v-if="header.column.getCanSort()" class="ml-2 text-xs text-gray-500">{{
@@ -49,10 +42,8 @@
                             </span>
                         </th>
 
-                        <th
-                            v-if="hasRowActions && headerGroupIndex === table.getHeaderGroups().length - 1"
-                            class="py-2 px-3 text-left text-sm font-semibold text-gray-900"
-                        >
+                        <th v-if="hasRowActions && headerGroupIndex === table.getHeaderGroups().length - 1"
+                            class="py-2 px-3 text-left text-sm font-semibold text-gray-900">
                             {{ rowActionsLabel }}
                         </th>
                     </tr>
@@ -72,13 +63,8 @@
                     </tr>
                     <tr v-for="row in table.getRowModel().rows" :key="row.id" class="hover:bg-gray-50">
                         <td v-if="props.selectable" class="py-2 px-3">
-                            <input
-                                type="checkbox"
-                                :checked="row.getIsSelected()"
-                                @change="row.toggleSelected()"
-                                :aria-label="`Seleccionar fila ${row.id}`"
-                                :disabled="loading"
-                            />
+                            <input type="checkbox" :checked="row.getIsSelected()" @change="row.toggleSelected()"
+                                :aria-label="`Seleccionar fila ${row.id}`" :disabled="loading" />
                         </td>
                         <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="py-2 px-3 align-top">
                             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
@@ -221,28 +207,44 @@ const sortIndicator = (state: false | 'asc' | 'desc') => {
     return ''
 }
 
-watch(() => props.pageSize, (v) => {
-    if (typeof v === 'number' && table.getState().pagination.pageSize !== v) {
-        table.setPageSize?.(v)
-    }
-})
+// Apply initial page size and reset to first page when it changes
+watch(
+    () => props.pageSize,
+    (v, oldV) => {
+        if (typeof v === 'number' && table.getState().pagination.pageSize !== v) {
+            table.setPageSize?.(v)
+            // When the page size changes, move back to the first page to avoid invalid page indexes
+            table.setPageIndex?.(0)
+        }
+    },
+    { immediate: true }
+)
 
+// When the global filter changes, reset pagination to the first page (UX-friendly)
 watch(globalFilter, () => {
     if (props.enablePagination) {
         table.setPageIndex?.(0)
     }
 })
 
+// Watch data and filtered length to keep pageIndex within valid bounds and reset selection
 watch(
-    () => props.data,
+    () => [props.data, table.getFilteredRowModel().rows.length],
     () => {
         if (props.selectable) {
             table.resetRowSelection?.()
         }
+
         if (props.enablePagination) {
-            table.setPageIndex?.(0)
+            const pageCount = Math.max(table.getPageCount(), 1)
+            const lastIndex = Math.max(pageCount - 1, 0)
+            const current = table.getState().pagination.pageIndex || 0
+            if (current > lastIndex) {
+                table.setPageIndex?.(lastIndex)
+            }
         }
-    }
+    },
+    { immediate: true }
 )
 
 defineExpose({

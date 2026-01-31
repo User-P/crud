@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts" generic="TData extends Record<string, any>">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import type { Table } from '@tanstack/vue-table'
 
 interface Props<TData> {
@@ -47,6 +47,13 @@ const lastPageIndex = computed(() => Math.max(pageCount.value - 1, 0))
 const pageSize = computed({
     get: () => props.table.getState().pagination.pageSize || props.pageSizeOptions[0],
     set: (value) => props.table.setPageSize?.(value),
+})
+
+// When user changes page size, jump back to the first page to avoid invalid page index
+watch(() => pageSize.value, (v, old) => {
+    if (v !== old) {
+        props.table.setPageIndex?.(0)
+    }
 })
 
 const totalRows = computed(() => props.table.getPreFilteredRowModel().rows.length)
