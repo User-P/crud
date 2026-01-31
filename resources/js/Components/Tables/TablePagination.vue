@@ -8,7 +8,7 @@
             <button class="px-2 py-1 rounded border" type="button" :disabled="!table.getCanNextPage()"
                 @click="table.nextPage()">Siguiente</button>
             <button class="px-2 py-1 rounded border" type="button" :disabled="!table.getCanNextPage()"
-                @click="table.setPageIndex(table.getPageCount() - 1)">Última</button>
+                @click="table.setPageIndex(lastPageIndex)">Última</button>
 
             <span class="text-sm text-gray-600">
                 Página {{ pageIndex + 1 }} / {{ pageCount }}
@@ -43,6 +43,7 @@ const props = withDefaults(defineProps<Props<TData>>(), {
 
 const pageIndex = computed(() => props.table.getState().pagination.pageIndex)
 const pageCount = computed(() => Math.max(props.table.getPageCount(), 1))
+const lastPageIndex = computed(() => Math.max(pageCount.value - 1, 0))
 const pageSize = computed({
     get: () => props.table.getState().pagination.pageSize || props.pageSizeOptions[0],
     set: (value) => props.table.setPageSize?.(value),
