@@ -4,20 +4,21 @@ Este folder contiene la tabla reutilizable basada en TanStack Table y componente
 
 ## Archivos
 
-- `TanStackTable.vue`: componente principal (sorting, filtros, selección, paginación, sticky header, loading, acciones por fila).
-- `TablePagination.vue`: paginación simple con primera/última página y rango mostrado.
-- `TableFilters.vue`: filtros por columna (inputs por columna filtrable).
-- `TableFiltersAdvanced.vue`: filtros avanzados por columna (texto, select, rangos numéricos y fechas). El filtro `dateRange` utiliza el componente `DatePicker` de PrimeVue en `selectionMode="range"` (entrada manual deshabilitada por defecto) para seleccionar el rango de fechas de forma compacta.
+-   `TanStackTable.vue`: componente principal (sorting, filtros, selección, paginación, sticky header, loading, acciones por fila).
+-   `TablePagination.vue`: paginación simple con primera/última página y rango mostrado.
+-   `TableFilters.vue`: filtros por columna (inputs por columna filtrable).
+-   `TableFiltersAdvanced.vue`: filtros avanzados por columna (texto, select, rangos numéricos y fechas). El filtro `dateRange` usa `DatePicker` de PrimeVue en `selection-mode="range"` y guarda el valor como `{ from, to }` en formato **YYYY-MM-DD** (ver `dateFilterUtils.ts`) para evitar problemas de zona horaria.
+-   `dateFilterUtils.ts`: utilidades para filtros de rango de fechas (parseo y formato YYYY-MM-DD).
 
 ## Dependencias UI
 
-- Se usan componentes PrimeVue en los helpers:
-    - `TanStackTable.vue` (InputText para filtro global).
-    - `TableFilters.vue` (InputText + Button).
-    - `TableFiltersAdvanced.vue` (InputText + Select + InputNumber + DatePicker + Button).
-    - `TablePagination.vue` (Button + Select).
-    - `TanStackTable.vue` (Checkbox para selección).
-- Asegúrate de tener PrimeVue y sus estilos cargados en el proyecto.
+-   Se usan componentes PrimeVue en los helpers:
+    -   `TanStackTable.vue` (InputText para filtro global).
+    -   `TableFilters.vue` (InputText + Button).
+    -   `TableFiltersAdvanced.vue` (InputText + Select + InputNumber + DatePicker + Button).
+    -   `TablePagination.vue` (Button + Select).
+    -   `TanStackTable.vue` (Checkbox para selección).
+-   Asegúrate de tener PrimeVue y sus estilos cargados en el proyecto.
 
 ## Uso básico
 
@@ -48,7 +49,7 @@ const data = ref<Row[]>(
         status: faker.helpers.arrayElement(["Activo", "Inactivo"]),
         age: faker.number.int({ min: 18, max: 65 }),
         createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
-    })),
+    }))
 );
 
 const columns: ColumnDef<Row>[] = [
@@ -150,76 +151,76 @@ const columns: ColumnDef<Row>[] = [
 
 ### Props
 
-- `data` (**required**): arreglo de datos.
-- `columns` (**required**): definición de columnas `ColumnDef<T>`.
-- `getRowId` (opcional): función para generar ID de fila estable.
-- `enableSorting` (opcional): activa ordenamiento.
-- `enablePagination` (opcional): activa paginación.
-- `pageSize` (opcional): tamaño de página inicial.
-- `emptyText` (opcional): texto cuando no hay datos.
-- `loading` (opcional): muestra estado de carga y bloquea selección.
-- `selectable` (opcional): activa selección de filas.
-- `enableGlobalFilter` (opcional): activa filtro global (input interno).
-- `enableColumnFilters` (opcional): activa filtros por columna (para `TableFilters`).
-- `showStickyHeader` (opcional): sticky header en el `<thead>`.
-- `rowActionsLabel` (opcional): texto del header para la columna de acciones.
+-   `data` (**required**): arreglo de datos.
+-   `columns` (**required**): definición de columnas `ColumnDef<T>`.
+-   `getRowId` (opcional): función para generar ID de fila estable.
+-   `enableSorting` (opcional): activa ordenamiento.
+-   `enablePagination` (opcional): activa paginación.
+-   `pageSize` (opcional): tamaño de página inicial.
+-   `emptyText` (opcional): texto cuando no hay datos.
+-   `loading` (opcional): muestra estado de carga y bloquea selección.
+-   `selectable` (opcional): activa selección de filas.
+-   `enableGlobalFilter` (opcional): activa filtro global (input interno).
+-   `enableColumnFilters` (opcional): activa filtros por columna (para `TableFilters`).
+-   `showStickyHeader` (opcional): sticky header en el `<thead>`.
+-   `rowActionsLabel` (opcional): texto del header para la columna de acciones.
 
 ### Slots
 
-- `toolbar`: recibe `{ table }`.
-- `pagination`: recibe `{ table }`.
-- `empty`: contenido cuando no hay datos.
-- `row-actions`: recibe `{ row, original, table }` para acciones por fila.
+-   `toolbar`: recibe `{ table }`.
+-   `pagination`: recibe `{ table }`.
+-   `empty`: contenido cuando no hay datos.
+-   `row-actions`: recibe `{ row, original, table }` para acciones por fila.
 
 ### Exposed (defineExpose)
 
-- `table`: instancia de TanStack.
-- `selectedCount`: cantidad de filas seleccionadas.
-- `totalRows`: total de filas antes de filtros.
-- `filteredTotal`: total de filas después de filtros.
+-   `table`: instancia de TanStack.
+-   `selectedCount`: cantidad de filas seleccionadas.
+-   `totalRows`: total de filas antes de filtros.
+-   `filteredTotal`: total de filas después de filtros.
 
 ### Notas de comportamiento
 
-- Al cambiar `data`, se reinicia la selección y vuelve a la página 1.
-- Al cambiar el filtro global, vuelve a la página 1.
-- Si los filtros reducen el total de páginas, se ajusta el `pageIndex` automáticamente.
-- El filtro global usa `includesString`.
-- El input del filtro global usa PrimeVue `InputText`.
-- `filterFn` soportadas por defecto: `numberRange` y `dateRange`.
+-   Al cambiar `data`, se reinicia la selección y vuelve a la página 1.
+-   Al cambiar el filtro global, vuelve a la página 1.
+-   Si los filtros reducen el total de páginas, se ajusta el `pageIndex` automáticamente.
+-   El filtro global usa `includesString`.
+-   El input del filtro global usa PrimeVue `InputText`.
+-   `filterFn` soportadas por defecto: `includesString`, `equalsString`, `numberRange` / `inNumberRange`, `dateRange`. El filtro de fechas espera valores `{ from?: string, to?: string }` en formato YYYY-MM-DD.
 
 ## TableFilters.vue
 
-- Renderiza inputs (PrimeVue `InputText`) para columnas con `enableColumnFilter: true`.
-- Usa `columnDef.meta.filterPlaceholder` si existe.
-- Limpia todos los filtros con `resetColumnFilters()`.
-- El botón de limpiar se desactiva si no hay filtros activos.
-- Si el input queda vacío, el filtro se elimina (`undefined`).
+-   Renderiza inputs (PrimeVue `InputText`) para columnas con `enableColumnFilter: true`.
+-   Usa `columnDef.meta.filterPlaceholder` si existe.
+-   Limpia todos los filtros con `resetColumnFilters()`.
+-   El botón de limpiar se desactiva si no hay filtros activos.
+-   Si el input queda vacío, el filtro se elimina (`undefined`).
 
 ## TablePagination.vue
 
-- Controles (PrimeVue `Button`): primera/anterior/siguiente/última.
-- Selector de tamaño de página con PrimeVue `Select`.
-- Muestra rango y total filtrado vs total real.
+-   Controles (PrimeVue `Button`): primera/anterior/siguiente/última.
+-   Selector de tamaño de página con PrimeVue `Select`.
+-   Muestra rango y total filtrado vs total real.
 
 ## Recomendaciones
 
-- Para filtros avanzados (select, rango, fecha), crea un `TableFiltersAdvanced.vue` y usa `column.setFilterValue()`.
-- Para acciones por fila, usa el slot `row-actions` y dispara modales o eventos.
-- Mantén `getRowId` si los datos vienen de backend para conservar selección.
+-   Para filtros avanzados (select, rango, fecha), crea un `TableFiltersAdvanced.vue` y usa `column.setFilterValue()`.
+-   Para acciones por fila, usa el slot `row-actions` y dispara modales o eventos.
+-   Mantén `getRowId` si los datos vienen de backend para conservar selección.
 
 ## TableFiltersAdvanced.vue
 
 Permite definir el tipo de filtro por columna usando `meta.filterType`:
 
-- `text` (default): input de texto.
-- `select`: select con opciones en `meta.filterOptions`.
-- `numberRange`: rango numérico `{ min, max }` con `filterFn: 'numberRange'`.
-- `dateRange`: rango de fechas `{ from, to }` con `filterFn: 'dateRange'`.
+-   `text` (default): input de texto.
+-   `select`: select con opciones en `meta.filterOptions`.
+-   `numberRange`: rango numérico `{ min, max }` con `filterFn: 'numberRange'`.
+-   `dateRange`: rango de fechas `{ from, to }` con `filterFn: 'dateRange'`.
 
 ### Meta soportada
 
-- `filterType`: `'text' | 'select' | 'numberRange' | 'dateRange'`.
-- `filterPlaceholder`: placeholder para texto.
-- `filterOptions`: opciones `{ label, value }` para `select`.
-- `filterMinPlaceholder` / `filterMaxPlaceholder`: placeholders para rango numérico.
-- `filterFromPlaceholder` / `filterToPlaceholder`: placeholders para rango de fechas (se combinan como `Desde - Hasta` si no se define `filterPlaceholder`).
+-   `filterType`: `'text' | 'select' | 'numberRange' | 'dateRange'`.
+-   `filterPlaceholder`: placeholder para texto.
+-   `filterOptions`: opciones `{ label, value }` para `select`.
+-   `filterMinPlaceholder` / `filterMaxPlaceholder`: placeholders para rango numérico.
+-   `filterFromPlaceholder` / `filterToPlaceholder`: placeholders para rango de fechas (se combinan como `Desde - Hasta` si no se define `filterPlaceholder`).

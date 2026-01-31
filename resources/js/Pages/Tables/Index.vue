@@ -130,7 +130,7 @@ const columns: ColumnDef<BasicRow>[] = [
         header: 'Alta',
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
-        filterFn: 'dateRange' as unknown as any,
+        filterFn: 'dateRange' as import('@tanstack/vue-table').FilterFnOption<BasicRow>,
         meta: { filterType: 'dateRange', filterFromPlaceholder: 'Desde', filterToPlaceholder: 'Hasta' },
     },
 ]
