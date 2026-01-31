@@ -1,32 +1,14 @@
 <template>
     <AdminLayout title="Tablas" subtitle="Prueba de TanStack Table (base reutilizable)">
-        <TanStackTable
-            :data="data"
-            :columns="columns"
-            :loading="loading"
-            enable-sorting
-            enable-pagination
-            enable-global-filter
-            enable-column-filters
-            selectable
-            :page-size="10"
-            show-sticky-header
-        >
+        <TanStackTable :data="data" :columns="columns" :loading="loading" enable-sorting enable-pagination
+            enable-global-filter enable-column-filters selectable :page-size="10" show-sticky-header>
             <template #toolbar="{ table }">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center gap-2">
-                        <Button
-                            type="button"
-                            class="p-button-sm p-button-secondary"
-                            label="Regenerar datos"
-                            @click="regenerate"
-                        />
-                        <Button
-                            type="button"
-                            class="p-button-sm p-button-info"
-                            label="Log Seleccionados"
-                            @click="logSelected(table)"
-                        />
+                        <Button type="button" class="p-button-sm p-button-secondary" label="Regenerar datos"
+                            @click="regenerate" />
+                        <Button type="button" class="p-button-sm p-button-info" label="Log Seleccionados"
+                            @click="logSelected(table)" />
                     </div>
                     <TableFiltersAdvanced :table="table" />
                 </div>
@@ -37,12 +19,8 @@
             <template #row-actions="{ original }">
                 <div class="flex items-center gap-2">
                     <Button type="button" class="p-button-sm" label="Editar" @click="editRow(original)" />
-                    <Button
-                        type="button"
-                        class="p-button-sm p-button-danger"
-                        label="Eliminar"
-                        @click="deleteRow(original)"
-                    />
+                    <Button type="button" class="p-button-sm p-button-danger" label="Eliminar"
+                        @click="deleteRow(original)" />
                 </div>
             </template>
         </TanStackTable>
@@ -152,7 +130,7 @@ const columns: ColumnDef<BasicRow>[] = [
         header: 'Alta',
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
-        filterFn: 'inNumberRange',
+        filterFn: 'dateRange' as unknown as any,
         meta: { filterType: 'dateRange', filterFromPlaceholder: 'Desde', filterToPlaceholder: 'Hasta' },
     },
 ]

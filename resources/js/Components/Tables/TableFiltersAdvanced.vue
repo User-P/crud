@@ -1,86 +1,43 @@
 <template>
     <div class="flex flex-wrap items-end gap-3 w-full">
-        <div
-            v-for="column in filterableColumns"
-            :key="column.id"
-            class="flex flex-col gap-1 w-full sm:w-48"
-        >
+        <div v-for="column in filterableColumns" :key="column.id" class="flex flex-col gap-1 w-full sm:w-48">
             <label class="text-xs text-gray-600">{{ getColumnLabel(column) }}</label>
 
             <template v-if="getFilterType(column) === 'select'">
-                <select
-                    class="border rounded px-2 py-1 text-sm w-full"
-                    :value="String(column.getFilterValue() ?? '')"
-                    @change="onSelectChange(column, $event)"
-                >
-                    <option value="">Todos</option>
-                    <option
-                        v-for="opt in getSelectOptions(column)"
-                        :key="String(opt.value)"
-                        :value="String(opt.value)"
-                    >
-                        {{ opt.label }}
-                    </option>
-                </select>
+                <Select :model-value="getSelectValue(column)" :options="getSelectOptions(column)" optionLabel="label"
+                    optionValue="value" class="w-full" placeholder="Todos" show-clear
+                    @update:model-value="(value) => updateSelectValue(column, value)" />
             </template>
 
             <template v-else-if="getFilterType(column) === 'numberRange'">
                 <div class="grid grid-cols-2 gap-2">
-                    <InputText
-                        type="number"
-                        class="w-full"
-                        :placeholder="getMinPlaceholder(column)"
-                        :model-value="String(getNumberRangeValue(column).min ?? '')"
-                        @update:model-value="(value) => updateNumberRange(column, { min: value })"
-                    />
-                    <InputText
-                        type="number"
-                        class="w-full"
-                        :placeholder="getMaxPlaceholder(column)"
-                        :model-value="String(getNumberRangeValue(column).max ?? '')"
-                        @update:model-value="(value) => updateNumberRange(column, { max: value })"
-                    />
+                    <InputNumber class="w-full" :placeholder="getMinPlaceholder(column)"
+                        :model-value="getNumberRangeValue(column).min ?? null"
+                        @update:model-value="(value) => updateNumberRange(column, { min: value })" />
+                    <InputNumber class="w-full" :placeholder="getMaxPlaceholder(column)"
+                        :model-value="getNumberRangeValue(column).max ?? null"
+                        @update:model-value="(value) => updateNumberRange(column, { max: value })" />
                 </div>
             </template>
 
             <template v-else-if="getFilterType(column) === 'dateRange'">
-                <div class="grid grid-cols-2 gap-2">
-                    <InputText
-                        type="date"
-                        class="w-full"
-                        :placeholder="getFromPlaceholder(column)"
-                        :model-value="getDateRangeValue(column).from ?? ''"
-                        @update:model-value="(value) => updateDateRange(column, { from: value })"
-                    />
-                    <InputText
-                        type="date"
-                        class="w-full"
-                        :placeholder="getToPlaceholder(column)"
-                        :model-value="getDateRangeValue(column).to ?? ''"
-                        @update:model-value="(value) => updateDateRange(column, { to: value })"
-                    />
+                <div>
+                    <!-- Single date range picker (PrimeVue DatePicker with selectionMode="range") -->
+                    <DatePicker class="w-full" :model-value="getDateRangeValueArray(column)" selectionMode="range"
+                        :manualInput="false" date-format="yy-mm-dd" show-clear
+                        @update:model-value="(value) => updateDateRangeFromPicker(column, value)" />
                 </div>
             </template>
 
             <template v-else>
-                <InputText
-                    type="search"
-                    class="w-full"
-                    :placeholder="getColumnPlaceholder(column)"
+                <InputText type="search" class="w-full" :placeholder="getColumnPlaceholder(column)"
                     :model-value="String(column.getFilterValue() ?? '')"
-                    @update:model-value="(value) => column.setFilterValue(value || undefined)"
-                />
+                    @update:model-value="(value) => column.setFilterValue(value || undefined)" />
             </template>
         </div>
 
-        <Button
-            v-if="filterableColumns.length > 0"
-            type="button"
-            class="p-button-sm p-button-secondary"
-            label="Limpiar filtros"
-            :disabled="!hasActiveFilters"
-            @click="clearAll"
-        />
+        <Button v-if="filterableColumns.length > 0" type="button" class="p-button-sm p-button-secondary"
+            label="Limpiar filtros" :disabled="!hasActiveFilters" @click="clearAll" />
     </div>
 </template>
 
@@ -88,7 +45,10 @@
 import { computed } from 'vue'
 import type { Column, Table } from '@tanstack/vue-table'
 import Button from 'primevue/button'
+import DatePicker from 'primevue/datepicker'
+import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
 
 interface FilterOption {
     label: string
@@ -138,16 +98,12 @@ const getMinPlaceholder = (column: Column<TData, unknown>) =>
 const getMaxPlaceholder = (column: Column<TData, unknown>) =>
     getColumnMeta(column).filterMaxPlaceholder ?? 'Max'
 
-const getFromPlaceholder = (column: Column<TData, unknown>) =>
-    getColumnMeta(column).filterFromPlaceholder ?? 'Desde'
 
-const getToPlaceholder = (column: Column<TData, unknown>) =>
-    getColumnMeta(column).filterToPlaceholder ?? 'Hasta'
 
 const getSelectOptions = (column: Column<TData, unknown>) =>
     getColumnMeta(column).filterOptions ?? []
 
-const parseNumber = (value: string | number | undefined) => {
+const parseNumber = (value: string | number | null | undefined) => {
     if (value === '' || value === undefined || value === null) return undefined
     const num = typeof value === 'number' ? value : Number(value)
     return Number.isFinite(num) ? num : undefined
@@ -160,7 +116,7 @@ const getNumberRangeValue = (column: Column<TData, unknown>) => {
 
 const updateNumberRange = (
     column: Column<TData, unknown>,
-    partial: { min?: string | number; max?: string | number }
+    partial: { min?: string | number | null; max?: string | number | null }
 ) => {
     const current = getNumberRangeValue(column)
     const next = {
@@ -176,19 +132,26 @@ const updateNumberRange = (
     column.setFilterValue(next)
 }
 
+const toDate = (value?: string | Date | null) => {
+    if (!value) return undefined
+    if (value instanceof Date) return value
+    const parsed = new Date(value)
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed
+}
+
 const getDateRangeValue = (column: Column<TData, unknown>) => {
-    const current = (column.getFilterValue() as { from?: string; to?: string }) || {}
-    return { from: current.from, to: current.to }
+    const current = (column.getFilterValue() as { from?: string | Date; to?: string | Date }) || {}
+    return { from: toDate(current.from), to: toDate(current.to) }
 }
 
 const updateDateRange = (
     column: Column<TData, unknown>,
-    partial: { from?: string; to?: string }
+    partial: { from?: Date | null; to?: Date | null }
 ) => {
     const current = getDateRangeValue(column)
     const next = {
-        from: partial.from !== undefined ? partial.from || undefined : current.from,
-        to: partial.to !== undefined ? partial.to || undefined : current.to,
+        from: partial.from !== undefined ? (partial.from || undefined) : current.from,
+        to: partial.to !== undefined ? (partial.to || undefined) : current.to,
     }
 
     if (!next.from && !next.to) {
@@ -196,21 +159,49 @@ const updateDateRange = (
         return
     }
 
-    column.setFilterValue(next)
+    // Store Date objects (filters accept Date or ISO strings in our table implementation)
+    column.setFilterValue({ from: next.from, to: next.to })
 }
 
-const onSelectChange = (column: Column<TData, unknown>, event: Event) => {
-    const target = event.target as HTMLSelectElement
-    const raw = target.value
-    if (raw === '') {
+const getDateRangeValueArray = (column: Column<TData, unknown>) => {
+    const { from, to } = getDateRangeValue(column)
+    return [from ?? null, to ?? null]
+}
+
+const updateDateRangeFromPicker = (column: Column<TData, unknown>, value: unknown) => {
+    // Value can be: null, Date, [Date, Date], or undefined depending on the DatePicker
+    if (!value) {
         column.setFilterValue(undefined)
         return
     }
 
-    const options = getSelectOptions(column)
-    const firstValue = options[0]?.value
-    const parsed = typeof firstValue === 'number' ? Number(raw) : raw
-    column.setFilterValue(parsed)
+    if (Array.isArray(value)) {
+        const [from, to] = value as (Date | null | undefined)[]
+        updateDateRange(column, { from: (from as Date) ?? undefined, to: (to as Date) ?? undefined })
+        return
+    }
+
+    // Single date selection fallback
+    if (value instanceof Date) {
+        updateDateRange(column, { from: value, to: undefined })
+        return
+    }
+
+    // Unknown value -> clear
+    column.setFilterValue(undefined)
+}
+
+const getSelectValue = (column: Column<TData, unknown>) => {
+    return (column.getFilterValue() as string | number | null | undefined) ?? null
+}
+
+const updateSelectValue = (column: Column<TData, unknown>, value: string | number | null) => {
+    if (value === null || value === '') {
+        column.setFilterValue(undefined)
+        return
+    }
+
+    column.setFilterValue(value)
 }
 
 const clearAll = () => {

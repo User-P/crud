@@ -7,123 +7,142 @@ Este folder contiene la tabla reutilizable basada en TanStack Table y componente
 - `TanStackTable.vue`: componente principal (sorting, filtros, selección, paginación, sticky header, loading, acciones por fila).
 - `TablePagination.vue`: paginación simple con primera/última página y rango mostrado.
 - `TableFilters.vue`: filtros por columna (inputs por columna filtrable).
-- `TableFiltersAdvanced.vue`: filtros avanzados por columna (texto, select, rangos numéricos y fechas).
+- `TableFiltersAdvanced.vue`: filtros avanzados por columna (texto, select, rangos numéricos y fechas). El filtro `dateRange` utiliza el componente `DatePicker` de PrimeVue en `selectionMode="range"` (entrada manual deshabilitada por defecto) para seleccionar el rango de fechas de forma compacta.
 
 ## Dependencias UI
 
 - Se usan componentes PrimeVue en los helpers:
-  - `TanStackTable.vue` (InputText para filtro global).
-  - `TableFilters.vue` (InputText + Button).
-  - `TablePagination.vue` (Button).
+    - `TanStackTable.vue` (InputText para filtro global).
+    - `TableFilters.vue` (InputText + Button).
+    - `TableFiltersAdvanced.vue` (InputText + Select + InputNumber + DatePicker + Button).
+    - `TablePagination.vue` (Button + Select).
+    - `TanStackTable.vue` (Checkbox para selección).
 - Asegúrate de tener PrimeVue y sus estilos cargados en el proyecto.
 
 ## Uso básico
 
 ```vue
 <script setup lang="ts">
-import { ref } from 'vue'
-import { faker } from '@faker-js/faker'
-import { type ColumnDef } from '@tanstack/vue-table'
-import TanStackTable from '@/Components/Tables/TanStackTable.vue'
-import TablePagination from '@/Components/Tables/TablePagination.vue'
-import TableFiltersAdvanced from '@/Components/Tables/TableFiltersAdvanced.vue'
-import Button from 'primevue/button'
+import { ref } from "vue";
+import { faker } from "@faker-js/faker";
+import { type ColumnDef } from "@tanstack/vue-table";
+import TanStackTable from "@/Components/Tables/TanStackTable.vue";
+import TablePagination from "@/Components/Tables/TablePagination.vue";
+import TableFiltersAdvanced from "@/Components/Tables/TableFiltersAdvanced.vue";
+import Button from "primevue/button";
 
-type Row = { id: string; name: string; email: string; status: 'Activo' | 'Inactivo'; age: number; createdAt: string }
+type Row = {
+    id: string;
+    name: string;
+    email: string;
+    status: "Activo" | "Inactivo";
+    age: number;
+    createdAt: string;
+};
 
-const data = ref<Row[]>(Array.from({ length: 20 }, () => ({
-  id: faker.string.uuid(),
-  name: faker.person.fullName(),
-  email: faker.internet.email(),
-  status: faker.helpers.arrayElement(['Activo', 'Inactivo']),
-  age: faker.number.int({ min: 18, max: 65 }),
-  createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
-})))
+const data = ref<Row[]>(
+    Array.from({ length: 20 }, () => ({
+        id: faker.string.uuid(),
+        name: faker.person.fullName(),
+        email: faker.internet.email(),
+        status: faker.helpers.arrayElement(["Activo", "Inactivo"]),
+        age: faker.number.int({ min: 18, max: 65 }),
+        createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
+    })),
+);
 
 const columns: ColumnDef<Row>[] = [
-  {
-    accessorKey: 'id',
-    header: 'ID',
-    cell: (info) => info.getValue(),
-    enableColumnFilter: true,
-    filterFn: 'includesString',
-    meta: { filterPlaceholder: 'Filtrar ID' },
-  },
-  {
-    accessorKey: 'name',
-    header: 'Nombre',
-    cell: (info) => info.getValue(),
-    enableColumnFilter: true,
-    filterFn: 'includesString',
-    meta: { filterPlaceholder: 'Filtrar nombre' },
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-    cell: (info) => info.getValue(),
-    enableColumnFilter: true,
-    filterFn: 'includesString',
-    meta: { filterPlaceholder: 'Filtrar email' },
-  },
-  {
-    accessorKey: 'status',
-    header: 'Estado',
-    cell: (info) => info.getValue(),
-    enableColumnFilter: true,
-    filterFn: 'equalsString',
-    meta: {
-      filterType: 'select',
-      filterOptions: [
-        { label: 'Activo', value: 'Activo' },
-        { label: 'Inactivo', value: 'Inactivo' },
-      ],
+    {
+        accessorKey: "id",
+        header: "ID",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "includesString",
+        meta: { filterPlaceholder: "Filtrar ID" },
     },
-  },
-  {
-    accessorKey: 'age',
-    header: 'Edad',
-    cell: (info) => info.getValue(),
-    enableColumnFilter: true,
-    filterFn: 'numberRange',
-    meta: { filterType: 'numberRange', filterMinPlaceholder: 'Min', filterMaxPlaceholder: 'Max' },
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Alta',
-    cell: (info) => info.getValue(),
-    enableColumnFilter: true,
-    filterFn: 'dateRange',
-    meta: { filterType: 'dateRange', filterFromPlaceholder: 'Desde', filterToPlaceholder: 'Hasta' },
-  },
-]
+    {
+        accessorKey: "name",
+        header: "Nombre",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "includesString",
+        meta: { filterPlaceholder: "Filtrar nombre" },
+    },
+    {
+        accessorKey: "email",
+        header: "Email",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "includesString",
+        meta: { filterPlaceholder: "Filtrar email" },
+    },
+    {
+        accessorKey: "status",
+        header: "Estado",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "equalsString",
+        meta: {
+            filterType: "select",
+            filterOptions: [
+                { label: "Activo", value: "Activo" },
+                { label: "Inactivo", value: "Inactivo" },
+            ],
+        },
+    },
+    {
+        accessorKey: "age",
+        header: "Edad",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "numberRange",
+        meta: {
+            filterType: "numberRange",
+            filterMinPlaceholder: "Min",
+            filterMaxPlaceholder: "Max",
+        },
+    },
+    {
+        accessorKey: "createdAt",
+        header: "Alta",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "dateRange",
+        meta: {
+            filterType: "dateRange",
+            filterFromPlaceholder: "Desde",
+            filterToPlaceholder: "Hasta",
+        },
+    },
+];
 </script>
 
 <template>
-  <TanStackTable
-    :data="data"
-    :columns="columns"
-    enable-sorting
-    enable-pagination
-    enable-global-filter
-    enable-column-filters
-    selectable
-    :page-size="10"
-    show-sticky-header
-  >
-    <template #toolbar="{ table }">
-      <div class="flex items-center gap-2">
-        <TableFiltersAdvanced :table="table" />
-      </div>
-    </template>
+    <TanStackTable
+        :data="data"
+        :columns="columns"
+        enable-sorting
+        enable-pagination
+        enable-global-filter
+        enable-column-filters
+        selectable
+        :page-size="10"
+        show-sticky-header
+    >
+        <template #toolbar="{ table }">
+            <div class="flex items-center gap-2">
+                <TableFiltersAdvanced :table="table" />
+            </div>
+        </template>
 
-    <template #pagination="{ table }">
-      <TablePagination :table="table" :page-size-options="[5, 10, 25]" />
-    </template>
+        <template #pagination="{ table }">
+            <TablePagination :table="table" :page-size-options="[5, 10, 25]" />
+        </template>
 
-    <template #row-actions="{ original }">
-      <Button type="button" class="p-button-sm" label="Editar" />
-    </template>
-  </TanStackTable>
+        <template #row-actions="{ original }">
+            <Button type="button" class="p-button-sm" label="Editar" />
+        </template>
+    </TanStackTable>
 </template>
 ```
 
@@ -165,8 +184,8 @@ const columns: ColumnDef<Row>[] = [
 - Al cambiar el filtro global, vuelve a la página 1.
 - Si los filtros reducen el total de páginas, se ajusta el `pageIndex` automáticamente.
 - El filtro global usa `includesString`.
- - El input del filtro global usa PrimeVue `InputText`.
- - `filterFn` soportadas por defecto: `numberRange` y `dateRange`.
+- El input del filtro global usa PrimeVue `InputText`.
+- `filterFn` soportadas por defecto: `numberRange` y `dateRange`.
 
 ## TableFilters.vue
 
@@ -179,7 +198,7 @@ const columns: ColumnDef<Row>[] = [
 ## TablePagination.vue
 
 - Controles (PrimeVue `Button`): primera/anterior/siguiente/última.
-- Selector de tamaño de página.
+- Selector de tamaño de página con PrimeVue `Select`.
 - Muestra rango y total filtrado vs total real.
 
 ## Recomendaciones

@@ -40,9 +40,12 @@
 
         <div class="flex flex-col sm:flex-row sm:items-center gap-3">
             <label class="text-sm text-gray-600">Mostrar</label>
-            <select class="border rounded px-2 py-1 text-sm" v-model.number="pageSize">
-                <option v-for="opt in pageSizeOptions" :key="opt" :value="opt">{{ opt }}</option>
-            </select>
+            <Select
+                v-model="pageSize"
+                :options="pageSizeOptions"
+                class="w-full sm:w-28"
+                aria-label="Tamaño de página"
+            />
             <span class="text-sm text-gray-600">
                 Mostrando {{ rangeStart }}–{{ rangeEnd }} de {{ filteredTotal }}
                 <template v-if="filteredTotal !== totalRows"> (total {{ totalRows }})</template>
@@ -55,6 +58,7 @@
 import { computed, watch } from 'vue'
 import type { Table } from '@tanstack/vue-table'
 import Button from 'primevue/button'
+import Select from 'primevue/select'
 
 interface Props<TData> {
     table: Table<TData>

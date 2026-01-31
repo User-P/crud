@@ -19,13 +19,8 @@
             <div class="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:w-auto">
                 <template v-if="props.enableGlobalFilter">
                     <label for="table-search" class="sr-only">Buscar</label>
-                    <InputText
-                        id="table-search"
-                        v-model="globalFilter"
-                        type="search"
-                        class="w-full sm:w-64"
-                        placeholder="Buscar..."
-                    />
+                    <InputText id="table-search" v-model="globalSearch" type="search" class="w-full sm:w-64"
+                        placeholder="Buscar..." />
                 </template>
 
                 <template v-if="props.selectable">
@@ -39,11 +34,14 @@
                 <thead :class="props.showStickyHeader ? 'sticky top-0 z-10 bg-white/95 backdrop-blur-sm' : ''">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
                         <th v-if="props.selectable" class="py-3 px-3 text-left w-12">
-                            <input type="checkbox" :checked="table.getIsAllPageRowsSelected()"
-                                :indeterminate.prop="table.getIsSomePageRowsSelected()"
-                                @change="table.toggleAllPageRowsSelected()"
+                            <Checkbox
+                                :model-value="table.getIsAllPageRowsSelected()"
+                                binary
+                                :indeterminate="table.getIsSomePageRowsSelected()"
+                                :disabled="loading || table.getRowModel().rows.length === 0"
                                 aria-label="Seleccionar todas las filas visibles"
-                                :disabled="loading || table.getRowModel().rows.length === 0" />
+                                @update:model-value="(value) => table.toggleAllPageRowsSelected(!!value)"
+                            />
                         </th>
 
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
@@ -75,8 +73,13 @@
                     </tr>
                     <tr v-for="row in table.getRowModel().rows" :key="row.id" class="hover:bg-gray-50">
                         <td v-if="props.selectable" class="py-3 px-3 align-top">
-                            <input type="checkbox" :checked="row.getIsSelected()" @change="row.toggleSelected()"
-                                :aria-label="`Seleccionar fila ${row.id}`" :disabled="loading" />
+                            <Checkbox
+                                :model-value="row.getIsSelected()"
+                                binary
+                                :disabled="loading"
+                                :aria-label="`Seleccionar fila ${row.id}`"
+                                @update:model-value="(value) => row.toggleSelected(!!value)"
+                            />
                         </td>
                         <td v-for="cell in row.getVisibleCells()" :key="cell.id"
                             class="py-3 px-4 align-top text-sm text-gray-700">
@@ -98,6 +101,7 @@
 
 <script setup lang="ts" generic="TData extends Record<string, any>">
 import { computed, ref, watch, useSlots } from 'vue'
+import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
 import {
     type ColumnDef,
@@ -174,18 +178,25 @@ const numberRangeFilter: FilterFn<any> = (row, columnId, value) => {
     return true
 }
 
+const toDate = (input?: string | Date | null) => {
+    if (!input) return undefined
+    if (input instanceof Date) return input
+    const parsed = new Date(input)
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed
+}
+
 const dateRangeFilter: FilterFn<any> = (row, columnId, value) => {
     const raw = row.getValue(columnId)
-    const rowDate = raw instanceof Date ? raw : new Date(raw as string)
-    if (Number.isNaN(rowDate.getTime())) return false
+    const rowDate = toDate(raw as string | Date | null)
+    if (!rowDate) return false
 
     const from = value?.from ?? value?.[0]
     const to = value?.to ?? value?.[1]
-    const fromDate = from ? new Date(from) : undefined
-    const toDate = to ? new Date(to) : undefined
+    const fromDate = toDate(from)
+    const toDateValue = toDate(to)
 
-    if (fromDate && !Number.isNaN(fromDate.getTime()) && rowDate < fromDate) return false
-    if (toDate && !Number.isNaN(toDate.getTime()) && rowDate > toDate) return false
+    if (fromDate && rowDate < fromDate) return false
+    if (toDateValue && rowDate > toDateValue) return false
     return true
 }
 
@@ -232,7 +243,22 @@ const table = useVueTable({
     getSortedRowModel: props.enableSorting ? getSortedRowModel() : undefined,
     getPaginationRowModel: props.enablePagination ? getPaginationRowModel() : undefined,
     filterFns: {
+        // String includes (case-insensitive) for global & column filters
+        includesString: (row, columnId, filterValue: string) => {
+            if (filterValue === undefined || filterValue === null || filterValue === '') return true
+            const rowValue = String(row.getValue(columnId) ?? '')
+            return rowValue.toLowerCase().includes(String(filterValue).toLowerCase())
+        },
+        // Equality match
+        equalsString: (row, columnId, filterValue) => {
+            if (filterValue === undefined || filterValue === null || filterValue === '') return true
+            const rowValue = row.getValue(columnId)
+            return String(rowValue) === String(filterValue)
+        },
+        // Number range (alias inNumberRange for convenience)
+        inNumberRange: numberRangeFilter,
         numberRange: numberRangeFilter,
+        // Date range
         dateRange: dateRangeFilter,
     },
     enableGlobalFilter: props.enableGlobalFilter,
@@ -246,6 +272,24 @@ const table = useVueTable({
 const loading = computed(() => props.loading)
 const emptyText = computed(() => props.emptyText)
 const rowActionsLabel = computed(() => props.rowActionsLabel)
+
+// Debounced global search input to reduce filter churn
+const globalSearch = ref(globalFilter.value)
+const debounce = (fn: (...args: any[]) => void, wait = 300) => {
+    let t: number | undefined
+    return (...args: any[]) => {
+        if (t) window.clearTimeout(t)
+        t = window.setTimeout(() => fn(...args), wait)
+    }
+}
+
+watch(
+    () => globalSearch.value,
+    debounce((v: string) => {
+        // TanStack expects a string for globalFilter, use empty string to clear filters
+        globalFilter.value = v || ''
+    }, 250)
+)
 
 const hasRowActions = computed(() => !!slots['row-actions'])
 const extraColumns = computed(() => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0))
