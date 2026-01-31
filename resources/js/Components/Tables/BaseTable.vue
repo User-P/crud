@@ -1,7 +1,7 @@
 <template>
     <div class="text-black">
         <!-- Toolbar: custom slot or default global search + summary -->
-        <div class="mb-3 flex items-center justify-between">
+        <div class="mb-3 flex items-center justify-between gap-4">
             <div class="flex items-center gap-2">
                 <slot name="toolbar" :table="table">
                     <!-- default: nothing, keep slot if provided by parent -->
@@ -10,7 +10,10 @@
 
             <div class="flex items-center gap-3">
                 <template v-if="props.enableGlobalFilter">
-                    <input v-model="globalFilter" type="search" class="rounded border px-2 py-1 text-sm"
+                    <input
+                        v-model="globalFilter"
+                        type="search"
+                        class="rounded border px-2 py-1 text-sm"
                         placeholder="Buscar..." />
                 </template>
 
@@ -21,16 +24,23 @@
         </div>
 
         <div class="overflow-auto">
-            <table class="min-w-full border-collapse">
-                <thead :class="props.showStickyHeader ? 'sticky top-0 bg-white' : ''">
+            <table class="min-w-full border-collapse" :aria-busy="loading">
+                <thead :class="props.showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-sm' : ''">
                     <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
                         <th v-if="props.selectable" class="py-2 px-3">
-                            <input type="checkbox" :checked="allPageSelected" :indeterminate.prop="isIndeterminate"
-                                @change="toggleSelectAll" aria-label="Seleccionar todas las filas visibles" />
+                            <input
+                                type="checkbox"
+                                :checked="table.getIsAllPageRowsSelected()"
+                                :indeterminate.prop="table.getIsSomePageRowsSelected()"
+                                @change="table.toggleAllPageRowsSelected()"
+                                aria-label="Seleccionar todas las filas visibles"
+                                :disabled="loading || table.getRowModel().rows.length === 0"
+                            />
                         </th>
 
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
-                            class="py-2 px-3 text-left text-sm font-semibold text-gray-900 cursor-pointer select-none"
+                            class="py-2 px-3 text-left text-sm font-semibold text-gray-900 select-none"
+                            :class="header.column.getCanSort() ? 'cursor-pointer' : ''"
                             @click="onHeaderClick(header)">
                             <span v-if="!header.isPlaceholder">
                                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
@@ -55,8 +65,13 @@
                     </tr>
                     <tr v-for="row in table.getRowModel().rows" :key="row.id" class="hover:bg-gray-50">
                         <td v-if="props.selectable" class="py-2 px-3">
-                            <input type="checkbox" :checked="isRowSelected(row)" @change="toggleRow(row)"
-                                :aria-label="`Seleccionar fila ${row.id}`" />
+                            <input
+                                type="checkbox"
+                                :checked="row.getIsSelected()"
+                                @change="row.toggleSelected()"
+                                :aria-label="`Seleccionar fila ${row.id}`"
+                                :disabled="loading"
+                            />
                         </td>
                         <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="py-2 px-3 align-top">
                             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
@@ -77,7 +92,6 @@ import {
     type Header,
     type PaginationState,
     type SortingState,
-    type ColumnFiltersState,
     type RowSelectionState,
     FlexRender,
     getCoreRowModel,
@@ -117,7 +131,6 @@ const pagination = ref<PaginationState>({
     pageIndex: 0,
     pageSize: props.pageSize,
 })
-const columnFilters = ref<ColumnFiltersState>([])
 const globalFilter = ref('')
 const rowSelection = ref<RowSelectionState>({})
 
@@ -134,9 +147,6 @@ const table = useVueTable({
         get pagination() {
             return pagination.value
         },
-        get columnFilters() {
-            return columnFilters.value
-        },
         get globalFilter() {
             return globalFilter.value
         },
@@ -150,9 +160,6 @@ const table = useVueTable({
     onPaginationChange: (updater) => {
         pagination.value = typeof updater === 'function' ? updater(pagination.value) : updater
     },
-    onColumnFiltersChange: (updater) => {
-        columnFilters.value = typeof updater === 'function' ? updater(columnFilters.value) : updater
-    },
     onGlobalFilterChange: (updater) => {
         globalFilter.value = typeof updater === 'function' ? updater(globalFilter.value) : updater
     },
@@ -163,46 +170,13 @@ const table = useVueTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: props.enableSorting ? getSortedRowModel() : undefined,
     getPaginationRowModel: props.enablePagination ? getPaginationRowModel() : undefined,
+    enableGlobalFilter: props.enableGlobalFilter,
     enableSorting: props.enableSorting,
+    enableRowSelection: props.selectable,
 })
 
 const loading = computed(() => props.loading)
 const emptyText = computed(() => props.emptyText)
-
-const allPageSelected = computed(() => {
-    const ids = table.getRowModel().rows.map(r => r.id)
-    if (ids.length === 0) return false
-    return ids.every(id => !!rowSelection.value[id])
-})
-
-const anyPageSelected = computed(() => {
-    const ids = table.getRowModel().rows.map(r => r.id)
-    return ids.some(id => !!rowSelection.value[id])
-})
-
-const isIndeterminate = computed(() => anyPageSelected.value && !allPageSelected.value)
-
-const toggleSelectAll = () => {
-    const ids = table.getRowModel().rows.map(r => r.id)
-    if (allPageSelected.value) {
-        // deselect visible
-        const next = { ...rowSelection.value }
-        ids.forEach(id => { delete next[id] })
-        rowSelection.value = next
-    } else {
-        const next = { ...rowSelection.value }
-        ids.forEach(id => { next[id] = true })
-        rowSelection.value = next
-    }
-}
-
-const isRowSelected = (row: any) => {
-    return !!rowSelection.value[row.id]
-}
-
-const toggleRow = (row: any) => {
-    rowSelection.value = { ...rowSelection.value, [row.id]: !rowSelection.value[row.id] }
-}
 
 const selectedCount = computed(() => Object.values(rowSelection.value).filter(Boolean).length)
 
@@ -222,6 +196,24 @@ watch(() => props.pageSize, (v) => {
         table.setPageSize?.(v)
     }
 })
+
+watch(globalFilter, () => {
+    if (props.enablePagination) {
+        table.setPageIndex?.(0)
+    }
+})
+
+watch(
+    () => props.data,
+    () => {
+        if (props.selectable) {
+            table.resetRowSelection?.()
+        }
+        if (props.enablePagination) {
+            table.setPageIndex?.(0)
+        }
+    }
+)
 
 defineExpose({
     table,

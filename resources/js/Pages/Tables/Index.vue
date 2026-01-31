@@ -1,12 +1,24 @@
 <template>
     <AdminLayout title="Tablas" subtitle="Prueba de TanStack Table (base reutilizable)">
-        <BaseTable :data="data" :columns="columns" enable-sorting enable-pagination enable-global-filter
-            :selectable="true" :page-size="10" show-sticky-header>
+        <BaseTable
+            :data="data"
+            :columns="columns"
+            :loading="loading"
+            enable-sorting
+            enable-pagination
+            enable-global-filter
+            :selectable="true"
+            :page-size="10"
+            show-sticky-header
+        >
             <template #toolbar="{ table }">
                 <div class="flex items-center gap-2">
-                    <button type="button" class="px-3 py-1 rounded border" @click="regenerate">Regenerar datos</button>
+                    <button type="button" class="px-3 py-1 rounded border" :disabled="loading"
+                        @click="regenerate">
+                        Regenerar datos
+                    </button>
                     <button type="button" class="px-3 py-1 rounded border"
-                        @click="console.log(table.getSelectedRowModel().rows)">Ver seleccionados</button>
+                        @click="logSelected(table)">Ver seleccionados</button>
                 </div>
             </template>
             <template #pagination="{ table }">
@@ -22,7 +34,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import BaseTable from '@/Components/Tables/BaseTable.vue'
 import TablePagination from '@/Components/Tables/TablePagination.vue'
 import { faker } from '@faker-js/faker'
-import { type ColumnDef } from '@tanstack/vue-table'
+import { type ColumnDef, type Table } from '@tanstack/vue-table'
 
 type BasicRow = {
     id: string
@@ -30,7 +42,7 @@ type BasicRow = {
     email: string
 }
 
-const makeFakeRows = (count = 100): BasicRow[] =>
+const makeFakeRows = (count = 10): BasicRow[] =>
     Array.from({ length: count }, () => ({
         id: faker.string.uuid(),
         name: faker.person.fullName(),
@@ -38,8 +50,17 @@ const makeFakeRows = (count = 100): BasicRow[] =>
     }))
 
 const data = ref<BasicRow[]>(makeFakeRows(10))
-const regenerate = () => {
-    data.value = makeFakeRows(10)
+const loading = ref(false)
+
+const regenerate = async () => {
+    loading.value = true
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    data.value = makeFakeRows(100)
+    loading.value = false
+}
+
+const logSelected = (table: Table<BasicRow>) => {
+    console.log(table.getSelectedRowModel().rows)
 }
 
 const columns: ColumnDef<BasicRow>[] = [
