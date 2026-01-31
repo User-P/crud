@@ -7,6 +7,7 @@ Este folder contiene la tabla reutilizable basada en TanStack Table y componente
 - `TanStackTable.vue`: componente principal (sorting, filtros, selección, paginación, sticky header, loading, acciones por fila).
 - `TablePagination.vue`: paginación simple con primera/última página y rango mostrado.
 - `TableFilters.vue`: filtros por columna (inputs por columna filtrable).
+- `TableFiltersAdvanced.vue`: filtros avanzados por columna (texto, select, rangos numéricos y fechas).
 
 ## Dependencias UI
 
@@ -25,15 +26,18 @@ import { faker } from '@faker-js/faker'
 import { type ColumnDef } from '@tanstack/vue-table'
 import TanStackTable from '@/Components/Tables/TanStackTable.vue'
 import TablePagination from '@/Components/Tables/TablePagination.vue'
-import TableFilters from '@/Components/Tables/TableFilters.vue'
+import TableFiltersAdvanced from '@/Components/Tables/TableFiltersAdvanced.vue'
 import Button from 'primevue/button'
 
-type Row = { id: string; name: string; email: string }
+type Row = { id: string; name: string; email: string; status: 'Activo' | 'Inactivo'; age: number; createdAt: string }
 
 const data = ref<Row[]>(Array.from({ length: 20 }, () => ({
   id: faker.string.uuid(),
   name: faker.person.fullName(),
   email: faker.internet.email(),
+  status: faker.helpers.arrayElement(['Activo', 'Inactivo']),
+  age: faker.number.int({ min: 18, max: 65 }),
+  createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
 })))
 
 const columns: ColumnDef<Row>[] = [
@@ -61,6 +65,36 @@ const columns: ColumnDef<Row>[] = [
     filterFn: 'includesString',
     meta: { filterPlaceholder: 'Filtrar email' },
   },
+  {
+    accessorKey: 'status',
+    header: 'Estado',
+    cell: (info) => info.getValue(),
+    enableColumnFilter: true,
+    filterFn: 'equalsString',
+    meta: {
+      filterType: 'select',
+      filterOptions: [
+        { label: 'Activo', value: 'Activo' },
+        { label: 'Inactivo', value: 'Inactivo' },
+      ],
+    },
+  },
+  {
+    accessorKey: 'age',
+    header: 'Edad',
+    cell: (info) => info.getValue(),
+    enableColumnFilter: true,
+    filterFn: 'numberRange',
+    meta: { filterType: 'numberRange', filterMinPlaceholder: 'Min', filterMaxPlaceholder: 'Max' },
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Alta',
+    cell: (info) => info.getValue(),
+    enableColumnFilter: true,
+    filterFn: 'dateRange',
+    meta: { filterType: 'dateRange', filterFromPlaceholder: 'Desde', filterToPlaceholder: 'Hasta' },
+  },
 ]
 </script>
 
@@ -78,7 +112,7 @@ const columns: ColumnDef<Row>[] = [
   >
     <template #toolbar="{ table }">
       <div class="flex items-center gap-2">
-        <TableFilters :table="table" />
+        <TableFiltersAdvanced :table="table" />
       </div>
     </template>
 
@@ -132,6 +166,7 @@ const columns: ColumnDef<Row>[] = [
 - Si los filtros reducen el total de páginas, se ajusta el `pageIndex` automáticamente.
 - El filtro global usa `includesString`.
  - El input del filtro global usa PrimeVue `InputText`.
+ - `filterFn` soportadas por defecto: `numberRange` y `dateRange`.
 
 ## TableFilters.vue
 
@@ -152,3 +187,20 @@ const columns: ColumnDef<Row>[] = [
 - Para filtros avanzados (select, rango, fecha), crea un `TableFiltersAdvanced.vue` y usa `column.setFilterValue()`.
 - Para acciones por fila, usa el slot `row-actions` y dispara modales o eventos.
 - Mantén `getRowId` si los datos vienen de backend para conservar selección.
+
+## TableFiltersAdvanced.vue
+
+Permite definir el tipo de filtro por columna usando `meta.filterType`:
+
+- `text` (default): input de texto.
+- `select`: select con opciones en `meta.filterOptions`.
+- `numberRange`: rango numérico `{ min, max }` con `filterFn: 'numberRange'`.
+- `dateRange`: rango de fechas `{ from, to }` con `filterFn: 'dateRange'`.
+
+### Meta soportada
+
+- `filterType`: `'text' | 'select' | 'numberRange' | 'dateRange'`.
+- `filterPlaceholder`: placeholder para texto.
+- `filterOptions`: opciones `{ label, value }` para `select`.
+- `filterMinPlaceholder` / `filterMaxPlaceholder`: placeholders para rango numérico.
+- `filterFromPlaceholder` / `filterToPlaceholder`: placeholders para rango de fechas.

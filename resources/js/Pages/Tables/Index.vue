@@ -28,7 +28,7 @@
                             @click="logSelected(table)"
                         />
                     </div>
-                    <TableFilters :table="table" />
+                    <TableFiltersAdvanced :table="table" />
                 </div>
             </template>
             <template #pagination="{ table }">
@@ -54,7 +54,7 @@ import { ref } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import TanStackTable from '@/Components/Tables/TanStackTable.vue'
 import TablePagination from '@/Components/Tables/TablePagination.vue'
-import TableFilters from '@/Components/Tables/TableFilters.vue'
+import TableFiltersAdvanced from '@/Components/Tables/TableFiltersAdvanced.vue'
 import { faker } from '@faker-js/faker'
 import { type ColumnDef, type Table } from '@tanstack/vue-table'
 import Button from 'primevue/button'
@@ -63,6 +63,9 @@ type BasicRow = {
     id: string
     name: string
     email: string
+    status: 'Activo' | 'Inactivo'
+    age: number
+    createdAt: string
 }
 
 const makeFakeRows = (count = 10): BasicRow[] =>
@@ -70,6 +73,9 @@ const makeFakeRows = (count = 10): BasicRow[] =>
         id: faker.string.uuid(),
         name: faker.person.fullName(),
         email: faker.internet.email(),
+        status: faker.helpers.arrayElement(['Activo', 'Inactivo']),
+        age: faker.number.int({ min: 18, max: 65 }),
+        createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
     }))
 
 const data = ref<BasicRow[]>(makeFakeRows(100))
@@ -118,6 +124,36 @@ const columns: ColumnDef<BasicRow>[] = [
         enableColumnFilter: true,
         filterFn: 'includesString',
         meta: { filterPlaceholder: 'Filtrar email' },
+    },
+    {
+        accessorKey: 'status',
+        header: 'Estado',
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'equalsString',
+        meta: {
+            filterType: 'select',
+            filterOptions: [
+                { label: 'Activo', value: 'Activo' },
+                { label: 'Inactivo', value: 'Inactivo' },
+            ],
+        },
+    },
+    {
+        accessorKey: 'age',
+        header: 'Edad',
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'inNumberRange',
+        meta: { filterType: 'numberRange', filterMinPlaceholder: 'Min', filterMaxPlaceholder: 'Max' },
+    },
+    {
+        accessorKey: 'createdAt',
+        header: 'Alta',
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'inNumberRange',
+        meta: { filterType: 'dateRange', filterFromPlaceholder: 'Desde', filterToPlaceholder: 'Hasta' },
     },
 ]
 

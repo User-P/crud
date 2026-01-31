@@ -102,6 +102,7 @@ import InputText from 'primevue/inputtext'
 import {
     type ColumnDef,
     type Header,
+    type FilterFn,
     type PaginationState,
     type SortingState,
     type ColumnFiltersState,
@@ -158,6 +159,36 @@ const columnFilters = ref<ColumnFiltersState>([])
 const globalFilter = ref('')
 const rowSelection = ref<RowSelectionState>({})
 
+const numberRangeFilter: FilterFn<any> = (row, columnId, value) => {
+    const raw = row.getValue(columnId)
+    const rowValue = typeof raw === 'number' ? raw : Number(raw)
+    if (!Number.isFinite(rowValue)) return false
+
+    const min = value?.min ?? value?.[0]
+    const max = value?.max ?? value?.[1]
+    const parsedMin = min === undefined || min === '' ? undefined : Number(min)
+    const parsedMax = max === undefined || max === '' ? undefined : Number(max)
+
+    if (parsedMin !== undefined && rowValue < parsedMin) return false
+    if (parsedMax !== undefined && rowValue > parsedMax) return false
+    return true
+}
+
+const dateRangeFilter: FilterFn<any> = (row, columnId, value) => {
+    const raw = row.getValue(columnId)
+    const rowDate = raw instanceof Date ? raw : new Date(raw as string)
+    if (Number.isNaN(rowDate.getTime())) return false
+
+    const from = value?.from ?? value?.[0]
+    const to = value?.to ?? value?.[1]
+    const fromDate = from ? new Date(from) : undefined
+    const toDate = to ? new Date(to) : undefined
+
+    if (fromDate && !Number.isNaN(fromDate.getTime()) && rowDate < fromDate) return false
+    if (toDate && !Number.isNaN(toDate.getTime()) && rowDate > toDate) return false
+    return true
+}
+
 const table = useVueTable({
     get data() {
         return props.data
@@ -200,6 +231,10 @@ const table = useVueTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: props.enableSorting ? getSortedRowModel() : undefined,
     getPaginationRowModel: props.enablePagination ? getPaginationRowModel() : undefined,
+    filterFns: {
+        numberRange: numberRangeFilter,
+        dateRange: dateRangeFilter,
+    },
     enableGlobalFilter: props.enableGlobalFilter,
     globalFilterFn: 'includesString',
     enableSorting: props.enableSorting,
