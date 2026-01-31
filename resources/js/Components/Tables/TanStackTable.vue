@@ -11,7 +11,7 @@
                 <div class="hidden sm:flex items-center gap-3 ml-2 text-sm text-gray-600">
                     <div v-if="props.enableGlobalFilter">
                         <div class="text-sm text-gray-500">Resultados: <span class="font-medium">{{ filteredTotal
-                                }}</span></div>
+                        }}</span></div>
                     </div>
                 </div>
             </div>
@@ -34,14 +34,11 @@
                 <thead :class="props.showStickyHeader ? 'sticky top-0 z-10 bg-white/95 backdrop-blur-sm' : ''">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
                         <th v-if="props.selectable" class="py-3 px-3 text-left w-12">
-                            <Checkbox
-                                :model-value="table.getIsAllPageRowsSelected()"
-                                binary
+                            <Checkbox :model-value="table.getIsAllPageRowsSelected()" binary
                                 :indeterminate="table.getIsSomePageRowsSelected()"
                                 :disabled="loading || table.getRowModel().rows.length === 0"
                                 aria-label="Seleccionar todas las filas visibles"
-                                @update:model-value="(value) => table.toggleAllPageRowsSelected(!!value)"
-                            />
+                                @update:model-value="(value) => table.toggleAllPageRowsSelected(!!value)" />
                         </th>
 
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
@@ -73,13 +70,9 @@
                     </tr>
                     <tr v-for="row in table.getRowModel().rows" :key="row.id" class="hover:bg-gray-50">
                         <td v-if="props.selectable" class="py-3 px-3 align-top">
-                            <Checkbox
-                                :model-value="row.getIsSelected()"
-                                binary
-                                :disabled="loading"
+                            <Checkbox :model-value="row.getIsSelected()" binary :disabled="loading"
                                 :aria-label="`Seleccionar fila ${row.id}`"
-                                @update:model-value="(value) => row.toggleSelected(!!value)"
-                            />
+                                @update:model-value="(value) => row.toggleSelected(!!value)" />
                         </td>
                         <td v-for="cell in row.getVisibleCells()" :key="cell.id"
                             class="py-3 px-4 align-top text-sm text-gray-700">
@@ -178,25 +171,54 @@ const numberRangeFilter: FilterFn<any> = (row, columnId, value) => {
     return true
 }
 
-const toDate = (input?: string | Date | null) => {
-    if (!input) return undefined
+const toDate = (input?: string | Date | number | null) => {
+    if (input === undefined || input === null || input === '') return undefined
     if (input instanceof Date) return input
-    const parsed = new Date(input)
-    return Number.isNaN(parsed.getTime()) ? undefined : parsed
+    if (typeof input === 'number') {
+        const parsed = new Date(input)
+        return Number.isNaN(parsed.getTime()) ? undefined : parsed
+    }
+    if (typeof input === 'string') {
+        const match = input.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+        if (match) {
+            const [, y, m, d] = match
+            return new Date(Number(y), Number(m) - 1, Number(d))
+        }
+        const parsed = new Date(input)
+        return Number.isNaN(parsed.getTime()) ? undefined : parsed
+    }
+    return undefined
+}
+
+// Helpers to normalize to local date-only values (strip time) for consistent comparisons
+const toDateOnly = (input?: string | Date | number | null) => {
+    const d = toDate(input)
+    if (!d) return undefined
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate())
 }
 
 const dateRangeFilter: FilterFn<any> = (row, columnId, value) => {
     const raw = row.getValue(columnId)
-    const rowDate = toDate(raw as string | Date | null)
-    if (!rowDate) return false
+    const rowRawDate = toDate(raw as string | Date | number | null)
+    if (!rowRawDate) return false
 
-    const from = value?.from ?? value?.[0]
-    const to = value?.to ?? value?.[1]
-    const fromDate = toDate(from)
-    const toDateValue = toDate(to)
+    // Convert row date to date-only (local) to avoid timezone/time-part surprises
+    const rowDate = new Date(rowRawDate.getFullYear(), rowRawDate.getMonth(), rowRawDate.getDate())
 
-    if (fromDate && rowDate < fromDate) return false
-    if (toDateValue && rowDate > toDateValue) return false
+    let from = value?.from ?? value?.[0]
+    let to = value?.to ?? value?.[1]
+    let fromDate = toDateOnly(from)
+    let toDateValue = toDateOnly(to)
+
+    // If bounds are inverted (user or picker returned [to, from]), swap them
+    if (fromDate && toDateValue && fromDate.getTime() > toDateValue.getTime()) {
+        const tmp = fromDate
+        fromDate = toDateValue
+        toDateValue = tmp
+    }
+
+    if (fromDate && rowDate.getTime() < fromDate.getTime()) return false
+    if (toDateValue && rowDate.getTime() > toDateValue.getTime()) return false
     return true
 }
 

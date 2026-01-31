@@ -222,4 +222,4 @@ Permite definir el tipo de filtro por columna usando `meta.filterType`:
 - `filterPlaceholder`: placeholder para texto.
 - `filterOptions`: opciones `{ label, value }` para `select`.
 - `filterMinPlaceholder` / `filterMaxPlaceholder`: placeholders para rango numérico.
-- `filterFromPlaceholder` / `filterToPlaceholder`: placeholders para rango de fechas.
+- `filterFromPlaceholder` / `filterToPlaceholder`: placeholders para rango de fechas (se combinan como `Desde - Hasta` si no se define `filterPlaceholder`).
