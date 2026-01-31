@@ -162,7 +162,8 @@ const columns: ColumnDef<Row>[] = [
 -   `selectable` (opcional): activa selección de filas.
 -   `enableGlobalFilter` (opcional): activa filtro global (input interno).
 -   `enableColumnFilters` (opcional): activa filtros por columna (para `TableFilters`).
--   `showStickyHeader` (opcional): sticky header en el `<thead>`.
+-   `showStickyHeader` (opcional): mantiene el encabezado fijo al hacer scroll vertical. Solo tiene efecto si hay scroll (véase `scrollMaxHeight`).
+-   `scrollMaxHeight` (opcional): altura máxima del área de la tabla (ej: `'70vh'`, `'500px'`). Por defecto `'70vh'` para permitir scroll vertical y horizontal; si se pasa `''`, la tabla crece sin límite y no hay scroll.
 -   `rowActionsLabel` (opcional): texto del header para la columna de acciones.
 
 ### Slots

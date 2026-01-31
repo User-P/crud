@@ -21,11 +21,13 @@
             </div>
         </div>
 
-        <div class="overflow-auto bg-white rounded-md shadow-sm">
+        <div class="overflow-auto overflow-x-auto overflow-y-auto bg-white rounded-md shadow-sm border border-gray-200/80"
+            :style="scrollMaxHeight ? { maxHeight: scrollMaxHeight } : undefined">
             <table class="min-w-full table-auto divide-y divide-gray-200" role="table" :aria-busy="loading">
-                <thead :class="showStickyHeader ? 'sticky top-0 z-10 bg-white/95 backdrop-blur-sm' : ''">
+                <thead class="relative">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
-                        <th v-if="selectable" class="py-3 px-3 text-left w-12">
+                        <th v-if="selectable" class="py-3 px-3 text-left w-12"
+                            :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
                             <Checkbox :model-value="table.getIsAllPageRowsSelected()" binary
                                 :indeterminate="table.getIsSomePageRowsSelected()"
                                 :disabled="loading || table.getRowModel().rows.length === 0"
@@ -33,9 +35,10 @@
                                 @update:model-value="(v) => table.toggleAllPageRowsSelected(!!v)" />
                         </th>
                         <th v-for="header in headerGroup.headers" :key="header.id" :colspan="header.colSpan"
-                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap"
-                            :class="header.column.getCanSort() ? 'cursor-pointer select-none' : ''"
-                            @click="onHeaderClick(header)">
+                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap" :class="[
+                                header.column.getCanSort() ? 'cursor-pointer select-none' : '',
+                                showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : '',
+                            ]" @click="onHeaderClick(header)">
                             <div class="flex items-center gap-2">
                                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
                                 <span v-if="header.column.getCanSort()" class="ml-1 text-xs text-gray-400">
@@ -44,7 +47,8 @@
                             </div>
                         </th>
                         <th v-if="hasRowActions && headerGroupIndex === table.getHeaderGroups().length - 1"
-                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 w-28">
+                            class="py-3 px-4 text-left text-sm font-semibold text-gray-700 w-28"
+                            :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
                             {{ rowActionsLabel }}
                         </th>
                     </tr>
@@ -121,6 +125,8 @@ interface Props<TData> {
     enableGlobalFilter?: boolean
     enableColumnFilters?: boolean
     showStickyHeader?: boolean
+    /** Altura máxima del área de scroll (ej: '70vh', '500px'). Si no se define, no hay scroll vertical y el sticky no tiene efecto. */
+    scrollMaxHeight?: string
     rowActionsLabel?: string
 }
 
@@ -134,6 +140,7 @@ const props = withDefaults(defineProps<Props<TData>>(), {
     enableGlobalFilter: false,
     enableColumnFilters: false,
     showStickyHeader: true,
+    scrollMaxHeight: '70vh',
     rowActionsLabel: 'Acciones',
 })
 
