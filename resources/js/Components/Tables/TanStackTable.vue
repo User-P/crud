@@ -115,7 +115,7 @@
                                         @update:model-value="(v) => row.toggleSelected(!!v)" />
                                 </td>
                                 <td v-for="cell in row.getVisibleCells()" :key="cell.id"
-                                    class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap"
+                                    :class="['py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700', isCellEditing(row.id, cell.column.id) ? 'min-w-0' : 'whitespace-nowrap']"
                                     @click="onCellClick($event, row, cell)">
                                     <slot name="cell" :cell="cell" :row="row" :value="cell.getValue()"
                                         :is-editing="isCellEditing(row.id, cell.column.id)"
@@ -137,7 +137,7 @@
                                                     :model-value="typeof editingValue === 'number' ? editingValue : null"
                                                     @update:model-value="(v) => (editingValue = typeof v === 'number' ? v : null)"
                                                     class="flex-1 min-w-0 text-xs"
-                                                    input-class="w-full min-w-0 text-xs p-1"
+                                                    input-class="w-full min-w-[6rem] text-xs p-1"
                                                     :placeholder="getCellMeta(cell).editPlaceholder"
                                                     @keydown.enter="saveEdit(row, cell.column.id)"
                                                     @keydown.esc="cancelEdit" />
@@ -145,7 +145,7 @@
                                                     :model-value="getDatePickerValue(editingValue)"
                                                     @update:model-value="updateDateEditValue"
                                                     class="flex-1 min-w-0 text-xs"
-                                                    input-class="w-full min-w-0 text-xs p-1" date-format="yy-mm-dd"
+                                                    input-class="w-full min-w-[9rem] text-xs p-1" date-format="yy-mm-dd"
                                                     :placeholder="getCellMeta(cell).editPlaceholder"
                                                     @keydown.enter="saveEdit(row, cell.column.id)"
                                                     @keydown.esc="cancelEdit" />
@@ -474,6 +474,7 @@ function onCellClick(event: MouseEvent, row: Row<TData>, cell: Cell<TData, unkno
     const meta = getCellMeta(cell)
     if (!meta.editable) return
     event.stopPropagation()
+    if (isCellEditing(row.id, cell.column.id)) return
     startEdit(row, cell)
 }
 
