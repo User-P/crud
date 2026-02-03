@@ -165,6 +165,10 @@ const columns: ColumnDef<Row>[] = [
 -   `showStickyHeader` (opcional): mantiene el encabezado fijo al hacer scroll vertical. Solo tiene efecto si hay scroll (véase `scrollMaxHeight`).
 -   `scrollMaxHeight` (opcional): altura máxima del área de la tabla (ej: `'70vh'`, `'500px'`). Por defecto `'70vh'` para permitir scroll vertical y horizontal; si se pasa `''`, la tabla crece sin límite y no hay scroll.
 -   `rowActionsLabel` (opcional): texto del header para la columna de acciones.
+-   `rowClick` (opcional): comportamiento al hacer clic en una fila: `'none'` | `'expand'` | `'drawer'` | `'custom'`. Con `'expand'` se expande/contrae si existe slot `expanded-row`; con `'drawer'` se abre el drawer con el registro; con `'custom'` se emite `@row-click`.
+-   `drawerTitle` (opcional): título del drawer cuando `rowClick="drawer"`.
+-   `skeletonLoading` (opcional): si `true` y `loading` es `true`, muestra filas skeleton en lugar del mensaje "Cargando...".
+-   `skeletonRows` (opcional): número de filas skeleton (por defecto `pageSize` o 10).
 
 ### Slots
 
@@ -172,6 +176,14 @@ const columns: ColumnDef<Row>[] = [
 -   `pagination`: recibe `{ table }`.
 -   `empty`: contenido cuando no hay datos.
 -   `row-actions`: recibe `{ row, original, table }` para acciones por fila.
+-   **`expanded-row`**: recibe `{ row, original, table }`. Contenido que se muestra al expandir la fila (subtabla, timeline, notas, JSON raw, etc.). Si existe este slot, se muestra la columna de expandir/contraer.
+-   **`drawer`**: recibe `{ row, original, close }`. Panel lateral (modo analista) para ver el registro sin salir de la tabla. Se abre con `rowClick="drawer"` o llamando a `openDrawer(row)` desde la ref.
+-   **`cell`**: recibe `{ cell, row, value, isEditing, editingValue, startEdit, save, cancel, meta }`. Para celdas editables inline: usa `meta.editable` y opcionalmente `meta.editOptions` (select). Si no usas el slot, el componente muestra por defecto un input o select según `meta.editOptions`. Al guardar se emite `@update:cell` para validar y actualizar datos.
+
+### Eventos
+
+-   `@row-click`: cuando `rowClick="custom"` y el usuario hace clic en la fila. Payload: `{ row, original }`.
+-   `@update:cell`: al guardar una celda editable inline. Payload: `{ rowId, columnId, value, oldValue, original }`. La página debe validar y actualizar `data` (y/o enviar al backend).
 
 ### Exposed (defineExpose)
 
@@ -179,6 +191,8 @@ const columns: ColumnDef<Row>[] = [
 -   `selectedCount`: cantidad de filas seleccionadas.
 -   `totalRows`: total de filas antes de filtros.
 -   `filteredTotal`: total de filas después de filtros.
+-   `closeDrawer`: cierra el drawer.
+-   `openDrawer(row)`: abre el drawer con la fila indicada.
 
 ### Notas de comportamiento
 
@@ -218,10 +232,20 @@ Permite definir el tipo de filtro por columna usando `meta.filterType`:
 -   `numberRange`: rango numérico `{ min, max }` con `filterFn: 'numberRange'`.
 -   `dateRange`: rango de fechas `{ from, to }` con `filterFn: 'dateRange'`.
 
-### Meta soportada
+### Meta soportada (TableFiltersAdvanced)
 
 -   `filterType`: `'text' | 'select' | 'numberRange' | 'dateRange'`.
 -   `filterPlaceholder`: placeholder para texto.
 -   `filterOptions`: opciones `{ label, value }` para `select`.
 -   `filterMinPlaceholder` / `filterMaxPlaceholder`: placeholders para rango numérico.
 -   `filterFromPlaceholder` / `filterToPlaceholder`: placeholders para rango de fechas (se combinan como `Desde - Hasta` si no se define `filterPlaceholder`).
+
+### Meta para celdas editables (TanStackTable)
+
+En la definición de columnas, usa `meta` para activar edición inline:
+
+-   `meta.editable: true`: la celda se puede editar al hacer clic.
+-   `meta.editOptions`: array `{ label, value }[]` para mostrar un Select en lugar de InputText.
+-   `meta.editPlaceholder`: placeholder del input cuando está vacío.
+
+Escucha `@update:cell` para validar y actualizar la fuente de datos (y/o llamar al API).

@@ -1,7 +1,8 @@
 <template>
     <AdminLayout title="Tablas" subtitle="Prueba de TanStack Table (base reutilizable)">
         <TanStackTable :data="data" :columns="columns" :loading="loading" enable-sorting enable-pagination
-            enable-global-filter enable-column-filters selectable :page-size="10" show-sticky-header>
+            enable-global-filter enable-column-filters selectable :page-size="10" show-sticky-header skeleton-loading
+            :skeleton-rows="8" row-click="drawer" drawer-title="Detalle del registro" @update:cell="onUpdateCell">
             <template #toolbar="{ table }">
                 <div class="flex flex-col gap-3 w-full min-w-0">
                     <div class="flex flex-wrap items-center gap-2 shrink-0">
@@ -15,6 +16,42 @@
             </template>
             <template #pagination="{ table }">
                 <TablePagination :table="table" :page-size-options="[5, 10, 25]" />
+            </template>
+            <template #expanded-row="{ original }">
+                <div class="text-xs font-mono bg-gray-100 rounded p-3 overflow-auto max-h-48">
+                    <pre>{{ JSON.stringify(original, null, 2) }}</pre>
+                </div>
+            </template>
+            <template #drawer="{ original, close }">
+                <div class="space-y-4">
+                    <dl class="grid grid-cols-1 gap-2 text-sm">
+                        <div>
+                            <dt class="font-medium text-gray-500">ID</dt>
+                            <dd class="mt-0.5">{{ original.id }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">Nombre</dt>
+                            <dd class="mt-0.5">{{ original.name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">Email</dt>
+                            <dd class="mt-0.5">{{ original.email }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">Estado</dt>
+                            <dd class="mt-0.5">{{ original.status }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">Edad</dt>
+                            <dd class="mt-0.5">{{ original.age }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">Alta</dt>
+                            <dd class="mt-0.5">{{ original.createdAt }}</dd>
+                        </div>
+                    </dl>
+                    <Button type="button" class="p-button-sm" label="Cerrar" @click="close" />
+                </div>
             </template>
             <template #row-actions="{ original }">
                 <div class="flex items-center gap-2">
@@ -78,6 +115,15 @@ const deleteRow = (row: BasicRow) => {
     console.log('Eliminar', row)
 }
 
+function onUpdateCell(payload: { rowId: string; columnId: string; value: unknown; oldValue: unknown; original: BasicRow }) {
+    const { columnId, value, original } = payload
+    const index = data.value.findIndex((r) => r.id === original.id)
+    if (index === -1) return
+    if (columnId === 'status' && (value === 'Activo' || value === 'Inactivo')) {
+        data.value = data.value.map((r, i) => (i === index ? { ...r, status: value } : r))
+    }
+}
+
 const columns: ColumnDef<BasicRow>[] = [
     {
         accessorKey: 'id',
@@ -93,7 +139,11 @@ const columns: ColumnDef<BasicRow>[] = [
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
         filterFn: 'includesString',
-        meta: { filterPlaceholder: 'Filtrar nombre' },
+        meta: {
+            filterPlaceholder: 'Filtrar nombre',
+            editable: true,
+            
+        },
     },
     {
         accessorKey: 'email',
@@ -112,6 +162,11 @@ const columns: ColumnDef<BasicRow>[] = [
         meta: {
             filterType: 'select',
             filterOptions: [
+                { label: 'Activo', value: 'Activo' },
+                { label: 'Inactivo', value: 'Inactivo' },
+            ],
+            editable: true,
+            editOptions: [
                 { label: 'Activo', value: 'Activo' },
                 { label: 'Inactivo', value: 'Inactivo' },
             ],

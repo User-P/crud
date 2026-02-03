@@ -7,7 +7,7 @@
                 </div>
                 <div v-if="enableGlobalFilter" class="flex items-center gap-2 sm:ml-0 text-sm text-gray-600 shrink-0">
                     <span class="text-gray-500 whitespace-nowrap">Resultados: <span class="font-medium">{{ filteredTotal
-                            }}</span></span>
+                    }}</span></span>
                 </div>
             </div>
             <div class="flex flex-col gap-2 w-full min-w-0 sm:flex-row sm:items-center sm:w-auto sm:shrink-0">
@@ -28,6 +28,9 @@
                 style="min-width: max(100%, max-content)">
                 <thead class="relative">
                     <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
+                        <th v-if="hasExpandedSlot" class="py-2 px-2 sm:py-3 sm:px-3 text-left w-10 sm:w-12 shrink-0"
+                            :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
+                        </th>
                         <th v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 text-left w-10 sm:w-12 shrink-0"
                             :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
                             <Checkbox :model-value="table.getIsAllPageRowsSelected()" binary
@@ -57,7 +60,25 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
-                    <tr v-if="loading">
+                    <!-- Skeleton loading -->
+                    <template v-if="loading && skeletonLoading">
+                        <tr v-for="i in skeletonCount" :key="'skeleton-' + i" class="animate-pulse">
+                            <td v-if="hasExpandedSlot" class="py-2 px-2 sm:py-3 sm:px-3 w-10 sm:w-12 shrink-0">
+                                <Skeleton shape="circle" size="1.25rem" />
+                            </td>
+                            <td v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 w-10 sm:w-12 shrink-0">
+                                <Skeleton shape="rectangle" class="h-5 w-5" />
+                            </td>
+                            <td v-for="col in table.getAllLeafColumns()" :key="col.id"
+                                class="py-2 px-2 sm:py-3 sm:px-4">
+                                <Skeleton width="80%" height="1.25rem" />
+                            </td>
+                            <td v-if="hasRowActions" class="py-2 px-2 sm:py-3 sm:px-4 w-20 sm:w-28 shrink-0">
+                                <Skeleton width="4rem" height="1.5rem" />
+                            </td>
+                        </tr>
+                    </template>
+                    <tr v-else-if="loading" :key="'loading'">
                         <td :colspan="table.getAllLeafColumns().length + extraColumns"
                             class="py-6 sm:py-8 px-3 sm:px-4 text-center text-xs sm:text-sm text-gray-500">
                             Cargando...
@@ -69,22 +90,78 @@
                             <slot name="empty">{{ emptyText }}</slot>
                         </td>
                     </tr>
-                    <tr v-for="row in table.getRowModel().rows" :key="row.id"
-                        class="hover:bg-gray-50 transition-colors">
-                        <td v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 align-top shrink-0">
-                            <Checkbox :model-value="row.getIsSelected()" binary :disabled="loading"
-                                :aria-label="`Seleccionar fila ${row.id}`"
-                                @update:model-value="(v) => row.toggleSelected(!!v)" />
-                        </td>
-                        <td v-for="cell in row.getVisibleCells()" :key="cell.id"
-                            class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap">
-                            <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                        </td>
-                        <td v-if="hasRowActions"
-                            class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 shrink-0">
-                            <slot name="row-actions" :row="row" :original="row.original" :table="table" />
-                        </td>
-                    </tr>
+                    <template v-else>
+                        <template v-for="row in table.getRowModel().rows" :key="row.id">
+                            <tr class="hover:bg-gray-50 transition-colors"
+                                :class="rowClick !== 'none' ? 'cursor-pointer' : ''"
+                                @click="rowClick !== 'none' ? onRowClick(row) : undefined">
+                                <td v-if="hasExpandedSlot" class="py-2 px-2 sm:py-3 sm:px-3 align-top shrink-0"
+                                    @click.stop>
+                                    <button type="button"
+                                        class="p-0.5 rounded text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                        :aria-label="row.getIsExpanded() ? 'Contraer' : 'Expandir'"
+                                        @click="row.toggleExpanded()">
+                                        <span class="text-sm font-medium">{{ row.getIsExpanded() ? '−' : '+' }}</span>
+                                    </button>
+                                </td>
+                                <td v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 align-top shrink-0" @click.stop>
+                                    <Checkbox :model-value="row.getIsSelected()" binary :disabled="loading"
+                                        :aria-label="`Seleccionar fila ${row.id}`"
+                                        @update:model-value="(v) => row.toggleSelected(!!v)" />
+                                </td>
+                                <td v-for="cell in row.getVisibleCells()" :key="cell.id"
+                                    class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap"
+                                    @click.stop="getCellMeta(cell).editable ? startEdit(row, cell.column.id, cell.getValue()) : null">
+                                    <slot name="cell" :cell="cell" :row="row" :value="cell.getValue()"
+                                        :is-editing="isCellEditing(row.id, cell.column.id)"
+                                        :editing-value="editingValue"
+                                        :start-edit="() => startEdit(row, cell.column.id, cell.getValue())"
+                                        :save="() => saveEdit(row, cell.column.id)" :cancel="cancelEdit"
+                                        :meta="getCellMeta(cell)">
+                                        <template
+                                            v-if="getCellMeta(cell).editable && isCellEditing(row.id, cell.column.id)">
+                                            <div class="flex items-center gap-1 min-w-0">
+                                                <Select v-if="getCellMeta(cell).editOptions?.length"
+                                                    :model-value="editingValue"
+                                                    @update:model-value="(v) => (editingValue = v as string | number | null)"
+                                                    :options="getCellMeta(cell).editOptions" option-label="label"
+                                                    option-value="value" class="flex-1 min-w-0 text-xs" size="small"
+                                                    @keydown.enter="saveEdit(row, cell.column.id)"
+                                                    @keydown.esc="cancelEdit" />
+                                                <InputText v-else
+                                                    :model-value="editingValue != null ? String(editingValue) : ''"
+                                                    @update:model-value="(v) => (editingValue = (v as string) || null)"
+                                                    class="flex-1 min-w-0 text-xs p-1"
+                                                    @keydown.enter="saveEdit(row, cell.column.id)"
+                                                    @keydown.esc="cancelEdit" />
+                                                <button type="button"
+                                                    class="p-1 text-green-600 hover:bg-green-50 rounded"
+                                                    aria-label="Guardar"
+                                                    @click="saveEdit(row, cell.column.id)">✓</button>
+                                                <button type="button"
+                                                    class="p-1 text-gray-500 hover:bg-gray-100 rounded"
+                                                    aria-label="Cancelar" @click="cancelEdit">✕</button>
+                                            </div>
+                                        </template>
+                                        <FlexRender v-else :render="cell.column.columnDef.cell"
+                                            :props="cell.getContext()" />
+                                    </slot>
+                                </td>
+                                <td v-if="hasRowActions"
+                                    class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 shrink-0"
+                                    @click.stop>
+                                    <slot name="row-actions" :row="row" :original="row.original" :table="table" />
+                                </td>
+                            </tr>
+                            <!-- Fila expandida: subtabla, timeline, notas, JSON raw, etc. -->
+                            <tr v-if="row.getIsExpanded() && hasExpandedSlot" class="bg-gray-50/80">
+                                <td :colspan="table.getAllLeafColumns().length + extraColumns"
+                                    class="py-3 px-4 align-top border-b border-gray-200">
+                                    <slot name="expanded-row" :row="row" :original="row.original" :table="table" />
+                                </td>
+                            </tr>
+                        </template>
+                    </template>
                 </tbody>
             </table>
         </div>
@@ -92,6 +169,17 @@
         <div class="mt-3">
             <slot name="pagination" :table="table" />
         </div>
+
+        <!-- Drawer lateral (modo analista): ver registro sin salir de la tabla -->
+        <PrimeSidebar v-model:visible="drawerVisible" position="right" class="w-full sm:max-w-lg lg:max-w-xl"
+            :modal="true" :dismissable="true" @hide="drawerRow = null">
+            <template #header>
+                <span class="font-semibold">{{ drawerTitle }}</span>
+            </template>
+            <div v-if="drawerRow" class="p-2">
+                <slot name="drawer" :row="drawerRow" :original="drawerRow.original" :close="closeDrawer" />
+            </div>
+        </PrimeSidebar>
     </div>
 </template>
 
@@ -99,9 +187,12 @@
 import { computed, ref, watch, useSlots } from 'vue'
 import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
+import PrimeSidebar from 'primevue/sidebar'
+import Skeleton from 'primevue/skeleton'
 import {
     type ColumnDef,
     type Header,
+    type Row,
     type FilterFn,
     type PaginationState,
     type SortingState,
@@ -112,9 +203,13 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     getFilteredRowModel,
+    type ExpandedState,
+    getExpandedRowModel,
     useVueTable,
 } from '@tanstack/vue-table'
+import Select from 'primevue/select'
 import { toDateOnly, type DateRangeValue } from './dateFilterUtils'
+import type { RowClickMode } from './tableMeta'
 
 interface Props<TData> {
     data: TData[]
@@ -125,13 +220,20 @@ interface Props<TData> {
     pageSize?: number
     emptyText?: string
     loading?: boolean
+    /** Si true, muestra filas skeleton en lugar del mensaje "Cargando..." (número de filas = skeletonRows). */
+    skeletonLoading?: boolean
+    /** Número de filas skeleton cuando loading y skeletonLoading son true (por defecto pageSize o 5). */
+    skeletonRows?: number
     selectable?: boolean
     enableGlobalFilter?: boolean
     enableColumnFilters?: boolean
     showStickyHeader?: boolean
-    /** Altura máxima del área de scroll (ej: '70vh', '500px'). Si no se define, no hay scroll vertical y el sticky no tiene efecto. */
     scrollMaxHeight?: string
     rowActionsLabel?: string
+    /** Comportamiento al hacer clic en una fila: 'none' | 'expand' | 'drawer' | 'custom'. */
+    rowClick?: RowClickMode
+    /** Título del drawer cuando rowClick es 'drawer'. */
+    drawerTitle?: string
 }
 
 const props = withDefaults(defineProps<Props<TData>>(), {
@@ -140,13 +242,22 @@ const props = withDefaults(defineProps<Props<TData>>(), {
     pageSize: 10,
     emptyText: 'Sin datos',
     loading: false,
+    skeletonLoading: false,
+    skeletonRows: 0,
     selectable: false,
     enableGlobalFilter: false,
     enableColumnFilters: false,
     showStickyHeader: true,
     scrollMaxHeight: '70vh',
     rowActionsLabel: 'Acciones',
+    rowClick: 'none',
+    drawerTitle: 'Detalle',
 })
+
+const emit = defineEmits<{
+    (e: 'row-click', payload: { row: Row<TData>; original: TData }): void
+    (e: 'update:cell', payload: { rowId: string; columnId: string; value: unknown; oldValue: unknown; original: TData }): void
+}>()
 
 const slots = useSlots()
 
@@ -155,6 +266,11 @@ const pagination = ref<PaginationState>({ pageIndex: 0, pageSize: props.pageSize
 const columnFilters = ref<ColumnFiltersState>([])
 const globalFilter = ref('')
 const rowSelection = ref<RowSelectionState>({})
+const expanded = ref<ExpandedState>({})
+const drawerVisible = ref(false)
+const drawerRow = ref<Row<TData> | null>(null)
+const editingCell = ref<{ rowId: string; columnId: string } | null>(null)
+const editingValue = ref<string | number | null>(null)
 
 const numberRangeFilter: FilterFn<any> = (row, columnId, value) => {
     const raw = row.getValue(columnId)
@@ -220,7 +336,14 @@ const table = useVueTable({
         get rowSelection() {
             return rowSelection.value
         },
+        get expanded() {
+            return expanded.value
+        },
     },
+    onExpandedChange: (updater) => {
+        expanded.value = typeof updater === 'function' ? updater(expanded.value) : updater
+    },
+    getExpandedRowModel: getExpandedRowModel(),
     onSortingChange: (updater) => {
         sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater
     },
@@ -275,7 +398,65 @@ watch(
 )
 
 const hasRowActions = computed(() => !!slots['row-actions'])
-const extraColumns = computed(() => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0))
+const hasExpandedSlot = computed(() => !!slots['expanded-row'])
+const extraColumns = computed(
+    () => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0) + (hasExpandedSlot.value ? 1 : 0)
+)
+const skeletonCount = computed(() => props.skeletonRows > 0 ? props.skeletonRows : Math.min(props.pageSize, 10))
+
+function closeDrawer() {
+    drawerVisible.value = false
+    drawerRow.value = null
+}
+
+function onRowClick(row: Row<TData>) {
+    if (props.rowClick === 'expand' && hasExpandedSlot.value) {
+        row.toggleExpanded()
+        return
+    }
+    if (props.rowClick === 'drawer') {
+        drawerRow.value = row
+        drawerVisible.value = true
+        return
+    }
+    if (props.rowClick === 'custom') {
+        emit('row-click', { row, original: row.original })
+    }
+}
+
+function isCellEditing(rowId: string, columnId: string) {
+    const c = editingCell.value
+    return c !== null && c.rowId === rowId && c.columnId === columnId
+}
+
+function startEdit(row: Row<TData>, columnId: string, value: unknown) {
+    editingCell.value = { rowId: row.id, columnId }
+    editingValue.value = value as string | number | null
+}
+
+function saveEdit(row: Row<TData>, columnId: string) {
+    if (editingCell.value?.rowId !== row.id || editingCell.value?.columnId !== columnId) return
+    const oldValue = row.getValue(columnId)
+    emit('update:cell', {
+        rowId: row.id,
+        columnId,
+        value: editingValue.value,
+        oldValue,
+        original: row.original,
+    })
+    editingCell.value = null
+    editingValue.value = null
+}
+
+function cancelEdit() {
+    editingCell.value = null
+    editingValue.value = null
+}
+
+function getCellMeta(cell: { column: { columnDef: { meta?: unknown } } }) {
+    const meta = cell.column.columnDef.meta as Record<string, unknown> | undefined
+    return (meta ?? {}) as { editable?: boolean; editOptions?: { label: string; value: string | number }[] }
+}
 const selectedCount = computed(() => Object.values(rowSelection.value).filter(Boolean).length)
 const filteredTotal = computed(() => table.getFilteredRowModel().rows.length)
 
@@ -329,5 +510,10 @@ defineExpose({
     selectedCount,
     totalRows: computed(() => table.getPreFilteredRowModel().rows.length),
     filteredTotal,
+    closeDrawer,
+    openDrawer: (row: Row<TData>) => {
+        drawerRow.value = row
+        drawerVisible.value = true
+    },
 })
 </script>
