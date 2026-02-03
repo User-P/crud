@@ -336,7 +336,7 @@ const columns: ColumnDef<Row>[] = [
 - `empty`: contenido cuando no hay datos.
 - `row-actions`: recibe `{ row, original, table }` para acciones por fila.
 - **`expanded-row`**: recibe `{ row, original, table }`. Contenido que se muestra al expandir la fila (subtabla, timeline, notas, JSON raw, etc.). Si existe este slot, se muestra la columna de expandir/contraer.
-- **`drawer`**: recibe `{ row, original, close }`. Panel lateral (modo analista) para ver el registro sin salir de la tabla. Se abre con `rowClick="drawer"` o llamando a `openDrawer(row)` desde la ref.
+- **`drawer`**: _Nota:_ el componente ya no renderiza un drawer (PrimeSidebar) internamente. En su lugar emite `open-drawer` cuando `rowClick="drawer"` se invoca; el consumer puede manejar este evento y renderizar su propio modal/drawer/dialog. El payload es `{ row, original, title }`. Para compatibilidad, `openDrawer(row)` sigue expuesto y ahora emite `open-drawer`.
 - **`cell`**: recibe `{ cell, row, value, isEditing, editingValue, startEdit, save, cancel, meta }`. Para celdas editables inline: usa `meta.editable` y opcionalmente `meta.editOptions` (select). Si no usas el slot, el componente muestra por defecto un input o select según `meta.editOptions`. Al guardar se emite `@update:cell` para validar y actualizar datos.
 
 ### Eventos
@@ -350,8 +350,7 @@ const columns: ColumnDef<Row>[] = [
 - `selectedCount`: cantidad de filas seleccionadas.
 - `totalRows`: total de filas antes de filtros.
 - `filteredTotal`: total de filas después de filtros.
-- `closeDrawer`: cierra el drawer.
-- `openDrawer(row)`: abre el drawer con la fila indicada.
+- `openDrawer(row)`: expuesto, solicita abrir el drawer en el nivel superior (emite `open-drawer`).
 
 ### Notas de comportamiento
 

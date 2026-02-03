@@ -20,7 +20,7 @@
                 </div>
                 <div v-if="enableGlobalFilter && showGlobalFilter" class="text-sm text-gray-600">
                     <span class="text-gray-500 whitespace-nowrap">Resultados: <span class="font-medium">{{ filteredTotal
-                            }}</span></span>
+                    }}</span></span>
                 </div>
             </div>
         </div>
@@ -195,16 +195,7 @@
             <slot name="pagination" :table="table" />
         </div>
 
-        <!-- Drawer lateral (modo analista): ver registro sin salir de la tabla -->
-        <PrimeSidebar v-model:visible="drawerVisible" position="right" class="w-full sm:max-w-lg lg:max-w-xl"
-            :modal="true" :dismissable="true" @hide="drawerRow = null">
-            <template #header>
-                <span class="font-semibold">{{ drawerTitle }}</span>
-            </template>
-            <div v-if="drawerRow" class="p-2">
-                <slot name="drawer" :row="drawerRow" :original="drawerRow.original" :close="closeDrawer" />
-            </div>
-        </PrimeSidebar>
+
     </div>
 </template>
 
@@ -214,7 +205,7 @@ import Checkbox from 'primevue/checkbox'
 import DatePicker from 'primevue/datepicker'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
-import PrimeSidebar from 'primevue/sidebar'
+
 import Skeleton from 'primevue/skeleton'
 import {
     type ColumnDef,
@@ -291,6 +282,8 @@ const props = withDefaults(defineProps<Props<TData>>(), {
 const emit = defineEmits<{
     (e: 'row-click', payload: { row: Row<TData>; original: TData }): void
     (e: 'update:cell', payload: { rowId: string; columnId: string; value: unknown; oldValue: unknown; original: TData }): void
+    (e: 'open-drawer', payload: { row: Row<TData>; original: TData; title?: string }): void
+    (e: 'close-drawer'): void
 }>()
 
 const slots = useSlots()
@@ -301,8 +294,7 @@ const columnFilters = ref<ColumnFiltersState>([])
 const globalFilter = ref('')
 const rowSelection = ref<RowSelectionState>({})
 const expanded = ref<ExpandedState>({})
-const drawerVisible = ref(false)
-const drawerRow = ref<Row<TData> | null>(null)
+
 const editingCell = ref<{ rowId: string; columnId: string } | null>(null)
 const editingValue = ref<string | number | null>(null)
 
@@ -449,10 +441,7 @@ const skeletonCount = computed(() => {
     return typeof props.pageSize === 'number' && props.pageSize > 0 ? props.pageSize : 10
 })
 
-function closeDrawer() {
-    drawerVisible.value = false
-    drawerRow.value = null
-}
+// Drawer lifecycle is handled by the parent/consumer via events `open-drawer` / `close-drawer`.
 
 function onRowClick(event: MouseEvent, row: Row<TData>) {
     if (shouldIgnoreRowClick(event)) return
@@ -461,8 +450,7 @@ function onRowClick(event: MouseEvent, row: Row<TData>) {
         return
     }
     if (props.rowClick === 'drawer') {
-        drawerRow.value = row
-        drawerVisible.value = true
+        emit('open-drawer', { row, original: row.original, title: props.drawerTitle })
         return
     }
     if (props.rowClick === 'custom') {
@@ -637,10 +625,9 @@ defineExpose({
     selectedCount,
     totalRows: computed(() => table.getPreFilteredRowModel().rows.length),
     filteredTotal,
-    closeDrawer,
+    // Expose a helper to programmatically request opening a drawer in the parent
     openDrawer: (row: Row<TData>) => {
-        drawerRow.value = row
-        drawerVisible.value = true
+        emit('open-drawer', { row, original: row.original, title: props.drawerTitle })
     },
 })
 </script>
