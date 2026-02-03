@@ -1,24 +1,27 @@
 <template>
     <div class="text-slate-900 w-full min-w-0">
-        <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 w-full min-w-0 sm:w-auto">
-                <div class="flex flex-wrap items-center gap-2 w-full min-w-0 sm:w-auto">
+        <div v-if="showTopBar" class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="w-full min-w-0">
+                <div class="flex items-center gap-2 w-full">
                     <slot name="toolbar" :table="table" />
                 </div>
-                <div v-if="enableGlobalFilter" class="flex items-center gap-2 sm:ml-0 text-sm text-gray-600 shrink-0">
+            </div>
+
+            <div class="flex flex-col gap-2 items-end mt-2 sm:mt-0 sm:ml-4 sm:items-end">
+                <div class="flex items-center gap-3">
+                    <template v-if="enableGlobalFilter && showGlobalFilter">
+                        <label for="table-search" class="sr-only">Buscar</label>
+                        <InputText id="table-search" v-model="globalSearch" type="search"
+                            class="w-full min-w-[12rem] sm:w-52 lg:w-64 text-sm p-2" placeholder="Buscar..." />
+                    </template>
+                    <template v-if="selectable && showSelectedCount">
+                        <span class="text-sm text-gray-600 whitespace-nowrap">{{ selectedCount }} seleccionados</span>
+                    </template>
+                </div>
+                <div v-if="enableGlobalFilter && showGlobalFilter" class="text-sm text-gray-600">
                     <span class="text-gray-500 whitespace-nowrap">Resultados: <span class="font-medium">{{ filteredTotal
                             }}</span></span>
                 </div>
-            </div>
-            <div class="flex flex-col gap-2 w-full min-w-0 sm:flex-row sm:items-center sm:w-auto sm:shrink-0">
-                <template v-if="enableGlobalFilter">
-                    <label for="table-search" class="sr-only">Buscar</label>
-                    <InputText id="table-search" v-model="globalSearch" type="search"
-                        class="w-full min-w-0 sm:w-52 lg:w-64" placeholder="Buscar..." />
-                </template>
-                <template v-if="selectable">
-                    <span class="text-sm text-gray-600 whitespace-nowrap">{{ selectedCount }} seleccionados</span>
-                </template>
             </div>
         </div>
 
@@ -251,6 +254,10 @@ interface Props<TData> {
     skeletonRows?: number
     selectable?: boolean
     enableGlobalFilter?: boolean
+    /** Si false, oculta el UI del filtro global pero mantiene la funcionalidad activa. */
+    showGlobalFilter?: boolean
+    /** Si false, oculta el contador de seleccionados en el header. */
+    showSelectedCount?: boolean
     enableColumnFilters?: boolean
     showStickyHeader?: boolean
     scrollMaxHeight?: string
@@ -271,6 +278,8 @@ const props = withDefaults(defineProps<Props<TData>>(), {
     skeletonRows: 0,
     selectable: false,
     enableGlobalFilter: false,
+    showGlobalFilter: true,
+    showSelectedCount: true,
     enableColumnFilters: false,
     showStickyHeader: true,
     scrollMaxHeight: '70vh',
@@ -426,6 +435,12 @@ const hasRowActions = computed(() => !!slots['row-actions'])
 const hasExpandedSlot = computed(() => !!slots['expanded-row'])
 const headerGroups = computed(() => table.getHeaderGroups())
 const leafColumns = computed(() => table.getAllLeafColumns())
+const showTopBar = computed(
+    () =>
+        !!slots.toolbar ||
+        (props.enableGlobalFilter && props.showGlobalFilter) ||
+        (props.selectable && props.showSelectedCount)
+)
 const extraColumns = computed(
     () => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0) + (hasExpandedSlot.value ? 1 : 0)
 )

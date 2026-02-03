@@ -318,6 +318,8 @@ const columns: ColumnDef<Row>[] = [
 - `loading` (opcional): muestra estado de carga y bloquea selección.
 - `selectable` (opcional): activa selección de filas.
 - `enableGlobalFilter` (opcional): activa filtro global (input interno).
+- `showGlobalFilter` (opcional): si `false`, oculta el UI del filtro global pero mantiene la funcionalidad activa (útil para un input custom).
+- `showSelectedCount` (opcional): si `false`, oculta el contador de seleccionados en el header.
 - `enableColumnFilters` (opcional): activa filtros por columna (para `TableFilters`).
 - `showStickyHeader` (opcional): mantiene el encabezado fijo al hacer scroll vertical. Solo tiene efecto si hay scroll (véase `scrollMaxHeight`).
 - `scrollMaxHeight` (opcional): altura máxima del área de la tabla (ej: `'70vh'`, `'500px'`). Por defecto `'70vh'` para permitir scroll vertical y horizontal; si se pasa `''`, la tabla crece sin límite y no hay scroll.

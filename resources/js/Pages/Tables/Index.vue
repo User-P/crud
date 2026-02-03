@@ -2,13 +2,12 @@
     <AdminLayout title="Tablas" subtitle="Prueba de TanStack Table (base reutilizable)">
         <div class="grid grid-cols-1 gap-6 text-black">
             <div>
-                <h3 class="text-sm font-semibold mb-2">Example: Advanced Table</h3>
                 <ExampleAdvancedTable :data="data" :columns="columns" :loading="loading" @update:cell="onUpdateCell"
                     @regenerate="regenerate" @edit-row="editRow" @delete-row="deleteRow" />
             </div>
             <div>
-                <h3 class="text-sm font-semibold mb-2">Example: Basic Table</h3>
-                <ExampleBasicTable :data="data" :columns="columns" :loading="loading" />
+                <ExampleBasicTable :data="data" :columns="columns" :loading="loading" @update:cell="onUpdateCell"
+                    @regenerate="regenerate" />
             </div>
         </div>
     </AdminLayout>
