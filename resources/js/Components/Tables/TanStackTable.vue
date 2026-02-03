@@ -109,9 +109,9 @@
                                         :aria-label="`Seleccionar fila ${row.id}`"
                                         @update:model-value="(v) => row.toggleSelected(!!v)" />
                                 </td>
-                                <td v-for="cell in row.getVisibleCells()" :key="cell.id"
-                                    class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap"
-                                    @click.stop="getCellMeta(cell).editable ? startEdit(row, cell.column.id, cell.getValue()) : null">
+                            <td v-for="cell in row.getVisibleCells()" :key="cell.id"
+                                class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap"
+                                @click="onCellClick($event, row, cell)">
                                     <slot name="cell" :cell="cell" :row="row" :value="cell.getValue()"
                                         :is-editing="isCellEditing(row.id, cell.column.id)"
                                         :editing-value="editingValue"
@@ -126,12 +126,14 @@
                                                     @update:model-value="(v) => (editingValue = v as string | number | null)"
                                                     :options="getCellMeta(cell).editOptions" option-label="label"
                                                     option-value="value" class="flex-1 min-w-0 text-xs" size="small"
+                                                    :placeholder="getCellMeta(cell).editPlaceholder"
                                                     @keydown.enter="saveEdit(row, cell.column.id)"
                                                     @keydown.esc="cancelEdit" />
                                                 <InputText v-else
                                                     :model-value="editingValue != null ? String(editingValue) : ''"
                                                     @update:model-value="(v) => (editingValue = (v as string) || null)"
                                                     class="flex-1 min-w-0 text-xs p-1"
+                                                    :placeholder="getCellMeta(cell).editPlaceholder"
                                                     @keydown.enter="saveEdit(row, cell.column.id)"
                                                     @keydown.esc="cancelEdit" />
                                                 <button type="button"
@@ -184,13 +186,14 @@
 </template>
 
 <script setup lang="ts" generic="TData extends Record<string, any>">
-import { computed, ref, watch, useSlots } from 'vue'
+import { computed, ref, watch, useSlots, onBeforeUnmount } from 'vue'
 import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
 import PrimeSidebar from 'primevue/sidebar'
 import Skeleton from 'primevue/skeleton'
 import {
     type ColumnDef,
+    type Cell,
     type Header,
     type Row,
     type FilterFn,
@@ -209,7 +212,7 @@ import {
 } from '@tanstack/vue-table'
 import Select from 'primevue/select'
 import { toDateOnly, type DateRangeValue } from './dateFilterUtils'
-import type { RowClickMode } from './tableMeta'
+import type { ColumnMetaBase, RowClickMode } from './tableMeta'
 
 interface Props<TData> {
     data: TData[]
@@ -222,7 +225,7 @@ interface Props<TData> {
     loading?: boolean
     /** Si true, muestra filas skeleton en lugar del mensaje "Cargando..." (número de filas = skeletonRows). */
     skeletonLoading?: boolean
-    /** Número de filas skeleton cuando loading y skeletonLoading son true (por defecto pageSize o 5). */
+    /** Número de filas skeleton cuando loading y skeletonLoading son true (por defecto pageSize o 10). */
     skeletonRows?: number
     selectable?: boolean
     enableGlobalFilter?: boolean
@@ -402,7 +405,10 @@ const hasExpandedSlot = computed(() => !!slots['expanded-row'])
 const extraColumns = computed(
     () => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0) + (hasExpandedSlot.value ? 1 : 0)
 )
-const skeletonCount = computed(() => props.skeletonRows > 0 ? props.skeletonRows : Math.min(props.pageSize, 10))
+const skeletonCount = computed(() => {
+    if (props.skeletonRows > 0) return props.skeletonRows
+    return typeof props.pageSize === 'number' && props.pageSize > 0 ? props.pageSize : 10
+})
 
 function closeDrawer() {
     drawerVisible.value = false
@@ -434,6 +440,13 @@ function startEdit(row: Row<TData>, columnId: string, value: unknown) {
     editingValue.value = value as string | number | null
 }
 
+function onCellClick(event: MouseEvent, row: Row<TData>, cell: Cell<TData, unknown>) {
+    const meta = getCellMeta(cell)
+    if (!meta.editable) return
+    event.stopPropagation()
+    startEdit(row, cell.column.id, cell.getValue())
+}
+
 function saveEdit(row: Row<TData>, columnId: string) {
     if (editingCell.value?.rowId !== row.id || editingCell.value?.columnId !== columnId) return
     const oldValue = row.getValue(columnId)
@@ -454,8 +467,8 @@ function cancelEdit() {
 }
 
 function getCellMeta(cell: { column: { columnDef: { meta?: unknown } } }) {
-    const meta = cell.column.columnDef.meta as Record<string, unknown> | undefined
-    return (meta ?? {}) as { editable?: boolean; editOptions?: { label: string; value: string | number }[] }
+    const meta = cell.column.columnDef.meta as ColumnMetaBase | undefined
+    return (meta ?? {}) as ColumnMetaBase
 }
 const selectedCount = computed(() => Object.values(rowSelection.value).filter(Boolean).length)
 const filteredTotal = computed(() => table.getFilteredRowModel().rows.length)
@@ -492,18 +505,32 @@ watch(globalFilter, () => {
 })
 
 watch(
-    () => [props.data, table.getFilteredRowModel().rows.length],
+    () => props.data,
     () => {
         if (props.selectable) table.resetRowSelection?.()
-        if (props.enablePagination) {
-            const pageCount = Math.max(table.getPageCount(), 1)
-            const lastIndex = Math.max(pageCount - 1, 0)
-            const current = table.getState().pagination.pageIndex ?? 0
-            if (current > lastIndex) table.setPageIndex?.(lastIndex)
-        }
+        if (props.enablePagination) table.setPageIndex?.(0)
     },
     { immediate: true }
 )
+
+watch(
+    () => table.getFilteredRowModel().rows.length,
+    () => {
+        ensurePageInRange()
+    }
+)
+
+onBeforeUnmount(() => {
+    if (debounceTimer) clearTimeout(debounceTimer)
+})
+
+function ensurePageInRange() {
+    if (!props.enablePagination) return
+    const pageCount = Math.max(table.getPageCount(), 1)
+    const lastIndex = Math.max(pageCount - 1, 0)
+    const current = table.getState().pagination.pageIndex ?? 0
+    if (current > lastIndex) table.setPageIndex?.(lastIndex)
+}
 
 defineExpose({
     table,

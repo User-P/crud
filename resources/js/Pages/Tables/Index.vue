@@ -116,11 +116,16 @@ const deleteRow = (row: BasicRow) => {
 }
 
 function onUpdateCell(payload: { rowId: string; columnId: string; value: unknown; oldValue: unknown; original: BasicRow }) {
-    const { columnId, value, original } = payload
+    const { columnId, value, oldValue, original } = payload
+    if (Object.is(value, oldValue)) return
     const index = data.value.findIndex((r) => r.id === original.id)
     if (index === -1) return
     if (columnId === 'status' && (value === 'Activo' || value === 'Inactivo')) {
         data.value = data.value.map((r, i) => (i === index ? { ...r, status: value } : r))
+        return
+    }
+    if (columnId === 'name' && typeof value === 'string') {
+        data.value = data.value.map((r, i) => (i === index ? { ...r, name: value } : r))
     }
 }
 
@@ -142,7 +147,7 @@ const columns: ColumnDef<BasicRow>[] = [
         meta: {
             filterPlaceholder: 'Filtrar nombre',
             editable: true,
-            
+            editPlaceholder: 'Editar nombre',
         },
     },
     {
