@@ -115,6 +115,12 @@ const onUpdateCell = (payload: {
     }
 };
 
+const onCellClick = (payload: { columnId: string; original: Row }) => {
+    if (payload.columnId !== "id") return;
+    // Ejemplo: abrir un panel externo (CaseReport) usando los datos de la fila
+    console.log("CaseReport:", payload.original);
+};
+
 const columns: ColumnDef<Row>[] = [
     {
         accessorKey: "id",
@@ -122,7 +128,7 @@ const columns: ColumnDef<Row>[] = [
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
         filterFn: "includesString",
-        meta: { filterPlaceholder: "Filtrar ID" },
+        meta: { filterPlaceholder: "Filtrar ID", emitOnClick: true },
     },
     {
         accessorKey: "name",
@@ -237,13 +243,12 @@ const columns: ColumnDef<Row>[] = [
         enable-global-filter
         enable-column-filters
         selectable
-        row-click="drawer"
-        drawer-title="Detalle del registro"
         skeleton-loading
         :skeleton-rows="8"
         :page-size="10"
         show-sticky-header
         @update:cell="onUpdateCell"
+        @cell-click="onCellClick"
     >
         <template #toolbar="{ table }">
             <div class="flex flex-col gap-2 w-full">
@@ -268,23 +273,6 @@ const columns: ColumnDef<Row>[] = [
                 class="text-xs font-mono bg-gray-100 rounded p-3 overflow-auto max-h-48"
             >
                 <pre>{{ JSON.stringify(original, null, 2) }}</pre>
-            </div>
-        </template>
-
-        <template #drawer="{ original, close }">
-            <div class="space-y-3 text-sm">
-                <div class="font-medium">{{ original.name }}</div>
-                <div class="text-gray-600">{{ original.email }}</div>
-                <div>
-                    Depto: {{ original.department }} · Score:
-                    {{ original.score }}
-                </div>
-                <Button
-                    type="button"
-                    class="p-button-sm"
-                    label="Cerrar"
-                    @click="close"
-                />
             </div>
         </template>
 
@@ -324,8 +312,7 @@ const columns: ColumnDef<Row>[] = [
 - `showStickyHeader` (opcional): mantiene el encabezado fijo al hacer scroll vertical. Solo tiene efecto si hay scroll (véase `scrollMaxHeight`).
 - `scrollMaxHeight` (opcional): altura máxima del área de la tabla (ej: `'70vh'`, `'500px'`). Por defecto `'70vh'` para permitir scroll vertical y horizontal; si se pasa `''`, la tabla crece sin límite y no hay scroll.
 - `rowActionsLabel` (opcional): texto del header para la columna de acciones.
-- `rowClick` (opcional): comportamiento al hacer clic en una fila: `'none'` | `'expand'` | `'drawer'` | `'custom'`. Con `'expand'` se expande/contrae si existe slot `expanded-row`; con `'drawer'` se abre el drawer con el registro; con `'custom'` se emite `@row-click`.
-- `drawerTitle` (opcional): título del drawer cuando `rowClick="drawer"`.
+- `rowClick` (opcional): comportamiento al hacer clic en una fila: `'none'` | `'expand'` | `'custom'`. Con `'expand'` se expande/contrae si existe slot `expanded-row`; con `'custom'` se emite `@row-click`.
 - `skeletonLoading` (opcional): si `true` y `loading` es `true`, muestra filas skeleton en lugar del mensaje "Cargando...".
 - `skeletonRows` (opcional): número de filas skeleton (por defecto `pageSize` o 10).
 
@@ -336,13 +323,13 @@ const columns: ColumnDef<Row>[] = [
 - `empty`: contenido cuando no hay datos.
 - `row-actions`: recibe `{ row, original, table }` para acciones por fila.
 - **`expanded-row`**: recibe `{ row, original, table }`. Contenido que se muestra al expandir la fila (subtabla, timeline, notas, JSON raw, etc.). Si existe este slot, se muestra la columna de expandir/contraer.
-- **`drawer`**: _Nota:_ el componente ya no renderiza un drawer (PrimeSidebar) internamente. En su lugar emite `open-drawer` cuando `rowClick="drawer"` se invoca; el consumer puede manejar este evento y renderizar su propio modal/drawer/dialog. El payload es `{ row, original, title }`. Para compatibilidad, `openDrawer(row)` sigue expuesto y ahora emite `open-drawer`.
 - **`cell`**: recibe `{ cell, row, value, isEditing, editingValue, startEdit, save, cancel, meta }`. Para celdas editables inline: usa `meta.editable` y opcionalmente `meta.editOptions` (select). Si no usas el slot, el componente muestra por defecto un input o select según `meta.editOptions`. Al guardar se emite `@update:cell` para validar y actualizar datos.
 
 ### Eventos
 
 - `@row-click`: cuando `rowClick="custom"` y el usuario hace clic en la fila. Payload: `{ row, original }`.
 - `@update:cell`: al guardar una celda editable inline. Payload: `{ rowId, columnId, value, oldValue, original }`. La página debe validar y actualizar `data` (y/o enviar al backend).
+- `@cell-click`: cuando una celda con `meta.emitOnClick` es clicada. Payload: `{ rowId, columnId, value, original, row, meta }`.
 
 ### Exposed (defineExpose)
 
@@ -350,7 +337,6 @@ const columns: ColumnDef<Row>[] = [
 - `selectedCount`: cantidad de filas seleccionadas.
 - `totalRows`: total de filas antes de filtros.
 - `filteredTotal`: total de filas después de filtros.
-- `openDrawer(row)`: expuesto, solicita abrir el drawer en el nivel superior (emite `open-drawer`).
 
 ### Notas de comportamiento
 
@@ -407,6 +393,7 @@ En la definición de columnas, usa `meta` para activar edición inline:
 - `meta.editType: 'text' | 'number' | 'date' | 'select'`: tipo de editor inline (si no se definen `editOptions`).
 - `meta.editOptions`: array `{ label, value }[]` para mostrar un Select en lugar de InputText.
 - `meta.editPlaceholder`: placeholder del input cuando está vacío.
+- `meta.emitOnClick: true`: emite `@cell-click` al hacer clic en la celda (útil para abrir paneles externos como CaseReport).
 
 Escucha `@update:cell` para validar y actualizar la fuente de datos (y/o llamar al API).
 Para `editType: 'date'`, el editor usa DatePicker y emite `YYYY-MM-DD` (local).

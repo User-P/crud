@@ -118,8 +118,11 @@
                                         @update:model-value="(v) => row.toggleSelected(!!v)" />
                                 </td>
                                 <td v-for="cell in row.getVisibleCells()" :key="cell.id"
-                                    :class="['py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700', isCellEditing(row.id, cell.column.id) ? 'min-w-0' : 'whitespace-nowrap']"
-                                    @click="onCellClick($event, row, cell)">
+                                    :class="[
+                                        'py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700',
+                                        isCellEditing(row.id, cell.column.id) ? 'min-w-0' : 'whitespace-nowrap',
+                                        getCellMeta(cell).emitOnClick ? 'cursor-pointer text-sky-700 hover:underline' : '',
+                                    ]" @click="onCellClick($event, row, cell)">
                                     <slot name="cell" :cell="cell" :row="row" :value="cell.getValue()"
                                         :is-editing="isCellEditing(row.id, cell.column.id)"
                                         :editing-value="editingValue" :start-edit="() => startEdit(row, cell)"
@@ -253,10 +256,8 @@ interface Props<TData> {
     showStickyHeader?: boolean
     scrollMaxHeight?: string
     rowActionsLabel?: string
-    /** Comportamiento al hacer clic en una fila: 'none' | 'expand' | 'drawer' | 'custom'. */
+    /** Comportamiento al hacer clic en una fila: 'none' | 'expand' | 'custom'. */
     rowClick?: RowClickMode
-    /** Título del drawer cuando rowClick es 'drawer'. */
-    drawerTitle?: string
 }
 
 const props = withDefaults(defineProps<Props<TData>>(), {
@@ -276,14 +277,19 @@ const props = withDefaults(defineProps<Props<TData>>(), {
     scrollMaxHeight: '70vh',
     rowActionsLabel: 'Acciones',
     rowClick: 'none',
-    drawerTitle: 'Detalle',
 })
 
 const emit = defineEmits<{
     (e: 'row-click', payload: { row: Row<TData>; original: TData }): void
     (e: 'update:cell', payload: { rowId: string; columnId: string; value: unknown; oldValue: unknown; original: TData }): void
-    (e: 'open-drawer', payload: { row: Row<TData>; original: TData; title?: string }): void
-    (e: 'close-drawer'): void
+    (e: 'cell-click', payload: {
+        rowId: string
+        columnId: string
+        value: unknown
+        original: TData
+        row: Row<TData>
+        meta?: ColumnMetaBase
+    }): void
 }>()
 
 const slots = useSlots()
@@ -441,16 +447,10 @@ const skeletonCount = computed(() => {
     return typeof props.pageSize === 'number' && props.pageSize > 0 ? props.pageSize : 10
 })
 
-// Drawer lifecycle is handled by the parent/consumer via events `open-drawer` / `close-drawer`.
-
 function onRowClick(event: MouseEvent, row: Row<TData>) {
     if (shouldIgnoreRowClick(event)) return
     if (props.rowClick === 'expand' && hasExpandedSlot.value) {
         row.toggleExpanded()
-        return
-    }
-    if (props.rowClick === 'drawer') {
-        emit('open-drawer', { row, original: row.original, title: props.drawerTitle })
         return
     }
     if (props.rowClick === 'custom') {
@@ -475,9 +475,21 @@ function startEdit(row: Row<TData>, cell: Cell<TData, unknown>) {
 
 function onCellClick(event: MouseEvent, row: Row<TData>, cell: Cell<TData, unknown>) {
     const meta = getCellMeta(cell)
+    const isEditing = isCellEditing(row.id, cell.column.id)
+    if (meta.emitOnClick && !isEditing) {
+        event.stopPropagation()
+        emit('cell-click', {
+            rowId: row.id,
+            columnId: cell.column.id,
+            value: cell.getValue(),
+            original: row.original,
+            row,
+            meta,
+        })
+    }
     if (!meta.editable) return
     event.stopPropagation()
-    if (isCellEditing(row.id, cell.column.id)) return
+    if (isEditing) return
     startEdit(row, cell)
 }
 
@@ -625,9 +637,5 @@ defineExpose({
     selectedCount,
     totalRows: computed(() => table.getPreFilteredRowModel().rows.length),
     filteredTotal,
-    // Expose a helper to programmatically request opening a drawer in the parent
-    openDrawer: (row: Row<TData>) => {
-        emit('open-drawer', { row, original: row.original, title: props.drawerTitle })
-    },
 })
 </script>

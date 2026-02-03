@@ -112,7 +112,7 @@ const columns: ColumnDef<BasicRow>[] = [
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
         filterFn: 'includesString',
-        meta: { filterPlaceholder: 'Filtrar ID' },
+        meta: { filterPlaceholder: 'Filtrar ID', emitOnClick: true },
     },
     {
         accessorKey: 'name',

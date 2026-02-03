@@ -23,6 +23,8 @@ export interface ColumnMetaBase {
     editOptions?: FilterOption[]
     /** Placeholder del input cuando está vacío. */
     editPlaceholder?: string
+    /** Si true, emite `cell-click` al hacer click en la celda. */
+    emitOnClick?: boolean
 }
 
-export type RowClickMode = 'none' | 'expand' | 'drawer' | 'custom'
+export type RowClickMode = 'none' | 'expand' | 'custom'

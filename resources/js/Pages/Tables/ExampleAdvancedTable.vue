@@ -41,8 +41,7 @@
         <TanStackTable ref="tableRef" :data="data" :columns="columns" :loading="loading" enable-sorting
             enable-pagination enable-global-filter :show-global-filter="false" :show-selected-count="false"
             enable-column-filters selectable :page-size="10" show-sticky-header skeleton-loading :skeleton-rows="8"
-            row-click="drawer" drawer-title="Detalle del registro" @update:cell="(e) => emit('update:cell', e)"
-            @open-drawer="onOpenDrawer">
+            @update:cell="(e) => emit('update:cell', e)" @cell-click="onCellClick">
             <template #pagination="{ table }">
                 <TablePagination :table="table" :page-size-options="[5, 10, 25]" />
             </template>
@@ -65,55 +64,14 @@
             </template>
         </TanStackTable>
 
-        <PrimeSidebar v-model:visible="sidebarVisible" position="right" class="w-full sm:max-w-lg lg:max-w-xl"
-            :modal="true" :dismissable="true" @hide="sidebarVisible = false">
-            <template #header>
-                <span class="font-semibold">{{ sidebarTitle || 'Detalle' }}</span>
-            </template>
-            <div v-if="sidebarRow" class="p-2">
-                <div class="space-y-4">
-                    <dl class="grid grid-cols-1 gap-2 text-sm">
-                        <div>
-                            <dt class="font-medium text-gray-500">ID</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.id }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Nombre</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.name }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Email</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.email }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Estado</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.status }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Departamento</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.department }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Edad</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.age }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Score</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.score }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Ciudad</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.city }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Alta</dt>
-                            <dd class="mt-0.5">{{ sidebarRow.createdAt }}</dd>
-                        </div>
-                    </dl>
-                    <Button type="button" class="p-button-sm" label="Cerrar" @click="sidebarVisible = false" />
-                </div>
+        <div v-if="caseReportData" class="rounded-lg border border-gray-200/80 bg-white p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-sm font-medium text-gray-700">Case report</div>
+                <Button type="button" class="p-button-sm p-button-text" label="Cerrar"
+                    @click="caseReportData = null" />
             </div>
-        </PrimeSidebar>
+            <CaseReport :case-data="caseReportData" />
+        </div>
     </div>
 </template>
 
@@ -125,7 +83,7 @@ import TablePagination from '@/Components/Tables/TablePagination.vue'
 import TableFiltersAdvanced from '@/Components/Tables/TableFiltersAdvanced.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import PrimeSidebar from 'primevue/sidebar'
+import CaseReport from '@/Components/Tables/CaseReport.vue'
 
 withDefaults(defineProps<{ data: any[]; columns: ColumnDef<any>[]; loading?: boolean }>(), {
     loading: false,
@@ -145,15 +103,7 @@ const filteredTotal = computed(() => tableRef.value?.filteredTotal?.value ?? 0)
 const totalRows = computed(() => tableRef.value?.totalRows?.value ?? 0)
 const selectedCount = computed(() => tableRef.value?.selectedCount?.value ?? 0)
 
-// Local drawer state - listen to `open-drawer` emitted by the table and show a local PrimeSidebar
-const sidebarVisible = ref(false)
-const sidebarRow = ref<any | null>(null)
-const sidebarTitle = ref<string | undefined>(undefined)
-function onOpenDrawer(payload: { row: any; original: any; title?: string }) {
-    sidebarRow.value = payload.original ?? payload.row?.original ?? payload.row
-    sidebarTitle.value = payload.title
-    sidebarVisible.value = true
-}
+const caseReportData = ref<any | null>(null)
 
 const globalSearch = computed({
     get: () => tableApi.value?.getState().globalFilter ?? '',
@@ -165,5 +115,10 @@ const globalSearch = computed({
 const logSelected = () => {
     if (!tableApi.value) return
     console.log(tableApi.value.getSelectedRowModel().rows)
+}
+
+function onCellClick(payload: { columnId: string; original: any }) {
+    if (payload.columnId !== 'id') return
+    caseReportData.value = payload.original
 }
 </script>
