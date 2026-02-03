@@ -13,14 +13,14 @@ Este folder contiene la tabla reutilizable basada en TanStack Table y componente
 ## Dependencias UI
 
 -   Se usan componentes PrimeVue en los helpers:
-    -   `TanStackTable.vue` (InputText para filtro global).
+    -   `TanStackTable.vue` (InputText para filtro global y edición inline, Select/InputNumber/DatePicker según meta).
     -   `TableFilters.vue` (InputText + Button).
     -   `TableFiltersAdvanced.vue` (InputText + Select + InputNumber + DatePicker + Button).
     -   `TablePagination.vue` (Button + Select).
     -   `TanStackTable.vue` (Checkbox para selección).
 -   Asegúrate de tener PrimeVue y sus estilos cargados en el proyecto.
 
-## Uso básico
+## Ejemplo completo (demo)
 
 ```vue
 <script setup lang="ts">
@@ -38,19 +38,66 @@ type Row = {
     email: string;
     status: "Activo" | "Inactivo";
     age: number;
+    score: number;
+    department: "Ventas" | "Marketing" | "Soporte" | "Finanzas" | "TI";
+    city: string;
     createdAt: string;
 };
 
-const data = ref<Row[]>(
-    Array.from({ length: 20 }, () => ({
+const DEPARTMENTS: Row["department"][] = ["Ventas", "Marketing", "Soporte", "Finanzas", "TI"];
+const STATUS: Row["status"][] = ["Activo", "Inactivo"];
+
+const makeRows = (count = 20): Row[] =>
+    Array.from({ length: count }, () => ({
         id: faker.string.uuid(),
         name: faker.person.fullName(),
         email: faker.internet.email(),
-        status: faker.helpers.arrayElement(["Activo", "Inactivo"]),
+        status: faker.helpers.arrayElement(STATUS),
         age: faker.number.int({ min: 18, max: 65 }),
+        score: faker.number.int({ min: 0, max: 100 }),
+        department: faker.helpers.arrayElement(DEPARTMENTS),
+        city: faker.location.city(),
         createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
-    }))
-);
+    }));
+
+const data = ref<Row[]>(makeRows(50));
+const loading = ref(false);
+
+const regenerate = async () => {
+    loading.value = true;
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    data.value = makeRows(50);
+    loading.value = false;
+};
+
+const updateRow = (rowId: string, patch: Partial<Row>) => {
+    data.value = data.value.map((row) => (row.id === rowId ? { ...row, ...patch } : row));
+};
+
+const onUpdateCell = (payload: { rowId: string; columnId: string; value: unknown; oldValue: unknown }) => {
+    const { rowId, columnId, value, oldValue } = payload;
+    if (Object.is(value, oldValue)) return;
+    switch (columnId) {
+        case "status":
+            if (value === "Activo" || value === "Inactivo") updateRow(rowId, { status: value });
+            return;
+        case "department":
+            if (typeof value === "string") updateRow(rowId, { department: value as Row["department"] });
+            return;
+        case "name":
+            if (typeof value === "string") updateRow(rowId, { name: value });
+            return;
+        case "city":
+            if (typeof value === "string") updateRow(rowId, { city: value });
+            return;
+        case "score":
+            if (typeof value === "number") updateRow(rowId, { score: value });
+            return;
+        case "createdAt":
+            if (typeof value === "string") updateRow(rowId, { createdAt: value });
+            return;
+    }
+};
 
 const columns: ColumnDef<Row>[] = [
     {
@@ -67,7 +114,7 @@ const columns: ColumnDef<Row>[] = [
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
         filterFn: "includesString",
-        meta: { filterPlaceholder: "Filtrar nombre" },
+        meta: { filterPlaceholder: "Filtrar nombre", editable: true, editPlaceholder: "Editar nombre" },
     },
     {
         accessorKey: "email",
@@ -85,10 +132,22 @@ const columns: ColumnDef<Row>[] = [
         filterFn: "equalsString",
         meta: {
             filterType: "select",
-            filterOptions: [
-                { label: "Activo", value: "Activo" },
-                { label: "Inactivo", value: "Inactivo" },
-            ],
+            filterOptions: STATUS.map((s) => ({ label: s, value: s })),
+            editable: true,
+            editOptions: STATUS.map((s) => ({ label: s, value: s })),
+        },
+    },
+    {
+        accessorKey: "department",
+        header: "Departamento",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "equalsString",
+        meta: {
+            filterType: "select",
+            filterOptions: DEPARTMENTS.map((d) => ({ label: d, value: d })),
+            editable: true,
+            editOptions: DEPARTMENTS.map((d) => ({ label: d, value: d })),
         },
     },
     {
@@ -96,12 +155,31 @@ const columns: ColumnDef<Row>[] = [
         header: "Edad",
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
-        filterFn: "numberRange",
+        filterFn: "inNumberRange",
+        meta: { filterType: "numberRange", filterMinPlaceholder: "Min", filterMaxPlaceholder: "Max" },
+    },
+    {
+        accessorKey: "score",
+        header: "Score",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "inNumberRange",
         meta: {
             filterType: "numberRange",
             filterMinPlaceholder: "Min",
             filterMaxPlaceholder: "Max",
+            editable: true,
+            editType: "number",
+            editPlaceholder: "0-100",
         },
+    },
+    {
+        accessorKey: "city",
+        header: "Ciudad",
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: "includesString",
+        meta: { filterPlaceholder: "Filtrar ciudad", editable: true, editPlaceholder: "Editar ciudad" },
     },
     {
         accessorKey: "createdAt",
@@ -113,6 +191,9 @@ const columns: ColumnDef<Row>[] = [
             filterType: "dateRange",
             filterFromPlaceholder: "Desde",
             filterToPlaceholder: "Hasta",
+            editable: true,
+            editType: "date",
+            editPlaceholder: "YYYY-MM-DD",
         },
     },
 ];
@@ -122,22 +203,47 @@ const columns: ColumnDef<Row>[] = [
     <TanStackTable
         :data="data"
         :columns="columns"
+        :loading="loading"
         enable-sorting
         enable-pagination
         enable-global-filter
         enable-column-filters
         selectable
+        row-click="drawer"
+        drawer-title="Detalle del registro"
+        skeleton-loading
+        :skeleton-rows="8"
         :page-size="10"
         show-sticky-header
+        @update:cell="onUpdateCell"
     >
         <template #toolbar="{ table }">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col gap-2 w-full">
+                <div class="flex items-center gap-2">
+                    <Button type="button" class="p-button-sm p-button-secondary" label="Regenerar datos"
+                        @click="regenerate" />
+                </div>
                 <TableFiltersAdvanced :table="table" />
             </div>
         </template>
 
         <template #pagination="{ table }">
             <TablePagination :table="table" :page-size-options="[5, 10, 25]" />
+        </template>
+
+        <template #expanded-row="{ original }">
+            <div class="text-xs font-mono bg-gray-100 rounded p-3 overflow-auto max-h-48">
+                <pre>{{ JSON.stringify(original, null, 2) }}</pre>
+            </div>
+        </template>
+
+        <template #drawer="{ original, close }">
+            <div class="space-y-3 text-sm">
+                <div class="font-medium">{{ original.name }}</div>
+                <div class="text-gray-600">{{ original.email }}</div>
+                <div>Depto: {{ original.department }} · Score: {{ original.score }}</div>
+                <Button type="button" class="p-button-sm" label="Cerrar" @click="close" />
+            </div>
         </template>
 
         <template #row-actions="{ original }">
@@ -199,6 +305,7 @@ const columns: ColumnDef<Row>[] = [
 -   Al cambiar `data`, se reinicia la selección y vuelve a la página 1.
 -   Al cambiar el filtro global, vuelve a la página 1.
 -   Si los filtros reducen el total de páginas, se ajusta el `pageIndex` automáticamente.
+-   El click en elementos interactivos (button, input, select, etc.) no dispara `rowClick`. Usa `data-stop-row-click` en wrappers si necesitas evitarlo manualmente.
 -   El filtro global usa `includesString`.
 -   El input del filtro global usa PrimeVue `InputText`.
 -   `filterFn` soportadas por defecto: `includesString`, `equalsString`, `numberRange` / `inNumberRange`, `dateRange`. El filtro de fechas espera valores `{ from?: string, to?: string }` en formato YYYY-MM-DD.
@@ -245,7 +352,9 @@ Permite definir el tipo de filtro por columna usando `meta.filterType`:
 En la definición de columnas, usa `meta` para activar edición inline:
 
 -   `meta.editable: true`: la celda se puede editar al hacer clic.
+-   `meta.editType: 'text' | 'number' | 'date' | 'select'`: tipo de editor inline (si no se definen `editOptions`).
 -   `meta.editOptions`: array `{ label, value }[]` para mostrar un Select en lugar de InputText.
 -   `meta.editPlaceholder`: placeholder del input cuando está vacío.
 
 Escucha `@update:cell` para validar y actualizar la fuente de datos (y/o llamar al API).
+Para `editType: 'date'`, el editor usa DatePicker y emite `YYYY-MM-DD` (local).

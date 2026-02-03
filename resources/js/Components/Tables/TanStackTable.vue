@@ -94,7 +94,7 @@
                         <template v-for="row in table.getRowModel().rows" :key="row.id">
                             <tr class="hover:bg-gray-50 transition-colors"
                                 :class="rowClick !== 'none' ? 'cursor-pointer' : ''"
-                                @click="rowClick !== 'none' ? onRowClick(row) : undefined">
+                                @click="rowClick !== 'none' ? onRowClick($event, row) : undefined">
                                 <td v-if="hasExpandedSlot" class="py-2 px-2 sm:py-3 sm:px-3 align-top shrink-0"
                                     @click.stop>
                                     <button type="button"
@@ -109,23 +109,40 @@
                                         :aria-label="`Seleccionar fila ${row.id}`"
                                         @update:model-value="(v) => row.toggleSelected(!!v)" />
                                 </td>
-                            <td v-for="cell in row.getVisibleCells()" :key="cell.id"
-                                class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap"
-                                @click="onCellClick($event, row, cell)">
+                                <td v-for="cell in row.getVisibleCells()" :key="cell.id"
+                                    class="py-2 px-2 sm:py-3 sm:px-4 align-top text-xs sm:text-sm text-gray-700 whitespace-nowrap"
+                                    @click="onCellClick($event, row, cell)">
                                     <slot name="cell" :cell="cell" :row="row" :value="cell.getValue()"
                                         :is-editing="isCellEditing(row.id, cell.column.id)"
                                         :editing-value="editingValue"
-                                        :start-edit="() => startEdit(row, cell.column.id, cell.getValue())"
+                                        :start-edit="() => startEdit(row, cell)"
                                         :save="() => saveEdit(row, cell.column.id)" :cancel="cancelEdit"
                                         :meta="getCellMeta(cell)">
                                         <template
                                             v-if="getCellMeta(cell).editable && isCellEditing(row.id, cell.column.id)">
                                             <div class="flex items-center gap-1 min-w-0">
-                                                <Select v-if="getCellMeta(cell).editOptions?.length"
+                                                <Select v-if="getEditType(cell) === 'select'"
                                                     :model-value="editingValue"
                                                     @update:model-value="(v) => (editingValue = v as string | number | null)"
                                                     :options="getCellMeta(cell).editOptions" option-label="label"
                                                     option-value="value" class="flex-1 min-w-0 text-xs" size="small"
+                                                    :placeholder="getCellMeta(cell).editPlaceholder"
+                                                    @keydown.enter="saveEdit(row, cell.column.id)"
+                                                    @keydown.esc="cancelEdit" />
+                                                <InputNumber v-else-if="getEditType(cell) === 'number'"
+                                                    :model-value="typeof editingValue === 'number' ? editingValue : null"
+                                                    @update:model-value="(v) => (editingValue = typeof v === 'number' ? v : null)"
+                                                    class="flex-1 min-w-0 text-xs"
+                                                    input-class="w-full min-w-0 text-xs p-1"
+                                                    :placeholder="getCellMeta(cell).editPlaceholder"
+                                                    @keydown.enter="saveEdit(row, cell.column.id)"
+                                                    @keydown.esc="cancelEdit" />
+                                                <DatePicker v-else-if="getEditType(cell) === 'date'"
+                                                    :model-value="getDatePickerValue(editingValue)"
+                                                    @update:model-value="updateDateEditValue"
+                                                    class="flex-1 min-w-0 text-xs"
+                                                    input-class="w-full min-w-0 text-xs p-1"
+                                                    date-format="yy-mm-dd"
                                                     :placeholder="getCellMeta(cell).editPlaceholder"
                                                     @keydown.enter="saveEdit(row, cell.column.id)"
                                                     @keydown.esc="cancelEdit" />
@@ -188,7 +205,9 @@
 <script setup lang="ts" generic="TData extends Record<string, any>">
 import { computed, ref, watch, useSlots, onBeforeUnmount } from 'vue'
 import Checkbox from 'primevue/checkbox'
+import DatePicker from 'primevue/datepicker'
 import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
 import PrimeSidebar from 'primevue/sidebar'
 import Skeleton from 'primevue/skeleton'
 import {
@@ -211,7 +230,7 @@ import {
     useVueTable,
 } from '@tanstack/vue-table'
 import Select from 'primevue/select'
-import { toDateOnly, type DateRangeValue } from './dateFilterUtils'
+import { toDateOnly, toYYYYMMDD, type DateRangeValue } from './dateFilterUtils'
 import type { ColumnMetaBase, RowClickMode } from './tableMeta'
 
 interface Props<TData> {
@@ -415,7 +434,8 @@ function closeDrawer() {
     drawerRow.value = null
 }
 
-function onRowClick(row: Row<TData>) {
+function onRowClick(event: MouseEvent, row: Row<TData>) {
+    if (shouldIgnoreRowClick(event)) return
     if (props.rowClick === 'expand' && hasExpandedSlot.value) {
         row.toggleExpanded()
         return
@@ -435,16 +455,16 @@ function isCellEditing(rowId: string, columnId: string) {
     return c !== null && c.rowId === rowId && c.columnId === columnId
 }
 
-function startEdit(row: Row<TData>, columnId: string, value: unknown) {
-    editingCell.value = { rowId: row.id, columnId }
-    editingValue.value = value as string | number | null
+function startEdit(row: Row<TData>, cell: Cell<TData, unknown>) {
+    editingCell.value = { rowId: row.id, columnId: cell.column.id }
+    editingValue.value = normalizeEditValue(cell.getValue(), getEditType(cell))
 }
 
 function onCellClick(event: MouseEvent, row: Row<TData>, cell: Cell<TData, unknown>) {
     const meta = getCellMeta(cell)
     if (!meta.editable) return
     event.stopPropagation()
-    startEdit(row, cell.column.id, cell.getValue())
+    startEdit(row, cell)
 }
 
 function saveEdit(row: Row<TData>, columnId: string) {
@@ -470,6 +490,42 @@ function getCellMeta(cell: { column: { columnDef: { meta?: unknown } } }) {
     const meta = cell.column.columnDef.meta as ColumnMetaBase | undefined
     return (meta ?? {}) as ColumnMetaBase
 }
+
+type EditType = 'text' | 'number' | 'date' | 'select'
+
+function getEditType(cell: { column: { columnDef: { meta?: unknown } } }) {
+    const meta = getCellMeta(cell)
+    if (meta.editOptions?.length) return 'select'
+    return (meta.editType ?? 'text') as EditType
+}
+
+function normalizeEditValue(value: unknown, editType: EditType) {
+    if (editType === 'number') {
+        if (value === undefined || value === null || value === '') return null
+        const parsed = typeof value === 'number' ? value : Number(value)
+        return Number.isFinite(parsed) ? parsed : null
+    }
+    if (editType === 'date') {
+        const date = toDateOnly(value as string | Date | number | null | undefined)
+        return date ? toYYYYMMDD(date) : null
+    }
+    if (value === undefined || value === null) return null
+    return typeof value === 'string' || typeof value === 'number' ? value : String(value)
+}
+
+function getDatePickerValue(value: string | number | null) {
+    if (value === null || value === undefined || value === '') return null
+    return toDateOnly(value as string | Date | number | null | undefined) ?? null
+}
+
+function updateDateEditValue(value: Date | Date[] | (Date | null)[] | null | undefined) {
+    if (!value) {
+        editingValue.value = null
+        return
+    }
+    const date = Array.isArray(value) ? value[0] : value
+    editingValue.value = date ? toYYYYMMDD(date) : null
+}
 const selectedCount = computed(() => Object.values(rowSelection.value).filter(Boolean).length)
 const filteredTotal = computed(() => table.getFilteredRowModel().rows.length)
 
@@ -481,6 +537,24 @@ const scrollWrapperStyle = computed(() => ({
 function onHeaderClick(header: Header<TData, unknown>) {
     if (!props.enableSorting || !header.column.getCanSort()) return
     header.column.toggleSorting()
+}
+
+function shouldIgnoreRowClick(event: MouseEvent) {
+    const target = event.target as HTMLElement | null
+    if (!target) return false
+    const selector = [
+        'button',
+        'a',
+        'input',
+        'select',
+        'textarea',
+        'label',
+        '[role="button"]',
+        '[role="link"]',
+        '[contenteditable="true"]',
+        '[data-stop-row-click]',
+    ].join(',')
+    return !!target.closest(selector)
 }
 
 function sortIndicator(state: false | 'asc' | 'desc') {

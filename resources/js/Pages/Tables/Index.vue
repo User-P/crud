@@ -42,8 +42,20 @@
                             <dd class="mt-0.5">{{ original.status }}</dd>
                         </div>
                         <div>
+                            <dt class="font-medium text-gray-500">Departamento</dt>
+                            <dd class="mt-0.5">{{ original.department }}</dd>
+                        </div>
+                        <div>
                             <dt class="font-medium text-gray-500">Edad</dt>
                             <dd class="mt-0.5">{{ original.age }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">Score</dt>
+                            <dd class="mt-0.5">{{ original.score }}</dd>
+                        </div>
+                        <div>
+                            <dt class="font-medium text-gray-500">Ciudad</dt>
+                            <dd class="mt-0.5">{{ original.city }}</dd>
                         </div>
                         <div>
                             <dt class="font-medium text-gray-500">Alta</dt>
@@ -80,16 +92,25 @@ type BasicRow = {
     email: string
     status: 'Activo' | 'Inactivo'
     age: number
+    score: number
+    department: 'Ventas' | 'Marketing' | 'Soporte' | 'Finanzas' | 'TI'
+    city: string
     createdAt: string
 }
+
+const DEPARTMENTS: BasicRow['department'][] = ['Ventas', 'Marketing', 'Soporte', 'Finanzas', 'TI']
+const STATUS_OPTIONS: BasicRow['status'][] = ['Activo', 'Inactivo']
 
 const makeFakeRows = (count = 10): BasicRow[] =>
     Array.from({ length: count }, () => ({
         id: faker.string.uuid(),
         name: faker.person.fullName(),
         email: faker.internet.email(),
-        status: faker.helpers.arrayElement(['Activo', 'Inactivo']),
+        status: faker.helpers.arrayElement(STATUS_OPTIONS),
         age: faker.number.int({ min: 18, max: 65 }),
+        score: faker.number.int({ min: 0, max: 100 }),
+        department: faker.helpers.arrayElement(DEPARTMENTS),
+        city: faker.location.city(),
         createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
     }))
 
@@ -120,12 +141,33 @@ function onUpdateCell(payload: { rowId: string; columnId: string; value: unknown
     if (Object.is(value, oldValue)) return
     const index = data.value.findIndex((r) => r.id === original.id)
     if (index === -1) return
+    const updateRow = (patch: Partial<BasicRow>) => {
+        data.value = data.value.map((r, i) => (i === index ? { ...r, ...patch } : r))
+    }
+
     if (columnId === 'status' && (value === 'Activo' || value === 'Inactivo')) {
-        data.value = data.value.map((r, i) => (i === index ? { ...r, status: value } : r))
+        updateRow({ status: value })
+        return
+    }
+    if (columnId === 'department' && typeof value === 'string') {
+        updateRow({ department: value as BasicRow['department'] })
         return
     }
     if (columnId === 'name' && typeof value === 'string') {
-        data.value = data.value.map((r, i) => (i === index ? { ...r, name: value } : r))
+        updateRow({ name: value })
+        return
+    }
+    if (columnId === 'city' && typeof value === 'string') {
+        updateRow({ city: value })
+        return
+    }
+    if (columnId === 'score') {
+        const next = typeof value === 'number' ? value : Number(value)
+        if (Number.isFinite(next)) updateRow({ score: next })
+        return
+    }
+    if (columnId === 'createdAt' && typeof value === 'string') {
+        updateRow({ createdAt: value })
     }
 }
 
@@ -178,6 +220,19 @@ const columns: ColumnDef<BasicRow>[] = [
         },
     },
     {
+        accessorKey: 'department',
+        header: 'Departamento',
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'equalsString',
+        meta: {
+            filterType: 'select',
+            filterOptions: DEPARTMENTS.map((d) => ({ label: d, value: d })),
+            editable: true,
+            editOptions: DEPARTMENTS.map((d) => ({ label: d, value: d })),
+        },
+    },
+    {
         accessorKey: 'age',
         header: 'Edad',
         cell: (info) => info.getValue(),
@@ -186,12 +241,46 @@ const columns: ColumnDef<BasicRow>[] = [
         meta: { filterType: 'numberRange', filterMinPlaceholder: 'Min', filterMaxPlaceholder: 'Max' },
     },
     {
+        accessorKey: 'score',
+        header: 'Score',
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'inNumberRange',
+        meta: {
+            filterType: 'numberRange',
+            filterMinPlaceholder: 'Min',
+            filterMaxPlaceholder: 'Max',
+            editable: true,
+            editType: 'number',
+            editPlaceholder: '0-100',
+        },
+    },
+    {
+        accessorKey: 'city',
+        header: 'Ciudad',
+        cell: (info) => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+        meta: {
+            filterPlaceholder: 'Filtrar ciudad',
+            editable: true,
+            editPlaceholder: 'Editar ciudad',
+        },
+    },
+    {
         accessorKey: 'createdAt',
         header: 'Alta',
         cell: (info) => info.getValue(),
         enableColumnFilter: true,
         filterFn: 'dateRange' as import('@tanstack/vue-table').FilterFnOption<BasicRow>,
-        meta: { filterType: 'dateRange', filterFromPlaceholder: 'Desde', filterToPlaceholder: 'Hasta' },
+        meta: {
+            filterType: 'dateRange',
+            filterFromPlaceholder: 'Desde',
+            filterToPlaceholder: 'Hasta',
+            editable: true,
+            editType: 'date',
+            editPlaceholder: 'YYYY-MM-DD',
+        },
     },
 ]
 

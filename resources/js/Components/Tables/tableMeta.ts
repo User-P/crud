@@ -17,6 +17,8 @@ export interface ColumnMetaBase {
     filterOptions?: FilterOption[]
     /** Si true, la celda se puede editar inline (requiere slot #cell o editOptions). */
     editable?: boolean
+    /** Tipo de editor inline (si no se provee editOptions). */
+    editType?: 'text' | 'number' | 'date' | 'select'
     /** Opciones para el editor inline tipo select (cuando editable y editType === 'select'). */
     editOptions?: FilterOption[]
     /** Placeholder del input cuando está vacío. */
