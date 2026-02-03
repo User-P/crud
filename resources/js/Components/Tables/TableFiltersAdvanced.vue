@@ -134,14 +134,14 @@ function setDateRangeValue(column: Column<TData, unknown>, value: DateRangeValue
     column.setFilterValue({ from: value.from, to: value.to })
 }
 
-function getDateRangeForPicker(column: Column<TData, unknown>): Date | [Date, Date] | [Date, null] | null {
+function getDateRangeForPicker(column: Column<TData, unknown>): Date | [Date, Date | null] | null {
     const { from, to } = getDateRangeValue(column)
     if (!from && !to) return null
     const fromDate = from ? fromYYYYMMDD(from) : undefined
     const toDate = to ? fromYYYYMMDD(to) : undefined
     if (fromDate && toDate) return [fromDate, toDate]
-    if (fromDate) return [fromDate, null as unknown as Date]
-    if (toDate) return [toDate, null as unknown as Date]
+    if (fromDate) return [fromDate, null]
+    if (toDate) return [toDate, null]
     return null
 }
 

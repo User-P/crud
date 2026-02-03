@@ -7,7 +7,7 @@
                 </div>
                 <div v-if="enableGlobalFilter" class="flex items-center gap-2 sm:ml-0 text-sm text-gray-600 shrink-0">
                     <span class="text-gray-500 whitespace-nowrap">Resultados: <span class="font-medium">{{ filteredTotal
-                    }}</span></span>
+                            }}</span></span>
                 </div>
             </div>
             <div class="flex flex-col gap-2 w-full min-w-0 sm:flex-row sm:items-center sm:w-auto sm:shrink-0">
@@ -27,7 +27,7 @@
             <table class="table-auto divide-y divide-gray-200 border-collapse w-full" role="table" :aria-busy="loading"
                 style="min-width: max(100%, max-content)">
                 <thead class="relative">
-                    <tr v-for="(headerGroup, headerGroupIndex) in table.getHeaderGroups()" :key="headerGroup.id">
+                    <tr v-for="(headerGroup, headerGroupIndex) in headerGroups" :key="headerGroup.id">
                         <th v-if="hasExpandedSlot" class="py-2 px-2 sm:py-3 sm:px-3 text-left w-10 sm:w-12 shrink-0"
                             :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
                         </th>
@@ -44,7 +44,11 @@
                             :class="[
                                 header.column.getCanSort() ? 'cursor-pointer select-none' : '',
                                 showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : '',
-                            ]" @click="onHeaderClick(header)">
+                            ]" @click="onHeaderClick(header)" :role="header.column.getCanSort() ? 'button' : undefined"
+                            :tabindex="header.column.getCanSort() ? 0 : -1"
+                            @keydown.enter.prevent="header.column.getCanSort() && onHeaderClick(header)"
+                            @keydown.space.prevent="header.column.getCanSort() && onHeaderClick(header)"
+                            :aria-sort="header.column.getIsSorted() === 'asc' ? 'ascending' : header.column.getIsSorted() === 'desc' ? 'descending' : 'none'">
                             <div class="flex items-center gap-2">
                                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
                                 <span v-if="header.column.getCanSort()" class="ml-1 text-xs text-gray-400">
@@ -52,7 +56,7 @@
                                 </span>
                             </div>
                         </th>
-                        <th v-if="hasRowActions && headerGroupIndex === table.getHeaderGroups().length - 1"
+                        <th v-if="hasRowActions && headerGroupIndex === headerGroups.length - 1"
                             class="py-2 px-2 sm:py-3 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 w-20 sm:w-28 shrink-0"
                             :class="showStickyHeader ? 'sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]' : ''">
                             {{ rowActionsLabel }}
@@ -69,8 +73,7 @@
                             <td v-if="selectable" class="py-2 px-2 sm:py-3 sm:px-3 w-10 sm:w-12 shrink-0">
                                 <Skeleton shape="rectangle" class="h-5 w-5" />
                             </td>
-                            <td v-for="col in table.getAllLeafColumns()" :key="col.id"
-                                class="py-2 px-2 sm:py-3 sm:px-4">
+                            <td v-for="col in leafColumns" :key="col.id" class="py-2 px-2 sm:py-3 sm:px-4">
                                 <Skeleton width="80%" height="1.25rem" />
                             </td>
                             <td v-if="hasRowActions" class="py-2 px-2 sm:py-3 sm:px-4 w-20 sm:w-28 shrink-0">
@@ -79,13 +82,13 @@
                         </tr>
                     </template>
                     <tr v-else-if="loading" :key="'loading'">
-                        <td :colspan="table.getAllLeafColumns().length + extraColumns"
+                        <td :colspan="leafColumns.length + extraColumns"
                             class="py-6 sm:py-8 px-3 sm:px-4 text-center text-xs sm:text-sm text-gray-500">
                             Cargando...
                         </td>
                     </tr>
                     <tr v-else-if="table.getRowModel().rows.length === 0">
-                        <td :colspan="table.getAllLeafColumns().length + extraColumns"
+                        <td :colspan="leafColumns.length + extraColumns"
                             class="py-6 sm:py-8 px-3 sm:px-4 text-center text-xs sm:text-sm text-gray-500">
                             <slot name="empty">{{ emptyText }}</slot>
                         </td>
@@ -94,7 +97,9 @@
                         <template v-for="row in table.getRowModel().rows" :key="row.id">
                             <tr class="hover:bg-gray-50 transition-colors"
                                 :class="rowClick !== 'none' ? 'cursor-pointer' : ''"
-                                @click="rowClick !== 'none' ? onRowClick($event, row) : undefined">
+                                :tabindex="rowClick !== 'none' ? 0 : undefined"
+                                @click="rowClick !== 'none' ? onRowClick($event, row) : undefined"
+                                @keydown.enter.prevent="rowClick !== 'none' ? onRowKey($event, row) : undefined">
                                 <td v-if="hasExpandedSlot" class="py-2 px-2 sm:py-3 sm:px-3 align-top shrink-0"
                                     @click.stop>
                                     <button type="button"
@@ -114,8 +119,7 @@
                                     @click="onCellClick($event, row, cell)">
                                     <slot name="cell" :cell="cell" :row="row" :value="cell.getValue()"
                                         :is-editing="isCellEditing(row.id, cell.column.id)"
-                                        :editing-value="editingValue"
-                                        :start-edit="() => startEdit(row, cell)"
+                                        :editing-value="editingValue" :start-edit="() => startEdit(row, cell)"
                                         :save="() => saveEdit(row, cell.column.id)" :cancel="cancelEdit"
                                         :meta="getCellMeta(cell)">
                                         <template
@@ -141,8 +145,7 @@
                                                     :model-value="getDatePickerValue(editingValue)"
                                                     @update:model-value="updateDateEditValue"
                                                     class="flex-1 min-w-0 text-xs"
-                                                    input-class="w-full min-w-0 text-xs p-1"
-                                                    date-format="yy-mm-dd"
+                                                    input-class="w-full min-w-0 text-xs p-1" date-format="yy-mm-dd"
                                                     :placeholder="getCellMeta(cell).editPlaceholder"
                                                     @keydown.enter="saveEdit(row, cell.column.id)"
                                                     @keydown.esc="cancelEdit" />
@@ -174,7 +177,7 @@
                             </tr>
                             <!-- Fila expandida: subtabla, timeline, notas, JSON raw, etc. -->
                             <tr v-if="row.getIsExpanded() && hasExpandedSlot" class="bg-gray-50/80">
-                                <td :colspan="table.getAllLeafColumns().length + extraColumns"
+                                <td :colspan="leafColumns.length + extraColumns"
                                     class="py-3 px-4 align-top border-b border-gray-200">
                                     <slot name="expanded-row" :row="row" :original="row.original" :table="table" />
                                 </td>
@@ -421,6 +424,8 @@ watch(
 
 const hasRowActions = computed(() => !!slots['row-actions'])
 const hasExpandedSlot = computed(() => !!slots['expanded-row'])
+const headerGroups = computed(() => table.getHeaderGroups())
+const leafColumns = computed(() => table.getAllLeafColumns())
 const extraColumns = computed(
     () => (props.selectable ? 1 : 0) + (hasRowActions.value ? 1 : 0) + (hasExpandedSlot.value ? 1 : 0)
 )
@@ -448,6 +453,11 @@ function onRowClick(event: MouseEvent, row: Row<TData>) {
     if (props.rowClick === 'custom') {
         emit('row-click', { row, original: row.original })
     }
+}
+
+function onRowKey(event: KeyboardEvent, row: Row<TData>) {
+    // Delegate to the same logic; KeyboardEvent has `target` so shouldIgnoreRowClick works.
+    onRowClick(event as unknown as MouseEvent, row)
 }
 
 function isCellEditing(rowId: string, columnId: string) {
