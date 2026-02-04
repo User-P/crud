@@ -67,8 +67,7 @@
         <div v-if="caseReportData" class="rounded-lg border border-gray-200/80 bg-white p-4 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <div class="text-sm font-medium text-gray-700">Case report</div>
-                <Button type="button" class="p-button-sm p-button-text" label="Cerrar"
-                    @click="caseReportData = null" />
+                <Button type="button" class="p-button-sm p-button-text" label="Cerrar" @click="caseReportData = null" />
             </div>
             <CaseReport :case-data="caseReportData" />
         </div>
@@ -94,10 +93,11 @@ const emit = defineEmits<{
     (e: 'regenerate'): void
     (e: 'edit-row', payload: any): void
     (e: 'delete-row', payload: any): void
+    (e: 'open-case-report', payload: any): void
 }>()
 
 const filtersOpen = ref(true)
-const tableRef = ref<any>(null)
+const tableRef = ref<InstanceType<typeof TanStackTable> | null>(null)
 const tableApi = computed(() => tableRef.value?.table)
 const filteredTotal = computed(() => tableRef.value?.filteredTotal?.value ?? 0)
 const totalRows = computed(() => tableRef.value?.totalRows?.value ?? 0)
@@ -119,6 +119,9 @@ const logSelected = () => {
 
 function onCellClick(payload: { columnId: string; original: any }) {
     if (payload.columnId !== 'id') return
-    caseReportData.value = payload.original
+    // Si `original.details` existe, lo combinamos con la fila para que `CaseReport` reciba tanto contexto (name, email...) como los detalles específicos
+    const merged = payload.original?.details ? { ...payload.original, ...payload.original.details } : payload.original
+    caseReportData.value = merged
+    emit('open-case-report', merged)
 }
 </script>

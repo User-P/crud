@@ -6,8 +6,7 @@
                     @regenerate="regenerate" @edit-row="editRow" @delete-row="deleteRow" />
             </div>
             <div>
-                <ExampleBasicTable :data="data" :columns="columns" :loading="loading" @update:cell="onUpdateCell"
-                    @regenerate="regenerate" />
+                <Informe />
             </div>
         </div>
     </AdminLayout>
@@ -17,9 +16,9 @@
 import { ref } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import ExampleAdvancedTable from '@/Pages/Tables/ExampleAdvancedTable.vue'
-import ExampleBasicTable from '@/Pages/Tables/ExampleBasicTable.vue'
 import { faker } from '@faker-js/faker'
 import { type ColumnDef } from '@tanstack/vue-table'
+import Informe from './Informe.vue'
 
 type BasicRow = {
     id: string
@@ -31,6 +30,8 @@ type BasicRow = {
     department: 'Ventas' | 'Marketing' | 'Soporte' | 'Finanzas' | 'TI'
     city: string
     createdAt: string
+    // Datos arbitrarios que no se muestran como columnas, p. ej. para la fila expandida o case report
+    details?: any
 }
 
 const DEPARTMENTS: BasicRow['department'][] = ['Ventas', 'Marketing', 'Soporte', 'Finanzas', 'TI']
@@ -47,6 +48,17 @@ const makeFakeRows = (count = 10): BasicRow[] =>
         department: faker.helpers.arrayElement(DEPARTMENTS),
         city: faker.location.city(),
         createdAt: faker.date.past({ years: 1 }).toISOString().slice(0, 10),
+        details: {
+            // Estructura de ejemplo para `caseReport`
+            description: faker.lorem.paragraph(),
+            findings: Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () => faker.lorem.sentence()),
+            actionables: Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, () => ({
+                key: `AC-${faker.string.alphanumeric(6).toUpperCase()}`,
+                area: faker.helpers.arrayElement(['Seguridad', 'TI', 'Soporte']),
+                action: faker.lorem.sentence(),
+                status: faker.helpers.arrayElement(['Solicitado', 'Pendiente', 'Completado']),
+            })),
+        },
     }))
 
 const data = ref<BasicRow[]>(makeFakeRows(100))
