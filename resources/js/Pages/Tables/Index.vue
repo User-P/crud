@@ -1,6 +1,8 @@
 <template>
     <AdminLayout title="Tablas" subtitle="Prueba de TanStack Table (base reutilizable)">
         <div class="grid grid-cols-1 gap-6 text-black">
+            <CustomPicker />
+
             <div>
                 <ExampleAdvancedTable :data="data" :columns="columns" :loading="loading" @update:cell="onUpdateCell"
                     @regenerate="regenerate" @edit-row="editRow" @delete-row="deleteRow" />
@@ -19,6 +21,7 @@ import ExampleAdvancedTable from '@/Pages/Tables/ExampleAdvancedTable.vue'
 import { faker } from '@faker-js/faker'
 import { type ColumnDef } from '@tanstack/vue-table'
 import Informe from './Informe.vue'
+import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
 
 type BasicRow = {
     id: string
