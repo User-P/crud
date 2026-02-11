@@ -1,7 +1,7 @@
 <template>
     <AdminLayout title="Tablas" subtitle="Prueba de TanStack Table (base reutilizable)">
         <div class="grid grid-cols-1 gap-6 text-black">
-            <CustomPicker />
+            <CustomPicker :initial-range="{ start: '2025-01-01', end: '2025-01-31' }" initial-type="custom" />
 
             <div>
                 <ExampleAdvancedTable :data="data" :columns="columns" :loading="loading" @update:cell="onUpdateCell"

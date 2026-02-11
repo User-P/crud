@@ -13,14 +13,37 @@ interface Dates {
     end: string;
 }
 
-export const useDateRange = () => {
-    const type = ref<'week' | 'custom'>('week');
+export interface UseDateRangeOptions {
+    /** Tipo inicial: 'week' o 'custom'. Por defecto 'week'. */
+    initialType?: 'week' | 'custom';
+    /** Fecha inicial para modo semanal (cualquier día de la semana, ej. '2025-02-10'). Por defecto semana actual. */
+    initialWeek?: string;
+    /** Rango inicial para modo personalizado ({ start, end } en 'YYYY-MM-DD'). Por defecto mes actual. */
+    initialRange?: { start: string; end: string };
+}
 
-    const selectedWeek = ref<Dayjs>(dayjs().startOf('isoWeek'));
-    const customRange = ref<[Dayjs, Dayjs]>([
-        dayjs().startOf('month'),
-        dayjs().endOf('month'),
-    ]);
+function parseWeekOption(initialWeek: string | undefined): Dayjs {
+    if (!initialWeek || !initialWeek.trim()) return dayjs().startOf('isoWeek');
+    const parsed = dayjs(initialWeek);
+    return parsed.isValid() ? parsed.startOf('isoWeek') : dayjs().startOf('isoWeek');
+}
+
+function parseRangeOption(initialRange: { start: string; end: string } | undefined): [Dayjs, Dayjs] {
+    if (!initialRange?.start || !initialRange?.end) {
+        return [dayjs().startOf('month'), dayjs().endOf('month')];
+    }
+    const start = dayjs(initialRange.start);
+    const end = dayjs(initialRange.end);
+    const valid = start.isValid() && end.isValid() && !start.isAfter(end);
+    return valid ? [start, end] : [dayjs().startOf('month'), dayjs().endOf('month')];
+}
+
+export const useDateRange = (options: UseDateRangeOptions = {}) => {
+    const { initialType = 'week', initialWeek, initialRange } = options;
+
+    const type = ref<'week' | 'custom'>(initialType);
+    const selectedWeek = ref<Dayjs>(parseWeekOption(initialWeek));
+    const customRange = ref<[Dayjs, Dayjs]>(parseRangeOption(initialRange));
 
     const dates = computed<Dates>(() => {
         if (type.value === 'week') {

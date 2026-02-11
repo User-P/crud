@@ -52,10 +52,20 @@ import { watch } from 'vue';
 import { useDateRange } from '@/composables/useDateRange';
 
 interface Props {
+    /** Si es true, no se muestra el selector de tipo (Semanal/Personalizado). */
     selectDisabled?: boolean;
+    /** Tipo inicial: 'week' o 'custom'. Por defecto 'week'. */
+    initialType?: 'week' | 'custom';
+    /** Fecha inicial para modo semanal (cualquier día de la semana, ej. '2025-02-10'). Por defecto semana actual. */
+    initialWeek?: string;
+    /** Rango inicial para modo personalizado. Por defecto mes actual. */
+    initialRange?: { start: string; end: string };
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    selectDisabled: false,
+    initialType: 'week',
+});
 
 const emit = defineEmits<{
     (e: 'update:dates', value: { start: string; end: string }): void;
@@ -74,7 +84,11 @@ const {
     updateWeek,
     updateCustomRange,
     formattedRange,
-} = useDateRange();
+} = useDateRange({
+    initialType: props.initialType,
+    initialWeek: props.initialWeek,
+    initialRange: props.initialRange,
+});
 
 const optionsType = [
     { label: 'Semanal', value: 'week' },
