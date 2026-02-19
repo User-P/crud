@@ -1,10 +1,10 @@
 <template>
-    <header class="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-x-3 border-b border-slate-200/80 bg-white px-4 shadow-sm shadow-slate-200/50 sm:gap-x-4 sm:px-6 lg:px-8">
-        <!-- Menú: móvil = abrir drawer; desktop = mostrar/contraer según estado -->
-        <div class="flex items-center gap-x-1">
+    <header class="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-slate-200/80 bg-white px-4 shadow-sm sm:px-6 lg:px-8">
+        <!-- Izquierda: menú + logo -->
+        <div class="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
             <button
                 type="button"
-                class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+                class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 lg:hidden"
                 aria-label="Abrir menú"
                 @click="$emit('toggle-sidebar')"
             >
@@ -13,7 +13,7 @@
             <button
                 v-if="sidebarHidden"
                 type="button"
-                class="hidden items-center gap-x-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 lg:flex"
+                class="hidden items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 lg:flex"
                 aria-label="Mostrar menú lateral"
                 @click="$emit('show-sidebar')"
             >
@@ -23,7 +23,7 @@
             <button
                 v-else
                 type="button"
-                class="hidden rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 lg:block"
+                class="hidden rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 lg:block"
                 :aria-label="sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'"
                 :title="sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'"
                 @click="$emit('toggle-sidebar-collapse')"
@@ -31,28 +31,39 @@
                 <ChevronRightIcon v-if="sidebarCollapsed" class="h-5 w-5" aria-hidden="true" />
                 <ChevronLeftIcon v-else class="h-5 w-5" aria-hidden="true" />
             </button>
+
+            <a
+                href="/dashboard"
+                class="flex items-center gap-2 truncate rounded-lg py-1.5 pr-2 transition hover:opacity-90"
+                @click.prevent="navigate('/dashboard')"
+            >
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
+                    <ChartBarSquareIcon class="h-4 w-4" aria-hidden="true" />
+                </div>
+                <span class="hidden truncate text-sm font-semibold text-slate-800 sm:block">Analytics</span>
+            </a>
         </div>
 
-        <div class="h-5 w-px bg-slate-200" aria-hidden="true" />
+        <!-- Centro: búsqueda -->
+        <div class="relative min-w-0 flex-1 max-w-xl mx-4">
+            <form action="#" method="GET" class="relative">
+                <label for="search-field" class="sr-only">Buscar</label>
+                <MagnifyingGlassIcon
+                    class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                    aria-hidden="true"
+                />
+                <input
+                    id="search-field"
+                    type="search"
+                    name="search"
+                    placeholder="Buscar..."
+                    class="block w-full rounded-lg border-0 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 ring-1 ring-slate-200/80 transition placeholder:italic focus:ring-2 focus:ring-indigo-500/20"
+                />
+            </form>
+        </div>
 
-        <!-- Búsqueda -->
-        <form class="relative flex flex-1 max-w-xl" action="#" method="GET">
-            <label for="search-field" class="sr-only">Buscar</label>
-            <MagnifyingGlassIcon
-                class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
-                aria-hidden="true"
-            />
-            <input
-                id="search-field"
-                type="search"
-                name="search"
-                placeholder="Buscar..."
-                class="block w-full rounded-xl border-0 bg-slate-50/80 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 ring-1 ring-slate-200/80 transition focus:ring-2 focus:ring-indigo-500/20 sm:leading-6"
-            />
-        </form>
-
-        <div class="flex items-center gap-x-1 sm:gap-x-2">
-            <!-- Notificaciones -->
+        <!-- Derecha: notificaciones + usuario -->
+        <div class="flex shrink-0 items-center gap-1 sm:gap-2">
             <button
                 type="button"
                 class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
@@ -63,24 +74,25 @@
 
             <div class="h-6 w-px bg-slate-200" aria-hidden="true" />
 
-            <!-- Usuario -->
             <div class="relative">
                 <button
                     type="button"
-                    class="flex items-center gap-x-2 rounded-xl py-1.5 pl-1.5 pr-2 transition hover:bg-slate-100"
-                    aria-label="Abrir menú de cuenta"
+                    class="flex items-center gap-2 rounded-lg py-1.5 pl-1 pr-2.5 transition hover:bg-slate-100 sm:gap-2.5 sm:pl-2"
+                    aria-label="Menú de cuenta"
+                    aria-haspopup="true"
+                    aria-expanded="false"
                     @click="toggleProfileMenu"
                 >
                     <img
-                        class="h-8 w-8 rounded-full border border-slate-200 object-cover"
+                        class="h-8 w-8 shrink-0 rounded-full border border-slate-200 object-cover"
                         :src="userAvatar"
                         :alt="user?.name || 'Usuario'"
                     />
-                    <span class="hidden text-left sm:block">
-                        <span class="block text-sm font-medium text-slate-900">{{ user?.name || 'Usuario' }}</span>
-                        <span class="block text-xs text-slate-500">Cuenta</span>
+                    <span class="hidden min-w-0 text-left md:block">
+                        <span class="block truncate text-sm font-medium text-slate-900">{{ user?.name || 'Usuario' }}</span>
+                        <span class="block truncate text-xs text-slate-500">Cuenta</span>
                     </span>
-                    <ChevronDownIcon class="hidden h-4 w-4 text-slate-400 sm:block" aria-hidden="true" />
+                    <ChevronDownIcon class="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                 </button>
                 <PrimeMenu ref="profileMenu" :model="profileMenuItems" popup />
             </div>
@@ -95,6 +107,7 @@ import PrimeMenu, { type MenuMethods } from 'primevue/menu'
 import {
     Bars3Icon,
     BellIcon,
+    ChartBarSquareIcon,
     ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,

@@ -137,9 +137,9 @@
             </ul>
         </nav>
 
-        <!-- Usuario + expandir (cuando está contraído) -->
+        <!-- Solo botón expandir cuando está contraído (cuenta y menú están en la barra superior) -->
         <div class="border-t border-slate-100 p-2">
-            <div v-if="collapsed" class="flex flex-col items-center gap-1">
+            <div v-if="collapsed" class="flex justify-center">
                 <button
                     type="button"
                     class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
@@ -150,32 +150,13 @@
                     <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
                 </button>
             </div>
-            <button
-                type="button"
-                :title="collapsed ? (user?.name || 'Usuario') : undefined"
-                class="flex w-full items-center gap-3 rounded-xl p-2.5 text-left transition hover:bg-slate-50"
-                @click="toggleProfileMenu"
-            >
-                <img
-                    class="h-9 w-9 shrink-0 rounded-full border-2 border-slate-200 object-cover"
-                    :src="userAvatar"
-                    :alt="user?.name || 'Usuario'"
-                />
-                <div v-if="!collapsed" class="min-w-0 flex-1">
-                    <span class="block truncate text-sm font-medium text-slate-900">{{ user?.name || 'Usuario' }}</span>
-                    <span class="block truncate text-xs text-slate-500">{{ user?.email || 'admin@example.com' }}</span>
-                </div>
-                <ChevronUpDownIcon v-if="!collapsed" class="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-            </button>
-            <PrimeMenu ref="profileMenu" :model="profileMenuItems" popup />
         </div>
     </aside>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { usePage, router } from '@inertiajs/vue3'
-import PrimeMenu, { type MenuMethods } from 'primevue/menu'
+import { ref } from 'vue'
+import { router } from '@inertiajs/vue3'
 import {
     HomeIcon,
     UsersIcon,
@@ -184,7 +165,6 @@ import {
     ChartBarIcon,
     ChartPieIcon,
     Cog6ToothIcon,
-    ChevronUpDownIcon,
     ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -286,35 +266,11 @@ function isGroupActive(item: NavigationItem): boolean {
     return item.children.some((c) => window.location.pathname === c.href)
 }
 
-const page = usePage<{ auth?: { user: any } }>()
-const user = computed(() => page.props.auth?.user)
-const userAvatar = computed(() => {
-    if (user.value?.profile_photo_url) return user.value.profile_photo_url
-    const initials = encodeURIComponent(user.value?.name || 'Usuario')
-    return `https://ui-avatars.com/api/?name=${initials}&background=6366f1&color=fff&size=72`
-})
-
-const profileMenu = ref<MenuMethods | null>(null)
-const profileMenuItems = [
-    { label: 'Tu Perfil', icon: 'pi pi-user', command: () => navigate('/profile') },
-    { label: 'Configuración', icon: 'pi pi-cog', command: () => navigate('/settings') },
-    { separator: true },
-    { label: 'Cerrar Sesión', icon: 'pi pi-sign-out', command: () => logout() },
-]
-
-function toggleProfileMenu(event: MouseEvent) {
-    profileMenu.value?.toggle(event)
-}
-
 function isCurrentRoute(href: string): boolean {
     return window.location.pathname === href
 }
 
 function navigate(href: string): void {
     router.visit(href)
-}
-
-function logout(): void {
-    router.post('/logout')
 }
 </script>
