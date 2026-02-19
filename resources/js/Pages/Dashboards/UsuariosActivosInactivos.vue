@@ -6,13 +6,10 @@
             { name: 'Usuarios activos / inactivos' },
         ]"
     >
-        <div
-            class="space-y-8 rounded-3xl bg-slate-50 p-6 sm:p-8"
-            style="background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,.06) 1px, transparent 0); background-size: 24px 24px;"
-        >
+        <div class="space-y-8">
             <DashboardHeader
-                title="Visualizaciones - Usuarios Activos vs Inactivos"
-                subtitle="Distribución de población (clic en 'Usuarios totales')"
+                title="Usuarios activos vs inactivos"
+                subtitle="Distribución y estatus por tipo de cuenta"
                 :icon="UserGroupIcon"
             >
                 <template #actions>
@@ -24,37 +21,52 @@
                 </template>
             </DashboardHeader>
 
-            <!-- Tarjetas KPI -->
-            <div ref="cardsRef" class="grid gap-6 sm:grid-cols-3">
+            <!-- Insight en una línea (data storytelling) -->
+            <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3 text-sm text-indigo-800">
+                <span class="font-medium">Resumen:</span>
+                El 94% de los usuarios están activos; 6% inactivos. La mayoría en estatus PROVISIONED.
+            </div>
+
+            <!-- KPIs con contexto -->
+            <div ref="cardsRef" class="grid gap-4 sm:grid-cols-3">
                 <MetricCard
                     label="Usuarios totales"
                     value="140,000"
                     :icon="GlobeAltIcon"
                     variant="blue"
+                    trend="up"
+                    :trend-percent="2.4"
+                    :sparkline-data="[128, 131, 132, 130, 134, 138, 140]"
+                    comparison="vs. mes anterior"
                 />
                 <MetricCard
                     label="Usuarios activos"
                     value="132,000"
                     :icon="CheckCircleIcon"
                     variant="green"
+                    trend="up"
+                    :trend-percent="1.8"
+                    :sparkline-data="[126, 128, 129, 130, 131, 132, 132]"
+                    comparison="vs. mes anterior"
                 />
                 <MetricCard
                     label="Usuarios inactivos"
                     value="8,000"
                     :icon="XCircleIcon"
                     variant="red"
+                    trend="down"
+                    :trend-percent="-0.5"
+                    :sparkline-data="[9, 8.5, 8.2, 8.1, 8.2, 8, 8]"
+                    comparison="vs. mes anterior"
                 />
             </div>
 
-            <!-- Gráficos -->
+            <!-- Gráficos (F-pattern: tendencias en el medio) -->
             <div class="grid gap-6 lg:grid-cols-2">
-                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="mb-4 flex items-center gap-2">
-                        <UserGroupIcon class="h-5 w-5 text-indigo-600" />
-                        <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-700">
-                            Usuarios activos / inactivos
-                        </h3>
-                    </div>
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
+                        Activos / inactivos
+                    </h3>
                     <div class="h-80">
                         <PieChart
                             :data="[
@@ -62,12 +74,13 @@
                                 { name: 'Inactivos', value: 8000 },
                             ]"
                             legend-position="bottom"
+                            donut
                         />
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-700">
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
                         Estatus de usuario
                     </h3>
                     <div class="h-80">

@@ -1,25 +1,61 @@
 <template>
     <button
         type="button"
-        class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2"
         @click="$emit('click')"
     >
-        <div class="flex items-start justify-between">
+        <div class="flex items-start justify-between gap-2">
             <div
-                class="flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
                 :class="v.iconBg"
             >
-                <component :is="icon" class="h-6 w-6" :class="v.iconColor" aria-hidden="true" />
+                <component :is="icon" class="h-5 w-5" :class="v.iconColor" aria-hidden="true" />
+            </div>
+            <div v-if="trend !== undefined" class="flex shrink-0 items-center gap-0.5">
+                <ArrowTrendingUpIcon
+                    v-if="trend === 'up'"
+                    class="h-4 w-4 text-emerald-500"
+                    aria-hidden="true"
+                />
+                <ArrowTrendingDownIcon
+                    v-else-if="trend === 'down'"
+                    class="h-4 w-4 text-rose-500"
+                    aria-hidden="true"
+                />
+                <MinusIcon
+                    v-else-if="trend === 'neutral'"
+                    class="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                />
+                <span
+                    v-if="trendPercent != null"
+                    class="text-xs font-medium"
+                    :class="trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-600' : 'text-slate-500'"
+                >
+                    {{ trendPercent > 0 ? '+' : '' }}{{ trendPercent }}%
+                </span>
             </div>
         </div>
-        <p class="mt-4 text-3xl font-bold tracking-tight text-slate-900">
+
+        <p class="mt-3 text-2xl font-bold tabular-nums tracking-tight text-slate-900">
             {{ value }}
         </p>
-        <p class="mt-1 text-sm font-medium text-slate-500">
+        <p class="mt-0.5 text-sm font-medium text-slate-500">
             {{ label }}
         </p>
+
+        <!-- Sparkline (tendencia reciente) -->
+        <div v-if="sparklineData?.length" class="mt-3 h-8 w-full">
+            <Sparkline :data="sparklineData" :color="sparklineColor" />
+        </div>
+
+        <!-- Comparación (vs. período anterior) -->
+        <p v-if="comparison" class="mt-2 text-xs text-slate-400">
+            {{ comparison }}
+        </p>
+
         <div
-            class="absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl transition-all duration-300 group-hover:h-1.5"
+            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl transition-all duration-300 group-hover:h-1"
             :class="v.bar"
         />
     </button>
@@ -28,17 +64,31 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Component } from 'vue'
+import Sparkline from './Sparkline.vue'
+import {
+    ArrowTrendingUpIcon,
+    ArrowTrendingDownIcon,
+    MinusIcon,
+} from '@heroicons/vue/24/outline'
 
 interface Props {
     label: string
     value: string | number
     icon: Component
-    /** 'blue' | 'green' | 'red' - color de la barra inferior e ícono */
     variant?: 'blue' | 'green' | 'red'
+    /** Mini tendencia: up | down | neutral */
+    trend?: 'up' | 'down' | 'neutral'
+    /** Porcentaje de cambio (ej. 3.2 para +3.2%) */
+    trendPercent?: number | null
+    /** Datos para sparkline (ej. últimos 7 puntos) */
+    sparklineData?: number[]
+    /** Comparación textual: "vs. mes anterior" */
+    comparison?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'blue',
+    trendPercent: null,
 })
 
 defineEmits<{
@@ -64,4 +114,10 @@ const variants: Record<'blue' | 'green' | 'red', { iconBg: string; iconColor: st
 }
 
 const v = computed(() => variants[props.variant])
+
+const sparklineColor = computed(() => {
+    if (props.trend === 'up' && (props.variant === 'green' || props.variant === 'blue')) return 'green'
+    if (props.trend === 'down' && props.variant === 'red') return 'red'
+    return props.variant
+})
 </script>

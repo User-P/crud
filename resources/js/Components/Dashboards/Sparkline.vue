@@ -1,0 +1,57 @@
+<template>
+    <div class="h-8 w-full min-w-[64px]" aria-hidden="true">
+        <svg
+            class="h-full w-full"
+            :viewBox="`0 0 ${width} ${height}`"
+            preserveAspectRatio="none"
+        >
+            <path
+                :d="pathD"
+                fill="none"
+                :stroke="strokeColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+        </svg>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const props = withDefaults(defineProps<{
+    /** Valores para la línea (ej. últimos 7 días) */
+    data: number[]
+    /** Color de la línea */
+    color?: 'blue' | 'green' | 'red' | 'slate'
+}>(), {
+    color: 'slate',
+})
+
+const width = 80
+const height = 32
+
+const strokeColor = computed(() => {
+    const map = { blue: '#3b82f6', green: '#10b981', red: '#ef4444', slate: '#64748b' }
+    return map[props.color]
+})
+
+const pathD = computed(() => {
+    const d = props.data
+    if (!d.length) return ''
+    const min = Math.min(...d)
+    const max = Math.max(...d)
+    const range = max - min || 1
+    const pad = 2
+    const w = width - pad * 2
+    const h = height - pad * 2
+    const step = d.length > 1 ? w / (d.length - 1) : 0
+    const points = d.map((v, i) => {
+        const x = pad + i * step
+        const y = pad + h - ((v - min) / range) * h
+        return `${x},${y}`
+    })
+    return `M ${points.join(' L ')}`
+})
+</script>
