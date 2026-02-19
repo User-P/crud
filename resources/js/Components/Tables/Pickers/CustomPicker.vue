@@ -48,8 +48,12 @@ import DatePicker, { RangePicker } from 'ant-design-vue/es/date-picker';
 import locale from 'ant-design-vue/es/date-picker/locale/es_ES';
 import Select from 'primevue/select';
 import type { Dayjs } from 'dayjs';
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useDateRange } from '@/composables/useDateRange';
+import {
+    resolveDateRangePreset,
+    type DateRangePresetKey,
+} from '@/composables/useDateRangePresets';
 
 interface Props {
     /** Si es true, no se muestra el selector de tipo (Semanal/Personalizado). */
@@ -60,11 +64,27 @@ interface Props {
     initialWeek?: string;
     /** Rango inicial para modo personalizado. Por defecto mes actual. */
     initialRange?: { start: string; end: string };
+    /**
+     * Atajo: preset por nombre. Si se define, ignora initialType/initialWeek/initialRange.
+     * Opciones: lastWeek, last7Days, last14Days, lastMonth, last3Months, last6Months, lastYear, currentMonth.
+     */
+    initialPreset?: DateRangePresetKey;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     selectDisabled: false,
     initialType: 'week',
+});
+
+const resolvedOptions = computed(() => {
+    if (props.initialPreset) {
+        return resolveDateRangePreset(props.initialPreset);
+    }
+    return {
+        initialType: props.initialType,
+        initialWeek: props.initialWeek,
+        initialRange: props.initialRange,
+    };
 });
 
 const emit = defineEmits<{
@@ -84,11 +104,7 @@ const {
     updateWeek,
     updateCustomRange,
     formattedRange,
-} = useDateRange({
-    initialType: props.initialType,
-    initialWeek: props.initialWeek,
-    initialRange: props.initialRange,
-});
+} = useDateRange(resolvedOptions.value);
 
 const optionsType = [
     { label: 'Semanal', value: 'week' },
