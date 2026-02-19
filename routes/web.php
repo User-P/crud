@@ -83,6 +83,19 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/charts', ChartsController::class)->name('charts.index');
 
+    Route::get('/dashboards', function () {
+        return Inertia::render('Dashboards/Index');
+    })->name('dashboards.index');
+    Route::get('/dashboards/vista-general', function () {
+        return Inertia::render('Dashboards/VistaGeneral');
+    })->name('dashboards.vista-general');
+    Route::get('/dashboards/usuarios-activos-inactivos', function () {
+        return Inertia::render('Dashboards/UsuariosActivosInactivos');
+    })->name('dashboards.usuarios-activos-inactivos');
+    Route::get('/dashboards/dias-suspendidos', function () {
+        return Inertia::render('Dashboards/DiasSuspendidos');
+    })->name('dashboards.dias-suspendidos');
+
     Route::get('/organization-chart', function () {
         return Inertia::render('OrganizationChart/Index');
     })->name('organization-chart.index');

@@ -10,17 +10,63 @@
         <!-- Navigation -->
         <nav class="flex flex-1 flex-col overflow-y-auto px-3 py-4">
             <ul role="list" class="flex flex-1 flex-col gap-y-1">
-                <li v-for="item in navigation" :key="item.name">
-                    <a :href="item.href" :class="[
-                        isCurrentRoute(item.href)
-                            ? 'bg-gray-800 text-white'
-                            : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                        'group flex gap-x-3 rounded-md p-3 text-sm font-semibold leading-6 transition-colors'
-                    ]" @click.prevent="navigate(item.href)">
-                        <component :is="item.icon" class="h-6 w-6 shrink-0" aria-hidden="true" />
-                        {{ item.name }}
-                    </a>
-                </li>
+                <template v-for="item in navigation" :key="item.name">
+                    <!-- Item con submenú -->
+                    <li v-if="item.children?.length">
+                        <button
+                            type="button"
+                            :class="[
+                                isDashboardsActive(item)
+                                    ? 'bg-gray-800 text-white'
+                                    : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                                'group flex w-full items-center justify-between gap-x-3 rounded-md p-3 text-sm font-semibold leading-6 transition-colors'
+                            ]"
+                            @click="toggleExpand(item.name)"
+                        >
+                            <div class="flex items-center gap-x-3">
+                                <component :is="item.icon" class="h-6 w-6 shrink-0" aria-hidden="true" />
+                                {{ item.name }}
+                            </div>
+                            <ChevronDownIcon
+                                class="h-5 w-5 shrink-0 transition-transform duration-200"
+                                :class="{ 'rotate-180': expandedItems.includes(item.name) }"
+                                aria-hidden="true"
+                            />
+                        </button>
+                        <ul
+                            v-show="expandedItems.includes(item.name)"
+                            class="mt-1 space-y-0.5 pl-9"
+                            role="list"
+                        >
+                            <li v-for="child in item.children" :key="child.href">
+                                <a
+                                    :href="child.href"
+                                    :class="[
+                                        isCurrentRoute(child.href)
+                                            ? 'bg-gray-700 text-white'
+                                            : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                                        'block rounded-md px-3 py-2 text-sm font-medium transition-colors'
+                                    ]"
+                                    @click.prevent="navigate(child.href)"
+                                >
+                                    {{ child.name }}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Item simple -->
+                    <li v-else>
+                        <a v-if="item.href" :href="item.href" :class="[
+                            isCurrentRoute(item.href!)
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+                            'group flex gap-x-3 rounded-md p-3 text-sm font-semibold leading-6 transition-colors'
+                        ]" @click.prevent="item.href && navigate(item.href)">
+                            <component :is="item.icon" class="h-6 w-6 shrink-0" aria-hidden="true" />
+                            {{ item.name }}
+                        </a>
+                    </li>
+                </template>
             </ul>
         </nav>
 
@@ -57,12 +103,20 @@ import {
     ChartPieIcon,
     Cog6ToothIcon,
     ChevronUpDownIcon,
+    ChevronDownIcon,
+    PresentationChartBarIcon,
 } from '@heroicons/vue/24/outline'
+
+interface NavChild {
+    name: string
+    href: string
+}
 
 interface NavigationItem {
     name: string
-    href: string
+    href?: string
     icon: any
+    children?: NavChild[]
 }
 
 const navigation: NavigationItem[] = [
@@ -72,10 +126,36 @@ const navigation: NavigationItem[] = [
     { name: 'Países', href: '/countries', icon: FolderIcon },
     { name: 'Eventos', href: '/events', icon: CalendarIcon },
     { name: 'Estadísticas', href: '/statistics', icon: ChartBarIcon },
+    {
+        name: 'Dashboards de métricas',
+        icon: PresentationChartBarIcon,
+        children: [
+            { name: 'Índice', href: '/dashboards' },
+            { name: 'Vista general', href: '/dashboards/vista-general' },
+            { name: 'Usuarios activos/inactivos', href: '/dashboards/usuarios-activos-inactivos' },
+            { name: 'Días suspendidos', href: '/dashboards/dias-suspendidos' },
+        ],
+    },
     { name: 'Tablas', href: '/tables', icon: FolderIcon },
     { name: 'Charts', href: '/charts', icon: ChartPieIcon },
     { name: 'Configuración', href: '/settings', icon: Cog6ToothIcon },
 ]
+
+const expandedItems = ref<string[]>(['Dashboards de métricas'])
+
+const toggleExpand = (name: string) => {
+    const idx = expandedItems.value.indexOf(name)
+    if (idx >= 0) {
+        expandedItems.value = expandedItems.value.filter((n) => n !== name)
+    } else {
+        expandedItems.value = [...expandedItems.value, name]
+    }
+}
+
+const isDashboardsActive = (item: NavigationItem): boolean => {
+    if (!item.children) return false
+    return item.children.some((c) => window.location.pathname === c.href)
+}
 
 const page = usePage<{ auth?: { user: any } }>()
 const user = computed(() => page.props.auth?.user)
