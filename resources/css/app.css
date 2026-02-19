@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+/* Shell premium: análisis y estadísticas (Tailwind v4 @theme) */
+@theme {
+    /* Sidebar */
+    --color-sidebar: #0f172a;
+    --color-sidebar-border: #1e293b;
+    --color-sidebar-text: #94a3b8;
+    --color-sidebar-text-hover: #f1f5f9;
+    --color-sidebar-active: #1e293b;
+    --color-sidebar-accent: #6366f1;
+    /* Surface (fondos de contenido) */
+    --color-surface: #ffffff;
+    --color-surface-subtle: #f8fafc;
+    --color-surface-muted: #f1f5f9;
+}
+
+:root {
+    --sidebar-bg: #0f172a;
+    --sidebar-border: #1e293b;
+    --sidebar-text: #94a3b8;
+    --sidebar-text-hover: #f1f5f9;
+    --sidebar-active-bg: #1e293b;
+    --sidebar-accent: #6366f1;
+}

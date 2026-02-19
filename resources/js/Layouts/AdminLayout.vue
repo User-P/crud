@@ -1,53 +1,87 @@
 <template>
-    <div class="min-h-screen bg-gray-100">
+    <div class="min-h-screen bg-surface-subtle">
         <div class="flex">
-            <!-- Sidebar para desktop -->
-            <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-                <Sidebar />
-            </div>
+            <!-- Sidebar desktop: visible solo si no está oculta -->
+            <template v-if="!sidebarHidden">
+                <div
+                    class="hidden shrink-0 transition-[width] duration-200 ease-out lg:flex lg:flex-col"
+                    :class="sidebarCollapsed ? 'lg:w-[4.5rem]' : 'lg:w-64'"
+                >
+                    <Sidebar
+                        :collapsed="sidebarCollapsed"
+                        @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
+                        @close="sidebarHidden = true"
+                    />
+                </div>
+            </template>
 
-            <!-- Sidebar móvil -->
-            <PrimeSidebar v-model:visible="sidebarOpen" position="left" class="lg:hidden" modal blockScroll>
-                <Sidebar />
+            <!-- Sidebar móvil (drawer) -->
+            <PrimeSidebar
+                v-model:visible="sidebarOpen"
+                position="left"
+                class="w-64 lg:hidden"
+                modal
+                blockScroll
+            >
+                <div class="flex h-full flex-col">
+                    <Sidebar
+                        :collapsed="false"
+                        @toggle-collapse="() => {}"
+                        @close="sidebarOpen = false"
+                    />
+                </div>
             </PrimeSidebar>
 
-            <!-- Contenido principal: min-w-0 evita que crezca con la tabla y overflow-x-hidden evita que se vea bajo la sidebar -->
-            <div class="lg:pl-72 flex-1 min-w-0 overflow-x-hidden">
-                <Navbar @toggle-sidebar="sidebarOpen = true" />
+            <!-- Área principal: sin margen si sidebar oculta -->
+            <div
+                class="min-w-0 flex-1 overflow-x-hidden transition-[margin] duration-200"
+                :class="sidebarHidden ? 'lg:ml-0' : (sidebarCollapsed ? 'lg:ml-0' : 'lg:ml-0')"
+            >
+                <Navbar
+                    :sidebar-hidden="sidebarHidden"
+                    :sidebar-collapsed="sidebarCollapsed"
+                    @toggle-sidebar="sidebarOpen = true"
+                    @show-sidebar="sidebarHidden = false"
+                    @toggle-sidebar-collapse="sidebarCollapsed = !sidebarCollapsed"
+                />
 
-                <main class="py-10 min-w-0">
-                    <div class="px-4 sm:px-6 lg:px-8 min-w-0">
-                        <!-- Breadcrumbs (opcional) -->
+                <main class="min-w-0 py-8">
+                    <div class="px-4 sm:px-6 lg:px-8">
+                        <!-- Breadcrumbs -->
                         <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="mb-6" aria-label="Breadcrumb">
-                            <ol role="list" class="flex items-center space-x-2">
-                                <li v-for="(crumb, index) in breadcrumbs" :key="crumb.name">
-                                    <div class="flex items-center">
-                                        <ChevronRightIcon v-if="index > 0" class="h-4 w-4 text-gray-400 mx-2"
-                                            aria-hidden="true" />
-                                        <a v-if="crumb.href" :href="crumb.href"
-                                            class="text-sm font-medium text-gray-500 hover:text-gray-700"
-                                            @click.prevent="router.visit(crumb.href)">
-                                            {{ crumb.name }}
-                                        </a>
-                                        <span v-else class="text-sm font-medium text-gray-900">
-                                            {{ crumb.name }}
-                                        </span>
-                                    </div>
+                            <ol role="list" class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
+                                <li v-for="(crumb, index) in breadcrumbs" :key="crumb.name" class="flex items-center gap-x-1.5">
+                                    <ChevronRightIcon
+                                        v-if="index > 0"
+                                        class="h-4 w-4 shrink-0 text-slate-300"
+                                        aria-hidden="true"
+                                    />
+                                    <a
+                                        v-if="crumb.href"
+                                        :href="crumb.href"
+                                        class="font-medium text-slate-500 transition hover:text-slate-700"
+                                        @click.prevent="router.visit(crumb.href)"
+                                    >
+                                        {{ crumb.name }}
+                                    </a>
+                                    <span v-else class="font-medium text-slate-900">
+                                        {{ crumb.name }}
+                                    </span>
                                 </li>
                             </ol>
                         </nav>
 
-                        <!-- Page header (opcional) -->
+                        <!-- Título de página -->
                         <div v-if="title" class="mb-8">
-                            <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                            <h1 class="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                                 {{ title }}
                             </h1>
-                            <p v-if="subtitle" class="mt-2 text-sm text-gray-700">
+                            <p v-if="subtitle" class="mt-1.5 text-sm text-slate-500">
                                 {{ subtitle }}
                             </p>
                         </div>
 
-                        <!-- Contenido de la página -->
+                        <!-- Contenido -->
                         <slot />
                     </div>
                 </main>
@@ -78,4 +112,6 @@ interface Props {
 defineProps<Props>()
 
 const sidebarOpen = ref(false)
+const sidebarHidden = ref(false)
+const sidebarCollapsed = ref(false)
 </script>

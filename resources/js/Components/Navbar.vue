@@ -1,78 +1,91 @@
 <template>
-  <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-    <!-- Mobile menu button -->
-    <button
-      type="button"
-      class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-      @click="$emit('toggle-sidebar')"
-    >
-      <span class="sr-only">Abrir sidebar</span>
-      <Bars3Icon class="h-6 w-6" aria-hidden="true" />
-    </button>
-
-    <!-- Separator -->
-    <div class="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
-
-    <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-      <!-- Search -->
-      <form class="relative flex flex-1" action="#" method="GET">
-        <label for="search-field" class="sr-only">Buscar</label>
-        <MagnifyingGlassIcon
-          class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400"
-          aria-hidden="true"
-        />
-        <input
-          id="search-field"
-          class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-          placeholder="Buscar..."
-          type="search"
-          name="search"
-        />
-      </form>
-
-      <div class="flex items-center gap-x-4 lg:gap-x-6">
-        <!-- Notifications button -->
-        <button
-          type="button"
-          class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
-        >
-          <span class="sr-only">Ver notificaciones</span>
-          <BellIcon class="h-6 w-6" aria-hidden="true" />
-        </button>
-
-        <!-- Separator -->
-        <div
-          class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200"
-          aria-hidden="true"
-        />
-
-        <!-- Profile dropdown -->
-        <div class="relative">
-          <button class="-m-1.5 flex items-center p-1.5" type="button" @click="toggleProfileMenu">
-            <span class="sr-only">Abrir menú de usuario</span>
-            <img
-              class="h-8 w-8 rounded-full bg-gray-50 object-cover"
-              :src="userAvatar"
-              :alt="user?.name || 'Usuario'"
-            />
-            <span class="hidden lg:flex lg:items-center">
-              <span
-                class="ml-4 text-sm font-semibold leading-6 text-gray-900"
-                aria-hidden="true"
-              >
-                {{ user?.name || 'Usuario' }}
-              </span>
-              <ChevronDownIcon
-                class="ml-2 h-5 w-5 text-gray-400"
-                aria-hidden="true"
-              />
-            </span>
-          </button>
-          <PrimeMenu ref="profileMenu" :model="profileMenuItems" popup />
+    <header class="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-x-3 border-b border-slate-200/80 bg-white px-4 shadow-sm shadow-slate-200/50 sm:gap-x-4 sm:px-6 lg:px-8">
+        <!-- Menú: móvil = abrir drawer; desktop = mostrar/contraer según estado -->
+        <div class="flex items-center gap-x-1">
+            <button
+                type="button"
+                class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+                aria-label="Abrir menú"
+                @click="$emit('toggle-sidebar')"
+            >
+                <Bars3Icon class="h-5 w-5" aria-hidden="true" />
+            </button>
+            <button
+                v-if="sidebarHidden"
+                type="button"
+                class="hidden items-center gap-x-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 lg:flex"
+                aria-label="Mostrar menú lateral"
+                @click="$emit('show-sidebar')"
+            >
+                <Bars3Icon class="h-5 w-5" aria-hidden="true" />
+                <span>Menú</span>
+            </button>
+            <button
+                v-else
+                type="button"
+                class="hidden rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 lg:block"
+                :aria-label="sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'"
+                :title="sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'"
+                @click="$emit('toggle-sidebar-collapse')"
+            >
+                <ChevronRightIcon v-if="sidebarCollapsed" class="h-5 w-5" aria-hidden="true" />
+                <ChevronLeftIcon v-else class="h-5 w-5" aria-hidden="true" />
+            </button>
         </div>
-      </div>
-    </div>
-  </header>
+
+        <div class="h-5 w-px bg-slate-200" aria-hidden="true" />
+
+        <!-- Búsqueda -->
+        <form class="relative flex flex-1 max-w-xl" action="#" method="GET">
+            <label for="search-field" class="sr-only">Buscar</label>
+            <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+            />
+            <input
+                id="search-field"
+                type="search"
+                name="search"
+                placeholder="Buscar..."
+                class="block w-full rounded-xl border-0 bg-slate-50/80 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 ring-1 ring-slate-200/80 transition focus:ring-2 focus:ring-indigo-500/20 sm:leading-6"
+            />
+        </form>
+
+        <div class="flex items-center gap-x-1 sm:gap-x-2">
+            <!-- Notificaciones -->
+            <button
+                type="button"
+                class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Notificaciones"
+            >
+                <BellIcon class="h-5 w-5" aria-hidden="true" />
+            </button>
+
+            <div class="h-6 w-px bg-slate-200" aria-hidden="true" />
+
+            <!-- Usuario -->
+            <div class="relative">
+                <button
+                    type="button"
+                    class="flex items-center gap-x-2 rounded-xl py-1.5 pl-1.5 pr-2 transition hover:bg-slate-100"
+                    aria-label="Abrir menú de cuenta"
+                    @click="toggleProfileMenu"
+                >
+                    <img
+                        class="h-8 w-8 rounded-full border border-slate-200 object-cover"
+                        :src="userAvatar"
+                        :alt="user?.name || 'Usuario'"
+                    />
+                    <span class="hidden text-left sm:block">
+                        <span class="block text-sm font-medium text-slate-900">{{ user?.name || 'Usuario' }}</span>
+                        <span class="block text-xs text-slate-500">Cuenta</span>
+                    </span>
+                    <ChevronDownIcon class="hidden h-4 w-4 text-slate-400 sm:block" aria-hidden="true" />
+                </button>
+                <PrimeMenu ref="profileMenu" :model="profileMenuItems" popup />
+            </div>
+        </div>
+    </header>
 </template>
 
 <script setup lang="ts">
@@ -80,43 +93,50 @@ import { computed, ref } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 import PrimeMenu, { type MenuMethods } from 'primevue/menu'
 import {
-  Bars3Icon,
-  BellIcon,
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
+    Bars3Icon,
+    BellIcon,
+    ChevronDownIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    MagnifyingGlassIcon,
 } from '@heroicons/vue/24/outline'
 
+defineProps<{
+    sidebarHidden?: boolean
+    sidebarCollapsed?: boolean
+}>()
+
 defineEmits<{
-  'toggle-sidebar': []
+    'toggle-sidebar': []
+    'show-sidebar': []
+    'toggle-sidebar-collapse': []
 }>()
 
 const page = usePage<{ auth?: { user: any } }>()
 const user = computed(() => page.props.auth?.user)
 const userAvatar = computed(() => {
-  if (user.value?.profile_photo_url) {
-    return user.value.profile_photo_url
-  }
-
-  const initials = encodeURIComponent(user.value?.name || 'Usuario')
-  return `https://ui-avatars.com/api/?name=${initials}&background=4f46e5&color=fff`
+    if (user.value?.profile_photo_url) return user.value.profile_photo_url
+    const initials = encodeURIComponent(user.value?.name || 'Usuario')
+    return `https://ui-avatars.com/api/?name=${initials}&background=6366f1&color=fff&size=64`
 })
 
 const profileMenu = ref<MenuMethods | null>(null)
 const profileMenuItems = [
-  { label: 'Tu Perfil', icon: 'pi pi-user', command: () => navigate('/profile') },
-  { separator: true },
-  { label: 'Cerrar Sesión', icon: 'pi pi-sign-out', command: () => logout() },
+    { label: 'Tu Perfil', icon: 'pi pi-user', command: () => navigate('/profile') },
+    { label: 'Configuración', icon: 'pi pi-cog', command: () => navigate('/settings') },
+    { separator: true },
+    { label: 'Cerrar Sesión', icon: 'pi pi-sign-out', command: () => logout() },
 ]
 
-const toggleProfileMenu = (event: MouseEvent): void => {
-  profileMenu.value?.toggle(event)
+function toggleProfileMenu(event: MouseEvent) {
+    profileMenu.value?.toggle(event)
 }
 
-const navigate = (href: string): void => {
-  router.visit(href)
+function navigate(href: string) {
+    router.visit(href)
 }
 
-const logout = (): void => {
-  router.post('/logout')
+function logout() {
+    router.post('/logout')
 }
 </script>
