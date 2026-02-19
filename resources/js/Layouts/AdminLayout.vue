@@ -4,13 +4,15 @@
             <!-- Sidebar desktop: visible solo si no está oculta -->
             <template v-if="!sidebarHidden">
                 <div
-                    class="hidden shrink-0 transition-[width] duration-200 ease-out lg:flex lg:flex-col"
-                    :class="sidebarCollapsed ? 'lg:w-[4.5rem]' : 'lg:w-64'"
+                    class="hidden shrink-0 transition-[width] duration-300 ease-in-out lg:flex lg:flex-col lg:z-30"
+                    :class="(sidebarCollapsed && !sidebarHoverExpanded) ? 'lg:w-[4.5rem]' : 'lg:w-64'"
                 >
                     <Sidebar
                         :collapsed="sidebarCollapsed"
                         @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
                         @close="sidebarHidden = true"
+                        @hover-expand="sidebarHoverExpanded = $event"
+                        @collapse="onSidebarCollapse"
                     />
                 </div>
             </template>
@@ -114,4 +116,10 @@ defineProps<Props>()
 const sidebarOpen = ref(false)
 const sidebarHidden = ref(false)
 const sidebarCollapsed = ref(false)
+const sidebarHoverExpanded = ref(false)
+
+function onSidebarCollapse() {
+    sidebarCollapsed.value = true
+    sidebarHoverExpanded.value = false
+}
 </script>

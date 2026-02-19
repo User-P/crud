@@ -1,15 +1,17 @@
 <template>
     <aside
-        class="flex h-screen flex-col border-r border-slate-200/60 bg-white shadow-lg shadow-slate-200/50 transition-[width] duration-200 ease-out"
-        :class="collapsed ? 'w-[4.5rem]' : 'w-64'"
+        class="flex h-screen flex-col border-r border-slate-200/60 bg-white shadow-lg shadow-slate-200/50 transition-[width] duration-300 ease-in-out"
+        :class="effectiveExpanded ? 'w-64' : 'w-[4.5rem]'"
+        @mouseenter="onMouseEnter"
+        @mouseleave="onMouseLeave"
     >
         <!-- Logo + contraer/cerrar -->
         <div
             class="flex h-14 shrink-0 items-center border-b border-slate-100"
-            :class="collapsed ? 'justify-center px-0' : 'justify-between px-4'"
+            :class="effectiveExpanded ? 'justify-between px-4' : 'justify-center px-0'"
         >
             <a
-                v-if="!collapsed"
+                v-if="effectiveExpanded"
                 href="/dashboard"
                 class="flex items-center gap-3 rounded-lg transition hover:opacity-90"
                 @click.prevent="navigate('/dashboard')"
@@ -25,7 +27,7 @@
             <div v-else class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30">
                 <ChartBarSquareIcon class="h-5 w-5" aria-hidden="true" />
             </div>
-            <div v-if="!collapsed" class="flex items-center gap-0.5">
+            <div v-if="effectiveExpanded" class="flex items-center gap-0.5">
                 <button
                     type="button"
                     class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
@@ -51,7 +53,7 @@
         <nav class="flex-1 overflow-y-auto overflow-x-hidden py-3">
             <ul role="list" class="space-y-1 px-2">
                 <template v-for="group in navGroups" :key="group.label">
-                    <li v-if="!collapsed" class="px-3 pt-4 first:pt-0">
+                    <li v-if="effectiveExpanded" class="px-3 pt-4 first:pt-0">
                         <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                             {{ group.label }}
                         </p>
@@ -62,15 +64,15 @@
                             <div class="relative">
                                 <button
                                     type="button"
-                                    :title="collapsed ? item.name : undefined"
+                                    :title="!effectiveExpanded ? item.name : undefined"
                                     :class="[
                                         isGroupActive(item)
                                             ? 'bg-indigo-50 text-indigo-700'
                                             : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
                                         'flex w-full items-center gap-3 rounded-lg py-2.5 text-left text-sm font-medium transition',
-                                        collapsed ? 'justify-center px-2' : 'px-3',
+                                        effectiveExpanded ? 'px-3' : 'justify-center px-2',
                                     ]"
-                                    @click="collapsed ? goFirstChild(item) : toggleExpand(item)"
+                                    @click="!effectiveExpanded ? goFirstChild(item) : toggleExpand(item)"
                                 >
                                     <component
                                         :is="item.icon"
@@ -78,16 +80,16 @@
                                         :class="isGroupActive(item) ? 'text-indigo-600' : 'text-slate-500'"
                                         aria-hidden="true"
                                     />
-                                    <span v-if="!collapsed" class="truncate">{{ item.name }}</span>
+                                    <span v-if="effectiveExpanded" class="truncate">{{ item.name }}</span>
                                     <ChevronDownIcon
-                                        v-if="!collapsed"
+                                        v-if="effectiveExpanded"
                                         class="ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform"
                                         :class="{ 'rotate-180': expandedItems.includes(item.name) }"
                                         aria-hidden="true"
                                     />
                                 </button>
                                 <ul
-                                    v-if="!collapsed && expandedItems.includes(item.name)"
+                                    v-if="effectiveExpanded && expandedItems.includes(item.name)"
                                     class="mt-0.5 space-y-0.5 border-l-2 border-slate-200 pl-4 ml-5"
                                     role="list"
                                 >
@@ -113,13 +115,13 @@
                             <a
                                 v-if="item.href"
                                 :href="item.href"
-                                :title="collapsed ? item.name : undefined"
+                                :title="!effectiveExpanded ? item.name : undefined"
                                 :class="[
                                     isCurrentRoute(item.href)
                                         ? 'bg-indigo-50 text-indigo-700'
                                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
                                     'flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition',
-                                    collapsed ? 'justify-center px-2' : 'px-3',
+                                    effectiveExpanded ? 'px-3' : 'justify-center px-2',
                                 ]"
                                 @click.prevent="item.href && navigate(item.href)"
                             >
@@ -129,7 +131,7 @@
                                     :class="isCurrentRoute(item.href) ? 'text-indigo-600' : 'text-slate-500'"
                                     aria-hidden="true"
                                 />
-                                <span v-if="!collapsed" class="truncate">{{ item.name }}</span>
+                                <span v-if="effectiveExpanded" class="truncate">{{ item.name }}</span>
                             </a>
                         </li>
                     </template>
@@ -139,7 +141,7 @@
 
         <!-- Solo botón expandir cuando está contraído (cuenta y menú están en la barra superior) -->
         <div class="border-t border-slate-100 p-2">
-            <div v-if="collapsed" class="flex justify-center">
+            <div v-if="!effectiveExpanded" class="flex justify-center">
                 <button
                     type="button"
                     class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
@@ -155,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import {
     HomeIcon,
@@ -195,10 +197,27 @@ const props = defineProps<{
     collapsed: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
     'toggle-collapse': []
     'close': []
+    'hover-expand': [value: boolean]
+    'collapse': []
 }>()
+
+const isHovered = ref(false)
+const effectiveExpanded = computed(() => !props.collapsed || isHovered.value)
+
+function onMouseEnter() {
+    if (props.collapsed) {
+        isHovered.value = true
+        emit('hover-expand', true)
+    }
+}
+
+function onMouseLeave() {
+    isHovered.value = false
+    emit('hover-expand', false)
+}
 
 const navGroups: NavGroup[] = [
     {
@@ -272,5 +291,8 @@ function isCurrentRoute(href: string): boolean {
 
 function navigate(href: string): void {
     router.visit(href)
+    isHovered.value = false
+    emit('hover-expand', false)
+    emit('collapse')
 }
 </script>
