@@ -63,39 +63,29 @@
 
             <!-- Gráficos (F-pattern: tendencias en el medio) -->
             <div class="grid gap-6 lg:grid-cols-2">
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
-                        Activos / inactivos
-                    </h3>
-                    <div class="h-80">
-                        <PieChart
-                            :data="[
-                                { name: 'Activos', value: 132000 },
-                                { name: 'Inactivos', value: 8000 },
-                            ]"
-                            legend-position="bottom"
-                            donut
-                        />
-                    </div>
-                </div>
+                <ExpandableChart title="Activos / inactivos">
+                    <PieChart
+                        :data="[
+                            { name: 'Activos', value: 132000 },
+                            { name: 'Inactivos', value: 8000 },
+                        ]"
+                        legend-position="bottom"
+                        donut
+                    />
+                </ExpandableChart>
 
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
-                        Estatus de usuario
-                    </h3>
-                    <div class="h-80">
-                        <HorizontalBarChart
-                            title=""
-                            :categories="['PROVISIONED', 'PASSWORD EXPIRED', 'LOCKED OUT', 'SUSPENDED']"
-                            :series="[
-                                { name: 'PROVISIONED', data: [122, 0, 0, 0] },
-                                { name: 'PASSWORD EXPIRED', data: [0, 20, 0, 0] },
-                                { name: 'LOCKED OUT', data: [0, 0, 50, 0] },
-                                { name: 'SUSPENDED', data: [0, 0, 0, 30] },
-                            ]"
-                        />
-                    </div>
-                </div>
+                <ExpandableChart title="Estatus de usuario">
+                    <HorizontalBarChart
+                        title=""
+                        :categories="['PROVISIONED', 'PASSWORD EXPIRED', 'LOCKED OUT', 'SUSPENDED']"
+                        :series="[
+                            { name: 'PROVISIONED', data: [122, 0, 0, 0] },
+                            { name: 'PASSWORD EXPIRED', data: [0, 20, 0, 0] },
+                            { name: 'LOCKED OUT', data: [0, 0, 50, 0] },
+                            { name: 'SUSPENDED', data: [0, 0, 0, 30] },
+                        ]"
+                    />
+                </ExpandableChart>
             </div>
         </div>
     </AdminLayout>
@@ -107,6 +97,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DashboardHeader from '@/Components/Dashboards/DashboardHeader.vue'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
+import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import PieChart from '@/Components/Charts/PieChart.vue'
 import HorizontalBarChart from '@/Components/Charts/HorizontalBarChart.vue'
 import {

@@ -44,36 +44,22 @@
             </div>
 
             <!-- Gráfico semáforo -->
-            <div class="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-                <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
-                    Usuarios suspendidos por rango de días
-                </h3>
-                <div ref="chartRef" class="h-80">
-                    <SemaphoreBarChart
-                        :categories="['1-3 días', '4-6 días', '7+ días']"
-                        :values="[600, 900, 1200]"
-                        :colors="['#eab308', '#f97316', '#ef4444']"
-                    />
-                </div>
-            </div>
+            <ExpandableChart title="Usuarios suspendidos por rango de días">
+                <SemaphoreBarChart
+                    :categories="['1-3 días', '4-6 días', '7+ días']"
+                    :values="[600, 900, 1200]"
+                    :colors="['#eab308', '#f97316', '#ef4444']"
+                />
+            </ExpandableChart>
         </div>
     </AdminLayout>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DashboardHeader from '@/Components/Dashboards/DashboardHeader.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
+import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import SemaphoreBarChart from '@/Components/Charts/SemaphoreBarChart.vue'
-import {
-    ExclamationTriangleIcon,
-} from '@heroicons/vue/24/outline'
-import { autoAnimate } from '@formkit/auto-animate'
-
-const chartRef = ref<HTMLElement | null>(null)
-
-onMounted(() => {
-    if (chartRef.value) autoAnimate(chartRef.value)
-})
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 </script>

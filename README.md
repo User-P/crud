@@ -1,8 +1,36 @@
 # Gestión de Usuarios y Estadísticas
 
-Aplicación Laravel 11 que expone un panel de APIs para administrar usuarios, sincronizar países desde una API pública y consultar estadísticas agregadas. Además incorpora jobs asíncronos, eventos y pruebas automáticas que cubren los módulos críticos de la prueba técnica.
+Aplicación Laravel 11 con frontend Vue 3 (Inertia.js) que expone un panel de APIs para administrar usuarios, sincronizar países desde una API pública y consultar estadísticas agregadas. Incluye jobs asíncronos, eventos, pruebas automáticas y un **panel de administración con dashboards de métricas**, gráficas interactivas y layout premium.
 
-## Arquitectura
+## Stack
+
+| Capa | Tecnología |
+|------|------------|
+| Backend | Laravel 11, Sanctum, PHP 8.x |
+| Frontend | Vue 3, TypeScript, Inertia.js |
+| Estilos | Tailwind CSS 4 |
+| Gráficas | ECharts |
+| Build | Vite 7 |
+
+## Requisitos y ejecución
+
+```bash
+# Backend
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan serve
+
+# Frontend (en otra terminal)
+npm install
+npm run dev
+```
+
+Acceso típico: `http://localhost:8000` (login) → Dashboard y menú lateral para navegar.
+
+---
+
+## Arquitectura (backend)
 
 - **Autenticación y Usuarios**
   - Rutas REST `api/v1/users` protegidas con Laravel Sanctum y políticas (`UserPolicy`).
@@ -77,8 +105,70 @@ php artisan test
 - Validaciones estrictas para entradas de usuario (regex de nombre, fuerza de contraseña, `email:rfc,dns`).
 - Manejo centralizado de errores JSON con trazas limitadas en producción.
 
+---
+
+## Panel de administración y dashboards (frontend)
+
+El frontend usa **Inertia.js** con **Vue 3** y **TypeScript**. Las páginas de administración comparten un layout unificado con sidebar, navbar y área de contenido.
+
+### Layout y navegación
+
+- **AdminLayout** (`Layouts/AdminLayout.vue`): layout principal con sidebar contraíble/ocultable y zona de contenido que se adapta al estado de la barra.
+- **Sidebar** (`Components/Sidebar.vue`):
+  - Tres estados: expandida, contraída (solo iconos) y oculta.
+  - Al pasar el ratón sobre la barra contraída, se expande temporalmente para navegar sin clic.
+  - Al elegir un ítem del menú se puede contraer automáticamente.
+  - Transiciones suaves (300ms) y secciones: Principal, Datos, Análisis, Sistema.
+- **Navbar** (`Components/Navbar.vue`): tres zonas — menú + logo “Analytics”, barra de búsqueda centrada, notificaciones y menú de usuario.
+
+### Dashboards de métricas
+
+Rutas bajo `/dashboards` (menú **Dashboards de métricas**):
+
+| Ruta | Página | Contenido |
+|------|--------|-----------|
+| `/dashboards` | Index | Enlaces a las subvistas |
+| `/dashboards/vista-general` | VistaGeneral | KPI principal (hero), MetricCards con sparklines, drill-down al clic |
+| `/dashboards/usuarios-activos-inactivos` | UsuariosActivosInactivos | KPIs, PieChart, HorizontalBarChart por estatus |
+| `/dashboards/dias-suspendidos` | DiasSuspendidos | Semáforo de riesgo (SemaphoreBarChart) por rango de días |
+
+### Componentes de dashboards
+
+- **DashboardHeader**: título, subtítulo, icono y slot para acciones (p. ej. selector de fechas).
+- **MetricCard**: tarjeta KPI con valor, tendencia (sube/baja/neutral), porcentaje, sparkline opcional y texto de comparación; clic abre detalle.
+- **Sparkline**: minigráfico de tendencia (línea) para métricas.
+- **DetailDrawer**: panel lateral que se abre al clic en una MetricCard para mostrar detalle (gráfica placeholder + tabla).
+- **ExpandableChart**: wrapper para cualquier gráfica; añade botón “Expandir” que abre la gráfica en overlay a pantalla casi completa para verla con más claridad. Al expandir, el mismo componente ECharts se redimensiona vía `ResizeObserver` en `BaseEChart`.
+
+### Gráficas (ECharts)
+
+- **BaseEChart**: contenedor ECharts con `ResizeObserver` para redimensionar al cambiar el tamaño del contenedor; usado por el resto de gráficas.
+- **PieChart** / **HorizontalBarChart** / **SemaphoreBarChart**: componentes específicos para los dashboards.
+- Las gráficas en “Usuarios activos/inactivos” y “Días suspendidos” están envueltas en **ExpandableChart** para poder abrirlas en grande.
+
+### Presentación de datos (data storytelling)
+
+- Insights en una línea debajo de los headers (resúmenes breves).
+- F-pattern: KPIs arriba, gráficas en el medio, controles y filtros en la parte superior.
+- Leyendas de riesgo y semáforos donde aplica (p. ej. días suspendidos).
+- Animaciones suaves con `@formkit/auto-animate` en listas y grids de tarjetas.
+
+### Estilos y tema
+
+- Variables CSS (`@theme`) para colores de superficie y sidebar (paleta coherente).
+- Estilo “premium” para análisis: bordes suaves, sombras ligeras, fondos `surface-subtle`.
+
+### Otras páginas del frontend
+
+- **Tablas**: `/tables` con TanStack Table, filtros y paginación.
+- **Gráficas**: `/charts` con ejemplos de ECharts.
+- **Usuarios**, **Countries**, **Events**, **Statistics**, **Settings**, **Diagram**, **Organization chart**: módulos existentes que pueden usar el mismo `AdminLayout` y sidebar.
+
+---
+
 ## Próximos Pasos Recomendados
 
-1. Añadir un front-end que consuma los endpoints expuestos.
+1. Conectar los dashboards a datos reales (endpoints de estadísticas e históricos).
 2. Incorporar notificaciones reales (mail/Slack) en el listener de estadísticas.
 3. Extender las pruebas a endpoints de países y estadísticas para cobertura adicional.
+4. Sustituir el placeholder del DetailDrawer por gráficas y tablas reales por tipo de métrica.
