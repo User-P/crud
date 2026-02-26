@@ -17,7 +17,7 @@
                 @click.prevent="navigate('/dashboard')"
             >
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30">
-                    <ChartBarSquareIcon class="h-5 w-5" aria-hidden="true" />
+                    <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
                 </div>
                 <div class="min-w-0">
                     <span class="block truncate text-sm font-semibold text-slate-900">Analytics</span>
@@ -25,7 +25,7 @@
                 </div>
             </a>
             <div v-else class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30">
-                <ChartBarSquareIcon class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
             </div>
             <div v-if="effectiveExpanded" class="flex items-center gap-0.5">
                 <button
@@ -35,7 +35,7 @@
                     aria-label="Contraer menú"
                     @click="$emit('toggle-collapse')"
                 >
-                    <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
+                    <Icon icon="heroicons:chevron-left" class="h-5 w-5" aria-hidden="true" />
                 </button>
                 <button
                     type="button"
@@ -44,7 +44,7 @@
                     aria-label="Ocultar menú"
                     @click="$emit('close')"
                 >
-                    <XMarkIcon class="h-5 w-5" aria-hidden="true" />
+                    <Icon icon="heroicons:x-mark" class="h-5 w-5" aria-hidden="true" />
                 </button>
             </div>
         </div>
@@ -74,15 +74,16 @@
                                     ]"
                                     @click="!effectiveExpanded ? goFirstChild(item) : toggleExpand(item)"
                                 >
-                                    <component
-                                        :is="item.icon"
+                                    <Icon
+                                        :icon="item.icon"
                                         class="h-5 w-5 shrink-0"
                                         :class="isGroupActive(item) ? 'text-indigo-600' : 'text-slate-500'"
                                         aria-hidden="true"
                                     />
                                     <span v-if="effectiveExpanded" class="truncate">{{ item.name }}</span>
-                                    <ChevronDownIcon
+                                    <Icon
                                         v-if="effectiveExpanded"
+                                        icon="heroicons:chevron-down"
                                         class="ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform"
                                         :class="{ 'rotate-180': expandedItems.includes(item.name) }"
                                         aria-hidden="true"
@@ -125,8 +126,8 @@
                                 ]"
                                 @click.prevent="item.href && navigate(item.href)"
                             >
-                                <component
-                                    :is="item.icon"
+                                <Icon
+                                    :icon="item.icon"
                                     class="h-5 w-5 shrink-0"
                                     :class="isCurrentRoute(item.href) ? 'text-indigo-600' : 'text-slate-500'"
                                     aria-hidden="true"
@@ -149,7 +150,7 @@
                     aria-label="Expandir menú"
                     @click="$emit('toggle-collapse')"
                 >
-                    <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
+                    <Icon icon="heroicons:chevron-right" class="h-5 w-5" aria-hidden="true" />
                 </button>
             </div>
         </div>
@@ -159,22 +160,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
-import {
-    HomeIcon,
-    UsersIcon,
-    FolderIcon,
-    CalendarIcon,
-    ChartBarIcon,
-    ChartPieIcon,
-    Cog6ToothIcon,
-    ChevronDownIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    XMarkIcon,
-    PresentationChartBarIcon,
-    ChartBarSquareIcon,
-    ChatBubbleLeftRightIcon,
-} from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 
 interface NavChild {
     name: string
@@ -184,7 +170,7 @@ interface NavChild {
 interface NavigationItem {
     name: string
     href?: string
-    icon: any
+    icon: string
     children?: NavChild[]
 }
 
@@ -223,25 +209,25 @@ const navGroups: NavGroup[] = [
     {
         label: 'Principal',
         items: [
-            { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-            { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
+            { name: 'Dashboard', href: '/dashboard', icon: 'heroicons:home' },
+            { name: 'Chat', href: '/chat', icon: 'heroicons:chat-bubble-left-right' },
         ],
     },
     {
         label: 'Datos',
         items: [
-            { name: 'Usuarios', href: '/users', icon: UsersIcon },
-            { name: 'Países', href: '/countries', icon: FolderIcon },
-            { name: 'Eventos', href: '/events', icon: CalendarIcon },
+            { name: 'Usuarios', href: '/users', icon: 'heroicons:users' },
+            { name: 'Países', href: '/countries', icon: 'heroicons:folder' },
+            { name: 'Eventos', href: '/events', icon: 'heroicons:calendar-days' },
         ],
     },
     {
         label: 'Análisis',
         items: [
-            { name: 'Estadísticas', href: '/statistics', icon: ChartBarIcon },
+            { name: 'Estadísticas', href: '/statistics', icon: 'heroicons:chart-bar' },
             {
                 name: 'Dashboards de métricas',
-                icon: PresentationChartBarIcon,
+                icon: 'heroicons:presentation-chart-bar',
                 children: [
                     { name: 'Índice', href: '/dashboards' },
                     { name: 'Vista general', href: '/dashboards/vista-general' },
@@ -249,14 +235,14 @@ const navGroups: NavGroup[] = [
                     { name: 'Días suspendidos', href: '/dashboards/dias-suspendidos' },
                 ],
             },
-            { name: 'Tablas', href: '/tables', icon: FolderIcon },
-            { name: 'Charts', href: '/charts', icon: ChartPieIcon },
+            { name: 'Tablas', href: '/tables', icon: 'heroicons:folder' },
+            { name: 'Charts', href: '/charts', icon: 'heroicons:chart-pie' },
         ],
     },
     {
         label: 'Sistema',
         items: [
-            { name: 'Configuración', href: '/settings', icon: Cog6ToothIcon },
+            { name: 'Configuración', href: '/settings', icon: 'heroicons:cog-6-tooth' },
         ],
     },
 ]

@@ -9,21 +9,24 @@
                 class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
                 :class="v.iconBg"
             >
-                <component :is="icon" class="h-5 w-5" :class="v.iconColor" aria-hidden="true" />
+                <Icon :icon="icon" class="h-5 w-5" :class="v.iconColor" aria-hidden="true" />
             </div>
             <div v-if="trend !== undefined" class="flex shrink-0 items-center gap-0.5">
-                <ArrowTrendingUpIcon
+                <Icon
                     v-if="trend === 'up'"
+                    icon="heroicons:arrow-trending-up"
                     class="h-4 w-4 text-emerald-500"
                     aria-hidden="true"
                 />
-                <ArrowTrendingDownIcon
+                <Icon
                     v-else-if="trend === 'down'"
+                    icon="heroicons:arrow-trending-down"
                     class="h-4 w-4 text-rose-500"
                     aria-hidden="true"
                 />
-                <MinusIcon
+                <Icon
                     v-else-if="trend === 'neutral'"
+                    icon="heroicons:minus"
                     class="h-4 w-4 text-slate-400"
                     aria-hidden="true"
                 />
@@ -63,18 +66,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Component } from 'vue'
+import { Icon } from '@iconify/vue'
 import Sparkline from './Sparkline.vue'
-import {
-    ArrowTrendingUpIcon,
-    ArrowTrendingDownIcon,
-    MinusIcon,
-} from '@heroicons/vue/24/outline'
 
 interface Props {
     label: string
     value: string | number
-    icon: Component
+    /** Iconify icon id (ej. heroicons:chart-bar) */
+    icon: string
     variant?: 'blue' | 'green' | 'red'
     /** Mini tendencia: up | down | neutral */
     trend?: 'up' | 'down' | 'neutral'

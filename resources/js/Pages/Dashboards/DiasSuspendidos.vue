@@ -10,7 +10,7 @@
             <DashboardHeader
                 title="Días usuarios suspendidos"
                 subtitle="Semáforo de riesgo por tiempo de suspensión"
-                :icon="ExclamationTriangleIcon"
+                icon="heroicons:exclamation-triangle"
             >
                 <template #actions>
                     <CustomPicker
@@ -61,5 +61,4 @@ import DashboardHeader from '@/Components/Dashboards/DashboardHeader.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
 import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import SemaphoreBarChart from '@/Components/Charts/SemaphoreBarChart.vue'
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 </script>

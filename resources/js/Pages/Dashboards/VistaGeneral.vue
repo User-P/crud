@@ -11,7 +11,7 @@
             <DashboardHeader
                 :title="title"
                 :subtitle="subtitle"
-                :icon="UserGroupIcon"
+                icon="heroicons:user-group"
             >
                 <template #actions>
                     <CustomPicker
@@ -32,7 +32,7 @@
                 >
                     <div class="flex items-center gap-3">
                         <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-                            <component :is="heroCard.icon" class="h-6 w-6" aria-hidden="true" />
+                            <Icon :icon="heroCard.icon" class="h-6 w-6" aria-hidden="true" />
                         </div>
                         <div>
                             <p class="text-sm font-medium text-slate-500">Métrica principal</p>
@@ -127,16 +127,7 @@ import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import Sparkline from '@/Components/Dashboards/Sparkline.vue'
 import DetailDrawer from '@/Components/Dashboards/DetailDrawer.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
-import {
-    GlobeAltIcon,
-    CheckCircleIcon,
-    XCircleIcon,
-    ClockIcon,
-    LockOpenIcon,
-    UserMinusIcon,
-    MinusCircleIcon,
-    UserGroupIcon,
-} from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 import { autoAnimate } from '@formkit/auto-animate'
 
 const title = 'Vista general'
@@ -146,7 +137,7 @@ type CardItem = {
     id: string
     label: string
     value: string
-    icon: typeof GlobeAltIcon
+    icon: string
     variant: 'blue' | 'green' | 'red'
     trend?: 'up' | 'down' | 'neutral'
     trendPercent?: number | null
@@ -158,7 +149,7 @@ const heroCard: CardItem = {
     id: 'total',
     label: 'Usuarios totales',
     value: '140,000',
-    icon: GlobeAltIcon,
+    icon: 'heroicons:globe-alt',
     variant: 'blue',
     trend: 'up',
     trendPercent: 2.4,
@@ -171,7 +162,7 @@ const primaryCards: CardItem[] = [
         id: 'activos',
         label: 'Usuarios activos',
         value: '132,000',
-        icon: CheckCircleIcon,
+        icon: 'heroicons:check-circle',
         variant: 'green',
         trend: 'up',
         trendPercent: 1.8,
@@ -182,7 +173,7 @@ const primaryCards: CardItem[] = [
         id: 'inactivos',
         label: 'Usuarios inactivos',
         value: '8,000',
-        icon: XCircleIcon,
+        icon: 'heroicons:x-circle',
         variant: 'red',
         trend: 'down',
         trendPercent: -0.5,
@@ -192,10 +183,10 @@ const primaryCards: CardItem[] = [
 ]
 
 const secondaryCards: CardItem[] = [
-    { id: 'espera', label: 'En espera', value: '8,000', icon: ClockIcon, variant: 'red', trend: 'neutral', trendPercent: 0, comparison: 'vs. mes anterior' },
-    { id: 'password', label: 'Password expirado', value: '8,000', icon: LockOpenIcon, variant: 'red', trend: 'up', trendPercent: 0.3, comparison: 'vs. mes anterior' },
-    { id: 'suspendidos', label: 'Suspendidos', value: '2,050', icon: UserMinusIcon, variant: 'red', trend: 'down', trendPercent: -1.2, comparison: 'vs. mes anterior' },
-    { id: 'desactivados', label: 'Desactivados', value: '1,000', icon: MinusCircleIcon, variant: 'red', trend: 'neutral', trendPercent: null, comparison: 'vs. mes anterior' },
+    { id: 'espera', label: 'En espera', value: '8,000', icon: 'heroicons:clock', variant: 'red', trend: 'neutral', trendPercent: 0, comparison: 'vs. mes anterior' },
+    { id: 'password', label: 'Password expirado', value: '8,000', icon: 'heroicons:lock-open', variant: 'red', trend: 'up', trendPercent: 0.3, comparison: 'vs. mes anterior' },
+    { id: 'suspendidos', label: 'Suspendidos', value: '2,050', icon: 'heroicons:user-minus', variant: 'red', trend: 'down', trendPercent: -1.2, comparison: 'vs. mes anterior' },
+    { id: 'desactivados', label: 'Desactivados', value: '1,000', icon: 'heroicons:minus-circle', variant: 'red', trend: 'neutral', trendPercent: null, comparison: 'vs. mes anterior' },
 ]
 
 const gridRef = ref<HTMLElement | null>(null)

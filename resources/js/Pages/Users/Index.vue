@@ -7,8 +7,9 @@
         <div class="mb-6 flex items-center justify-between">
             <div class="flex flex-1 items-center gap-x-4">
                 <div class="relative flex-1 max-w-md">
-                    <MagnifyingGlassIcon
-                        class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400 pl-3"
+                    <Icon
+                        icon="heroicons:magnifying-glass"
+                        class="pointer-events-none absolute inset-y-0 left-0 flex h-full w-5 items-center pl-3 text-gray-400"
                         aria-hidden="true" />
                     <InputText v-model="search" type="search" placeholder="Buscar usuarios..." class="w-full pl-10" />
                 </div>
@@ -124,7 +125,7 @@ import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Tag from 'primevue/tag'
 import PrimeMenu, { type MenuMethods } from 'primevue/menu'
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 
 interface User {
     id: number

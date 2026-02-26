@@ -23,12 +23,12 @@
                             <button type="button"
                                 class="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-800"
                                 title="Ver datatable" @click="openDetails(card.id, 'table')">
-                                <component :is="card.icon" class="h-5 w-5" aria-hidden="true" />
+                                <Icon :icon="card.icon" class="h-5 w-5" aria-hidden="true" />
                             </button>
                             <button type="button"
                                 class="rounded-full bg-indigo-100 p-2 text-indigo-600 transition hover:bg-indigo-200 hover:text-indigo-800"
                                 title="Ver gráfica (ApexCharts)" @click="openDetails(card.id, 'chart')">
-                                <ChartBarIcon class="h-5 w-5" aria-hidden="true" />
+                                <Icon icon="heroicons:chart-bar" class="h-5 w-5" aria-hidden="true" />
                             </button>
                         </div>
                     </div>
@@ -46,10 +46,9 @@
                                     ? 'bg-rose-50 text-rose-700'
                                     : 'bg-slate-100 text-slate-600',
                         ]">
-                            <ArrowTrendingUpIcon v-if="card.trend === 'up'" class="mr-1 h-4 w-4" aria-hidden="true" />
-                            <ArrowTrendingDownIcon v-else-if="card.trend === 'down'" class="mr-1 h-4 w-4"
-                                aria-hidden="true" />
-                            <MinusSmallIcon v-else class="mr-1 h-4 w-4" aria-hidden="true" />
+                            <Icon v-if="card.trend === 'up'" icon="heroicons:arrow-trending-up" class="mr-1 h-4 w-4" aria-hidden="true" />
+                            <Icon v-else-if="card.trend === 'down'" icon="heroicons:arrow-trending-down" class="mr-1 h-4 w-4" aria-hidden="true" />
+                            <Icon v-else icon="heroicons:minus-small" class="mr-1 h-4 w-4" aria-hidden="true" />
                             {{ card.delta }}
                         </span>
                         <span class="text-slate-500">{{ card.deltaLabel }}</span>
@@ -96,7 +95,7 @@
 
             <div v-else
                 class="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50 p-10 text-center text-indigo-700">
-                <ChartBarIcon class="mx-auto h-10 w-10 text-indigo-400" />
+                <Icon icon="heroicons:chart-bar" class="mx-auto h-10 w-10 text-indigo-400" />
                 <h4 class="mt-4 text-lg font-semibold">Placeholder de ApexCharts</h4>
                 <p class="mt-2 text-sm">
                     Aquí agregarás el componente de gráficos para
@@ -113,16 +112,7 @@ import { computed, ref } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
-import {
-    ArrowTrendingDownIcon,
-    ArrowTrendingUpIcon,
-    ChartBarIcon,
-    CpuChipIcon,
-    MinusSmallIcon,
-    ShieldCheckIcon,
-    UserGroupIcon,
-} from '@heroicons/vue/24/outline'
-import type { Component } from 'vue'
+import { Icon } from '@iconify/vue'
 
 type StatCard = {
     id: string
@@ -132,7 +122,7 @@ type StatCard = {
     delta: string
     deltaLabel: string
     trend: 'up' | 'down' | 'flat'
-    icon: Component
+    icon: string
 }
 
 const statCards: StatCard[] = [
@@ -144,7 +134,7 @@ const statCards: StatCard[] = [
         delta: '+3.2%',
         deltaLabel: 'vs. el mes anterior',
         trend: 'up',
-        icon: UserGroupIcon,
+        icon: 'heroicons:user-group',
     },
     {
         id: 'sensitive-events',
@@ -154,7 +144,7 @@ const statCards: StatCard[] = [
         delta: '-5.4%',
         deltaLabel: 'vs. semana anterior',
         trend: 'down',
-        icon: ShieldCheckIcon,
+        icon: 'heroicons:shield-check',
     },
     {
         id: 'automations',
@@ -164,7 +154,7 @@ const statCards: StatCard[] = [
         delta: '+0.0%',
         deltaLabel: 'sin cambios recientes',
         trend: 'flat',
-        icon: CpuChipIcon,
+        icon: 'heroicons:cpu-chip',
     },
     {
         id: 'avg-response-time',
@@ -174,7 +164,7 @@ const statCards: StatCard[] = [
         delta: '+1.1%',
         deltaLabel: 'ligero incremento',
         trend: 'up',
-        icon: ChartBarIcon,
+        icon: 'heroicons:chart-bar',
     },
 ]
 

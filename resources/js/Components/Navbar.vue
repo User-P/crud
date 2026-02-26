@@ -8,7 +8,7 @@
                 aria-label="Abrir menú"
                 @click="$emit('toggle-sidebar')"
             >
-                <Bars3Icon class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="heroicons:bars-3" class="h-5 w-5" aria-hidden="true" />
             </button>
             <button
                 v-if="sidebarHidden"
@@ -17,7 +17,7 @@
                 aria-label="Mostrar menú lateral"
                 @click="$emit('show-sidebar')"
             >
-                <Bars3Icon class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="heroicons:bars-3" class="h-5 w-5" aria-hidden="true" />
                 <span>Menú</span>
             </button>
             <button
@@ -28,8 +28,8 @@
                 :title="sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'"
                 @click="$emit('toggle-sidebar-collapse')"
             >
-                <ChevronRightIcon v-if="sidebarCollapsed" class="h-5 w-5" aria-hidden="true" />
-                <ChevronLeftIcon v-else class="h-5 w-5" aria-hidden="true" />
+                <Icon v-if="sidebarCollapsed" icon="heroicons:chevron-right" class="h-5 w-5" aria-hidden="true" />
+                <Icon v-else icon="heroicons:chevron-left" class="h-5 w-5" aria-hidden="true" />
             </button>
 
             <a
@@ -38,7 +38,7 @@
                 @click.prevent="navigate('/dashboard')"
             >
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
-                    <ChartBarSquareIcon class="h-4 w-4" aria-hidden="true" />
+                    <Icon icon="heroicons:chart-bar-square" class="h-4 w-4" aria-hidden="true" />
                 </div>
                 <span class="hidden truncate text-sm font-semibold text-slate-800 sm:block">Analytics</span>
             </a>
@@ -48,7 +48,8 @@
         <div class="relative min-w-0 flex-1 max-w-xl mx-4">
             <form action="#" method="GET" class="relative">
                 <label for="search-field" class="sr-only">Buscar</label>
-                <MagnifyingGlassIcon
+                <Icon
+                    icon="heroicons:magnifying-glass"
                     class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
                     aria-hidden="true"
                 />
@@ -69,7 +70,7 @@
                 class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                 aria-label="Notificaciones"
             >
-                <BellIcon class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="heroicons:bell" class="h-5 w-5" aria-hidden="true" />
             </button>
 
             <div class="h-6 w-px bg-slate-200" aria-hidden="true" />
@@ -92,7 +93,7 @@
                         <span class="block truncate text-sm font-medium text-slate-900">{{ user?.name || 'Usuario' }}</span>
                         <span class="block truncate text-xs text-slate-500">Cuenta</span>
                     </span>
-                    <ChevronDownIcon class="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                    <Icon icon="heroicons:chevron-down" class="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                 </button>
                 <PrimeMenu ref="profileMenu" :model="profileMenuItems" popup />
             </div>
@@ -104,15 +105,7 @@
 import { computed, ref } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 import PrimeMenu, { type MenuMethods } from 'primevue/menu'
-import {
-    Bars3Icon,
-    BellIcon,
-    ChartBarSquareIcon,
-    ChevronDownIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    MagnifyingGlassIcon,
-} from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 
 defineProps<{
     sidebarHidden?: boolean

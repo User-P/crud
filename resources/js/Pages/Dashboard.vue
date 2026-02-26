@@ -18,8 +18,8 @@
           {{ stat.value }}
         </dd>
         <div class="mt-2 flex items-center text-sm">
-          <component
-            :is="stat.changeType === 'increase' ? ArrowUpIcon : ArrowDownIcon"
+          <Icon
+            :icon="stat.changeType === 'increase' ? 'heroicons:arrow-up' : 'heroicons:arrow-down'"
             :class="[
               stat.changeType === 'increase' ? 'text-green-500' : 'text-red-500',
               'h-4 w-4',
@@ -65,8 +65,8 @@
                           'flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white',
                         ]"
                       >
-                        <component
-                          :is="activity.icon"
+                        <Icon
+                          :icon="activity.icon"
                           class="h-5 w-5 text-white"
                           aria-hidden="true"
                         />
@@ -104,8 +104,8 @@
               class="relative rounded-lg border-2 border-dashed border-gray-300 p-4 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
               @click="router.visit(action.href)"
             >
-              <component
-                :is="action.icon"
+              <Icon
+                :icon="action.icon"
                 class="mx-auto h-8 w-8 text-gray-400"
                 aria-hidden="true"
               />
@@ -126,7 +126,7 @@
         </h3>
         <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <div class="text-center">
-            <ChartBarIcon class="mx-auto h-12 w-12 text-gray-400" />
+            <Icon icon="heroicons:chart-bar" class="mx-auto h-12 w-12 text-gray-400" />
             <p class="mt-2 text-sm text-gray-500">
               Gráfica de estadísticas
             </p>
@@ -143,17 +143,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import {
-  ArrowUpIcon,
-  ArrowDownIcon,
-  UserPlusIcon,
-  DocumentPlusIcon,
-  FolderPlusIcon,
-  Cog6ToothIcon,
-  CheckCircleIcon,
-  UserCircleIcon,
-  ChartBarIcon,
-} from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 
 interface Stat {
   name: string
@@ -166,14 +156,14 @@ interface Activity {
   id: number
   content: string
   time: string
-  icon: any
+  icon: string
   iconBackground: string
 }
 
 interface QuickAction {
   name: string
   href: string
-  icon: any
+  icon: string
 }
 
 const stats: Stat[] = [
@@ -188,36 +178,36 @@ const recentActivity: Activity[] = [
     id: 1,
     content: 'Nuevo usuario registrado',
     time: 'Hace 5 min',
-    icon: UserCircleIcon,
+    icon: 'heroicons:user-circle',
     iconBackground: 'bg-blue-500',
   },
   {
     id: 2,
     content: 'Evento creado exitosamente',
     time: 'Hace 15 min',
-    icon: CheckCircleIcon,
+    icon: 'heroicons:check-circle',
     iconBackground: 'bg-green-500',
   },
   {
     id: 3,
     content: 'País actualizado',
     time: 'Hace 1 hora',
-    icon: FolderPlusIcon,
+    icon: 'heroicons:folder-plus',
     iconBackground: 'bg-purple-500',
   },
   {
     id: 4,
     content: 'Configuración modificada',
     time: 'Hace 2 horas',
-    icon: Cog6ToothIcon,
+    icon: 'heroicons:cog-6-tooth',
     iconBackground: 'bg-orange-500',
   },
 ]
 
 const quickActions: QuickAction[] = [
-  { name: 'Nuevo Usuario', href: '/users/create', icon: UserPlusIcon },
-  { name: 'Nuevo Evento', href: '/events/create', icon: DocumentPlusIcon },
-  { name: 'Nuevo País', href: '/countries/create', icon: FolderPlusIcon },
-  { name: 'Configuración', href: '/settings', icon: Cog6ToothIcon },
+  { name: 'Nuevo Usuario', href: '/users/create', icon: 'heroicons:user-plus' },
+  { name: 'Nuevo Evento', href: '/events/create', icon: 'heroicons:document-plus' },
+  { name: 'Nuevo País', href: '/countries/create', icon: 'heroicons:folder-plus' },
+  { name: 'Configuración', href: '/settings', icon: 'heroicons:cog-6-tooth' },
 ]
 </script>

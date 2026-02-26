@@ -53,8 +53,9 @@
                         <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="mb-6" aria-label="Breadcrumb">
                             <ol role="list" class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
                                 <li v-for="(crumb, index) in breadcrumbs" :key="crumb.name" class="flex items-center gap-x-1.5">
-                                    <ChevronRightIcon
+                                    <Icon
                                         v-if="index > 0"
+                                        icon="heroicons:chevron-right"
                                         class="h-4 w-4 shrink-0 text-slate-300"
                                         aria-hidden="true"
                                     />
@@ -96,7 +97,7 @@
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import PrimeSidebar from 'primevue/sidebar'
-import { ChevronRightIcon } from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 import Sidebar from '@/Components/Sidebar.vue'
 import Navbar from '@/Components/Navbar.vue'
 

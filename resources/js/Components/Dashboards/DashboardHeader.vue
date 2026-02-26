@@ -4,7 +4,7 @@
             <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600"
             >
-                <component :is="icon" class="h-6 w-6" aria-hidden="true" />
+                <Icon :icon="icon" class="h-6 w-6" aria-hidden="true" />
             </div>
             <div>
                 <h2 class="text-xl font-semibold tracking-tight text-slate-900">
@@ -22,11 +22,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Component } from 'vue'
+import { Icon } from '@iconify/vue'
 
 defineProps<{
     title: string
     subtitle?: string
-    icon: Component
+    /** Iconify icon id (ej. heroicons:exclamation-triangle) */
+    icon: string
 }>()
 </script>

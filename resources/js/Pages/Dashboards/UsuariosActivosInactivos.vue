@@ -10,7 +10,7 @@
             <DashboardHeader
                 title="Usuarios activos vs inactivos"
                 subtitle="Distribución y estatus por tipo de cuenta"
-                :icon="UserGroupIcon"
+                icon="heroicons:user-group"
             >
                 <template #actions>
                     <CustomPicker
@@ -32,7 +32,7 @@
                 <MetricCard
                     label="Usuarios totales"
                     value="140,000"
-                    :icon="GlobeAltIcon"
+                    icon="heroicons:globe-alt"
                     variant="blue"
                     trend="up"
                     :trend-percent="2.4"
@@ -42,7 +42,7 @@
                 <MetricCard
                     label="Usuarios activos"
                     value="132,000"
-                    :icon="CheckCircleIcon"
+                    icon="heroicons:check-circle"
                     variant="green"
                     trend="up"
                     :trend-percent="1.8"
@@ -52,7 +52,7 @@
                 <MetricCard
                     label="Usuarios inactivos"
                     value="8,000"
-                    :icon="XCircleIcon"
+                    icon="heroicons:x-circle"
                     variant="red"
                     trend="down"
                     :trend-percent="-0.5"
@@ -100,12 +100,6 @@ import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
 import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import PieChart from '@/Components/Charts/PieChart.vue'
 import HorizontalBarChart from '@/Components/Charts/HorizontalBarChart.vue'
-import {
-    GlobeAltIcon,
-    CheckCircleIcon,
-    XCircleIcon,
-    UserGroupIcon,
-} from '@heroicons/vue/24/outline'
 import { autoAnimate } from '@formkit/auto-animate'
 
 const cardsRef = ref<HTMLElement | null>(null)

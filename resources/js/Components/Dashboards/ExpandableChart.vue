@@ -33,8 +33,8 @@
                     :aria-label="expanded ? 'Reducir gráfica' : 'Expandir gráfica'"
                     @click="toggleExpand"
                 >
-                    <ArrowsPointingOutIcon v-if="!expanded" class="h-5 w-5" aria-hidden="true" />
-                    <ArrowsPointingInIcon v-else class="h-5 w-5" aria-hidden="true" />
+                    <Icon v-if="!expanded" icon="heroicons:arrows-pointing-out" class="h-5 w-5" aria-hidden="true" />
+                    <Icon v-else icon="heroicons:arrows-pointing-in" class="h-5 w-5" aria-hidden="true" />
                 </button>
                 <button
                     v-if="expanded"
@@ -44,7 +44,7 @@
                     aria-label="Cerrar vista expandida"
                     @click="expanded = false"
                 >
-                    <XMarkIcon class="h-5 w-5" aria-hidden="true" />
+                    <Icon icon="heroicons:x-mark" class="h-5 w-5" aria-hidden="true" />
                 </button>
             </div>
         </div>
@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { ArrowsPointingOutIcon, ArrowsPointingInIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 
 defineProps<{
     title: string

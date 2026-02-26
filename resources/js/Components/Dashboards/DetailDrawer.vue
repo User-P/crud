@@ -24,7 +24,7 @@
                             aria-label="Cerrar"
                             @click="close"
                         >
-                            <XMarkIcon class="h-5 w-5" />
+                            <Icon icon="heroicons:x-mark" class="h-5 w-5" />
                         </button>
                     </div>
                     <div class="flex-1 overflow-y-auto p-6">
@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { XMarkIcon } from '@heroicons/vue/24/outline'
+import { Icon } from '@iconify/vue'
 
 defineProps<{
     visible: boolean
