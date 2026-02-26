@@ -1,6 +1,8 @@
 import axios from "axios"
 import { ref } from "vue"
 
+const API_BASE = '/dashboard_cyaal'
+
 export const useUsers = () => {
     const resumen = ref()
     const users = ref()
@@ -53,115 +55,103 @@ export const useUsers = () => {
         },
     ];
 
+    // Misma vista general con filtro por unidad (?unit=XXX)
     const byUnits = [
         {
-            name: 'Visualizacion por unidad de negocio.',
-            description: 'Unidad de negocios EKT',
-            href: '/dashboard_cyaal/grafica-por-unidad',
-            icon: 'heroicons:chart-bar',
-            iconBg: 'bg-indigo-100',
-            iconColor: 'text-indigo-600',
-            badge: 'KPIs',
-        },
-        {
-            name: 'Usuarios de EKT.',
-            description: 'Unidad de negocios EKT',
-            href: '/dashboard_cyaal/usuarios-ekt',
+            name: 'Usuarios de EKT',
+            description: 'Vista general filtrada por unidad de negocio EKT',
+            href: '/dashboards/vista-general?unit=EKT',
             icon: 'streamline-plump:user-pin',
             iconBg: 'bg-indigo-100',
             iconColor: 'text-indigo-600',
-            badge: 'KPIs',
+            badge: 'EKT',
         },
         {
-            name: 'Usuarios de TPE.',
-            description: 'Unidad de negocios TPE.',
-            href: '/dashboard_cyaal/usuarios-tpe',
+            name: 'Usuarios de TPE',
+            description: 'Vista general filtrada por unidad de negocio TPE',
+            href: '/dashboards/vista-general?unit=TPE',
             icon: 'stash:user-id',
             iconBg: 'bg-emerald-100',
             iconColor: 'text-emerald-600',
-            badge: 'Gráficos',
+            badge: 'TPE',
         },
         {
-            name: 'Usuarios de TVA.',
-            description: 'Unidad de negocios TVA.',
-            href: '/dashboard_cyaal/usuarios-tva',
+            name: 'Usuarios de TVA',
+            description: 'Vista general filtrada por unidad de negocio TVA',
+            href: '/dashboards/vista-general?unit=TVA',
             icon: 'hugeicons:ai-user',
             iconBg: 'bg-amber-100',
             iconColor: 'text-amber-600',
-            badge: 'Riesgo',
+            badge: 'TVA',
         },
         {
-            name: 'Usuarios de BACK OFFICE.',
-            description: 'Unidad de negocio de BACK OFFICE',
-            href: '/dashboard_cyaal/usuarios-back-office',
+            name: 'Usuarios de BACK OFFICE',
+            description: 'Vista general filtrada por unidad de negocio BACK OFFICE',
+            href: '/dashboards/vista-general?unit=BACK_OFFICE',
             icon: 'line-md:account',
             iconBg: 'bg-blue-100',
             iconColor: 'text-blue-600',
-            badge: 'Riesgo',
-        },
-        {
-            name: 'Estatus de usuarios por país.',
-            description: 'Unidad de negocio de BACK OFFICE',
-            href: '/dashboard_cyaal/por-pais',
-            icon: 'line-md:map-marker-loop',
-            iconBg: 'bg-blue-100',
-            iconColor: 'text-blue-600',
-            badge: 'Riesgo',
+            badge: 'BACK OFFICE',
         },
     ];
 
     const getResumen = async () => {
         try {
-            const { data } = await axios.get('dashboard_cyaal/resumen')
+            const { data } = await axios.get(`${API_BASE}/resumen`)
             resumen.value = data
         } catch (error) {
             console.log('error al cargar')
         }
     }
 
-    const getIndicadores = async (date: string) => {
+    const getIndicadores = async (date: string, unit?: string) => {
         try {
-            const { data } = await axios.get(`users/cards/${date}`)
+            const params = unit ? { unit } : {}
+            const { data } = await axios.get(`${API_BASE}/users/cards/${date}`, { params })
             users.value = data
         } catch (error) {
             console.log('error al cargar')
         }
     }
 
-    const getCharts = async (date: string) => {
+    const getCharts = async (date: string, unit?: string) => {
         try {
-            const { data } = await axios.get(`users/charts/${date}`)
+            const params = unit ? { unit } : {}
+            const { data } = await axios.get(`${API_BASE}/users/charts/${date}`, { params })
             charts.value = data
-            categories.value = data.charts.categories
+            categories.value = data.charts?.categories
         } catch (error) {
             console.log('error al cargar')
         }
     }
 
-    const getSuspended = async (date: string) => {
+    const getSuspended = async (date: string, unit?: string) => {
         try {
-            const { data } = await axios.get(`users/suspended/${date}`)
+            const params = unit ? { unit } : {}
+            const { data } = await axios.get(`${API_BASE}/users/suspended/${date}`, { params })
             suspended.value = data
         } catch (error) {
             console.log('error al cargar')
         }
     }
 
-    const getUsersAdd = async (date: string) => {
+    const getUsersAdd = async (date: string, unit?: string) => {
         try {
-            const { data } = await axios.get(`users/users-add/${date}`)
+            const params = unit ? { unit } : {}
+            const { data } = await axios.get(`${API_BASE}/users/users-add/${date}`, { params })
             usersAdd.value = data
         } catch (error) {
             console.log('error al cargar')
         }
     }
 
-    const getDetails = async (type: string, date: string) => {
+    const getDetails = async (type: string, date: string, unit?: string) => {
         try {
             isLoading.value = true
-            const { data } = await axios.post(`users/details/`, {
+            const { data } = await axios.post(`${API_BASE}/users/details`, {
                 type,
-                date
+                date,
+                ...(unit && { unit }),
             })
             details.value = data
         } catch (error) {
@@ -171,12 +161,13 @@ export const useUsers = () => {
         }
     }
 
-    const getUsersAddDetails = async (type: string, date: string) => {
+    const getUsersAddDetails = async (type: string, date: string, unit?: string) => {
         try {
             isLoading.value = true
-            const { data } = await axios.post(`users/users-add-details/`, {
+            const { data } = await axios.post(`${API_BASE}/users/users-add-details`, {
                 type,
-                date
+                date,
+                ...(unit && { unit }),
             })
             usersAddDetails.value = data
         } catch (error) {
@@ -184,7 +175,6 @@ export const useUsers = () => {
         } finally {
             isLoading.value = false
         }
-
     }
 
     return {

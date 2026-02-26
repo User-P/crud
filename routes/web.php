@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\OktaController;
 use App\Http\Controllers\Auth\SamlController;
 use App\Http\Controllers\ChartsController;
+use App\Http\Controllers\Cyaal\UsersController as CyaalUsersController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateDownloadController;
 use Illuminate\Support\Facades\Route;
@@ -86,8 +87,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboards', function () {
         return Inertia::render('Dashboards/Index');
     })->name('dashboards.index');
-    Route::get('/dashboards/vista-general', function () {
-        return Inertia::render('Dashboards/VistaGeneral');
+    Route::get('/dashboards/vista-general', function (\Illuminate\Http\Request $request) {
+        return Inertia::render('Dashboards/VistaGeneral', [
+            'unit' => $request->query('unit'),
+        ]);
     })->name('dashboards.vista-general');
     Route::get('/dashboards/usuarios-activos-inactivos', function () {
         return Inertia::render('Dashboards/UsuariosActivosInactivos');
@@ -95,6 +98,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboards/dias-suspendidos', function () {
         return Inertia::render('Dashboards/DiasSuspendidos');
     })->name('dashboards.dias-suspendidos');
+
+    // API Cyaal: vista general y por unidad de negocio (?unit=EKT)
+    Route::prefix('dashboard_cyaal')->group(function () {
+        Route::get('resumen', function () {
+            return response()->json(['message' => 'Resumen no implementado en esta copia']);
+        })->name('cyaal.resumen');
+        Route::get('users/cards/{end}', [CyaalUsersController::class, 'cards'])->name('cyaal.users.cards');
+        Route::get('users/charts/{end}', [CyaalUsersController::class, 'charts'])->name('cyaal.users.charts');
+        Route::post('users/details', [CyaalUsersController::class, 'details'])->name('cyaal.users.details');
+        Route::get('users/suspended/{end}', [CyaalUsersController::class, 'suspended'])->name('cyaal.users.suspended');
+        Route::post('users/suspended-details', [CyaalUsersController::class, 'suspendedDetails'])->name('cyaal.users.suspended-details');
+        Route::get('users/users-add/{date}', [CyaalUsersController::class, 'usersAdd'])->name('cyaal.users.add');
+        Route::post('users/users-add-details', [CyaalUsersController::class, 'usersAddDetails'])->name('cyaal.users.add-details');
+    });
 
     Route::get('/organization-chart', function () {
         return Inertia::render('OrganizationChart/Index');
