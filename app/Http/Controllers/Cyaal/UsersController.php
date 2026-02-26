@@ -84,7 +84,10 @@ class UsersController extends Controller
             return response()->json(['error' => 'Tipo de consulta no soportado: ' . $type], 400);
         }
 
-        $rows = $this->queries->getDetails($date, $type, $unit);
+        $limit = $request->input('limit');
+        $limit = is_numeric($limit) && (int) $limit > 0 ? (int) $limit : null;
+
+        $rows = $this->queries->getDetails($date, $type, $unit, $limit);
 
         return response()->json($rows);
     }
@@ -123,7 +126,10 @@ class UsersController extends Controller
             return response()->json(['error' => 'Se requieren date y dias_suspendido'], 400);
         }
 
-        $rows = $this->queries->getSuspendedDetails($date, $diasSuspendido, $unit);
+        $limit = $request->input('limit');
+        $limit = is_numeric($limit) && (int) $limit > 0 ? (int) $limit : null;
+
+        $rows = $this->queries->getSuspendedDetails($date, $diasSuspendido, $unit, $limit);
 
         return response()->json($rows);
     }
@@ -176,7 +182,10 @@ class UsersController extends Controller
             return response()->json(['error' => 'Se requieren type y date'], 400);
         }
 
-        $rows = $this->queries->getUsersAddDetails($date, $type, $unit);
+        $limit = $request->input('limit');
+        $limit = is_numeric($limit) && (int) $limit > 0 ? (int) $limit : null;
+
+        $rows = $this->queries->getUsersAddDetails($date, $type, $unit, $limit);
 
         return response()->json($rows);
     }

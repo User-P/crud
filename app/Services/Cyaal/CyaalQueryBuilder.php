@@ -136,8 +136,9 @@ final class CyaalQueryBuilder
 
     /**
      * Detalle de usuarios: misma CTE + filtro por tipo de estatus (+ unidad si aplica).
+     * @param int|null $limit Si es null o <= 0 no se aplica límite (producción). Para pruebas pasar ej. 100.
      */
-    public function getDetails(string $endDate, string $type, ?string $unit = null, int $limit = 100): array
+    public function getDetails(string $endDate, string $type, ?string $unit = null, ?int $limit = null): array
     {
         $filter = self::STATUS_FILTERS[$type] ?? null;
         if ($filter === null) {
@@ -145,12 +146,12 @@ final class CyaalQueryBuilder
         }
 
         $cte = $this->buildUsuariosUnicosCte($endDate, $unit);
+        $limitClause = ($limit !== null && $limit > 0) ? " LIMIT {$limit}" : '';
 
         $sql = $cte . "
             SELECT *
             FROM usuarios_unicos
-            WHERE orden = 1 AND ({$filter})
-            LIMIT {$limit}
+            WHERE orden = 1 AND ({$filter})" . $limitClause . "
         ";
 
         return DB::connection(self::CONNECTION)->select($sql);
@@ -199,8 +200,9 @@ final class CyaalQueryBuilder
 
     /**
      * Detalle de usuarios suspendidos por rango (MENOR, MODERADO o ELEVADO).
+     * @param int|null $limit Si es null o <= 0 no se aplica límite. Para pruebas pasar ej. 100.
      */
-    public function getSuspendedDetails(string $endDate, string $diasSuspendido, ?string $unit = null, int $limit = 100): array
+    public function getSuspendedDetails(string $endDate, string $diasSuspendido, ?string $unit = null, ?int $limit = null): array
     {
         $valid = ['MENOR', 'MODERADO', 'ELEVADO'];
         if (! in_array($diasSuspendido, $valid, true)) {
@@ -210,6 +212,7 @@ final class CyaalQueryBuilder
         $end = $this->escapeDate($endDate);
         $unitCondition = $this->unitCondition($unit);
         $diasLiteral = "'" . str_replace("'", "''", $diasSuspendido) . "'";
+        $limitClause = ($limit !== null && $limit > 0) ? " LIMIT {$limit}" : '';
 
         $sql = "WITH usuarios_unicos AS (
             SELECT
@@ -229,8 +232,7 @@ final class CyaalQueryBuilder
         )
         SELECT *
         FROM usuarios_unicos
-        WHERE orden = 1 AND estatus_cyaal_usr = 'SUSPENDED' AND dias_suspendido = " . $diasLiteral . "
-        LIMIT {$limit}
+        WHERE orden = 1 AND estatus_cyaal_usr = 'SUSPENDED' AND dias_suspendido = " . $diasLiteral . $limitClause . "
         ";
 
         return DB::connection(self::CONNECTION)->select($sql);
@@ -256,17 +258,18 @@ final class CyaalQueryBuilder
 
     /**
      * Detalle de usuarios desactivados en una fecha.
+     * @param int|null $limit Si es null o <= 0 no se aplica límite. Para pruebas pasar ej. 100.
      */
-    public function getDeactivatedDetails(string $date, ?string $unit = null, int $limit = 100): array
+    public function getDeactivatedDetails(string $date, ?string $unit = null, ?int $limit = null): array
     {
         $dateLiteral = $this->escapeDate($date);
         $unitCondition = $this->unitCondition($unit);
+        $limitClause = ($limit !== null && $limit > 0) ? " LIMIT {$limit}" : '';
 
         $sql = "SELECT * FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.deactivate'
               AND resultado_salida = 'SUCCESS'
-              AND CAST(fch_publicacion_utc AS DATE) = " . $dateLiteral . $unitCondition . "
-            LIMIT {$limit}";
+              AND CAST(fch_publicacion_utc AS DATE) = " . $dateLiteral . $unitCondition . $limitClause;
 
         return DB::connection(self::CONNECTION)->select($sql);
     }
@@ -298,13 +301,15 @@ final class CyaalQueryBuilder
 
     /**
      * Detalle de altas de usuarios (por tipo: dia_alta, mes_alta, total_alta).
+     * @param int|null $limit Si es null o <= 0 no se aplica límite. Para pruebas pasar ej. 100.
      */
-    public function getUsersAddDetails(string $endDate, string $type, ?string $unit = null, int $limit = 100): array
+    public function getUsersAddDetails(string $endDate, string $type, ?string $unit = null, ?int $limit = null): array
     {
         $firstDayOfMonth = date('Y-m-01', strtotime($endDate));
         $end = $this->escapeDate($endDate);
         $first = $this->escapeDate($firstDayOfMonth);
         $unitCondition = $this->unitCondition($unit);
+        $limitClause = ($limit !== null && $limit > 0) ? " LIMIT {$limit}" : '';
 
         $dateCondition = match ($type) {
             'dia_alta'   => 'AND CAST(fch_publicacion_utc AS DATE) = ' . $end,
@@ -316,8 +321,7 @@ final class CyaalQueryBuilder
         $sql = "SELECT * FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.create'
               AND resultado_salida = 'SUCCESS'
-              {$dateCondition}" . $unitCondition . "
-            LIMIT {$limit}";
+              {$dateCondition}" . $unitCondition . $limitClause;
 
         return DB::connection(self::CONNECTION)->select($sql);
     }
