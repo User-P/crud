@@ -8,6 +8,9 @@ use stdClass;
 /**
  * Construye y ejecuta consultas Cyaal reutilizables.
  * Soporta conteo general y por unidad de negocio (misma lógica, condición opcional).
+ *
+ * Impala/Cloudera ODBC no maneja bien placeholders (?); los valores se inlined como literales
+ * validados (fecha Y-m-d, unidad alfanumérica) para evitar errores de sintaxis e inyección.
  */
 final class CyaalQueryBuilder
 {
@@ -31,16 +34,42 @@ final class CyaalQueryBuilder
     ];
 
     /**
-     * CTE base: usuarios únicos por id_cyaal_usr y fecha de carga.
-     * Incluye condición opcional por unidad de negocio.
+     * Fecha segura para Impala: solo Y-m-d, inlined como literal con comillas.
      */
-    public function buildUsuariosUnicosCte(string $endDate, ?string $unit = null): array
+    private function escapeDate(string $date): string
     {
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND ' . self::COL_UNIDAD . ' = ?'
+        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            throw new \InvalidArgumentException('Fecha inválida, se espera Y-m-d: ' . $date);
+        }
+        return "'" . $date . "'";
+    }
+
+    /**
+     * Unidad segura para Impala: solo letras, números y guión bajo; inlined con comillas.
+     */
+    private function escapeUnit(?string $unit): string
+    {
+        if ($unit === null || $unit === '') {
+            return '';
+        }
+        if (! preg_match('/^[A-Za-z0-9_\-]+$/', $unit)) {
+            throw new \InvalidArgumentException('Unidad de negocio inválida: ' . $unit);
+        }
+        return "'" . str_replace("'", "''", $unit) . "'";
+    }
+
+    /**
+     * CTE base: usuarios únicos por id_cyaal_usr y fecha de carga.
+     * Valores inlined (Impala ODBC no soporta bien placeholders).
+     */
+    public function buildUsuariosUnicosCte(string $endDate, ?string $unit = null): string
+    {
+        $end = $this->escapeDate($endDate);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND ' . self::COL_UNIDAD . ' = ' . $this->escapeUnit($unit)
             : '';
 
-        $sql = "WITH usuarios_unicos AS (
+        return "WITH usuarios_unicos AS (
             SELECT
                 *,
                 ROW_NUMBER() OVER(
@@ -48,12 +77,8 @@ final class CyaalQueryBuilder
                     ORDER BY audit_fch_carga DESC
                 ) AS orden
             FROM " . self::TABLE_USUARIOS . "
-            WHERE CAST(audit_fch_carga AS DATE) <= ?" . $unitCondition . "
+            WHERE CAST(audit_fch_carga AS DATE) <= " . $end . $unitCondition . "
         )";
-
-        $bindings = array_filter([$endDate, $unit], fn ($v) => $v !== null && $v !== '');
-
-        return ['sql' => $sql, 'bindings' => $bindings];
     }
 
     /**
@@ -62,9 +87,8 @@ final class CyaalQueryBuilder
     public function getStatusCounts(string $endDate, ?string $unit = null): stdClass
     {
         $cte = $this->buildUsuariosUnicosCte($endDate, $unit);
-        $bindings = $cte['bindings'];
 
-        $sql = $cte['sql'] . "
+        $sql = $cte . "
             SELECT
                 COUNT(*) AS total_general,
                 SUM(CASE WHEN estatus_cyaal_usr = 'ACTIVE' THEN 1 ELSE 0 END) AS status_active,
@@ -79,7 +103,7 @@ final class CyaalQueryBuilder
             WHERE orden = 1
         ";
 
-        $result = DB::connection(self::CONNECTION)->selectOne($sql, $bindings);
+        $result = DB::connection(self::CONNECTION)->selectOne($sql);
 
         return $result ?? $this->emptyStatusCounts();
     }
@@ -95,16 +119,15 @@ final class CyaalQueryBuilder
         }
 
         $cte = $this->buildUsuariosUnicosCte($endDate, $unit);
-        $bindings = $cte['bindings'];
 
-        $sql = $cte['sql'] . "
+        $sql = $cte . "
             SELECT *
             FROM usuarios_unicos
             WHERE orden = 1 AND ({$filter})
             LIMIT {$limit}
         ";
 
-        return DB::connection(self::CONNECTION)->select($sql, $bindings);
+        return DB::connection(self::CONNECTION)->select($sql);
     }
 
     /**
@@ -112,10 +135,10 @@ final class CyaalQueryBuilder
      */
     public function getSuspendedChart(string $endDate, ?string $unit = null): array
     {
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND ' . self::COL_UNIDAD . ' = ?'
+        $end = $this->escapeDate($endDate);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND ' . self::COL_UNIDAD . ' = ' . $this->escapeUnit($unit)
             : '';
-        $bindings = array_filter([$endDate, $unit], fn ($v) => $v !== null && $v !== '');
 
         $sql = "WITH usuarios_unicos AS (
             SELECT
@@ -131,7 +154,7 @@ final class CyaalQueryBuilder
                     WHEN DATE_SUB(CURRENT_DATE(), 7) >= CAST(fch_cambio_estatus_cyaal_usr AS DATE) THEN 'ELEVADO'
                 END AS dias_suspendido
             FROM " . self::TABLE_USUARIOS . "
-            WHERE CAST(audit_fch_carga AS DATE) <= ?" . $unitCondition . "
+            WHERE CAST(audit_fch_carga AS DATE) <= " . $end . $unitCondition . "
         )
         SELECT dias_suspendido, COUNT(*) AS conteo
         FROM usuarios_unicos
@@ -139,7 +162,7 @@ final class CyaalQueryBuilder
         GROUP BY dias_suspendido
         ";
 
-        $rows = DB::connection(self::CONNECTION)->select($sql, $bindings);
+        $rows = DB::connection(self::CONNECTION)->select($sql);
 
         $labels = ['MENOR', 'MODERADO', 'ELEVADO'];
         $map = collect($rows)->pluck('conteo', 'dias_suspendido')->all();
@@ -160,10 +183,11 @@ final class CyaalQueryBuilder
             return [];
         }
 
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND ' . self::COL_UNIDAD . ' = ?'
+        $end = $this->escapeDate($endDate);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND ' . self::COL_UNIDAD . ' = ' . $this->escapeUnit($unit)
             : '';
-        $bindings = array_filter([$endDate, $unit], fn ($v) => $v !== null && $v !== '');
+        $diasLiteral = "'" . str_replace("'", "''", $diasSuspendido) . "'";
 
         $sql = "WITH usuarios_unicos AS (
             SELECT
@@ -179,17 +203,15 @@ final class CyaalQueryBuilder
                     WHEN DATE_SUB(CURRENT_DATE(), 7) >= CAST(fch_cambio_estatus_cyaal_usr AS DATE) THEN 'ELEVADO'
                 END AS dias_suspendido
             FROM " . self::TABLE_USUARIOS . "
-            WHERE CAST(audit_fch_carga AS DATE) <= ?" . $unitCondition . "
+            WHERE CAST(audit_fch_carga AS DATE) <= " . $end . $unitCondition . "
         )
         SELECT *
         FROM usuarios_unicos
-        WHERE orden = 1 AND estatus_cyaal_usr = 'SUSPENDED' AND dias_suspendido = ?
+        WHERE orden = 1 AND estatus_cyaal_usr = 'SUSPENDED' AND dias_suspendido = " . $diasLiteral . "
         LIMIT {$limit}
         ";
 
-        $bindings[] = $diasSuspendido;
-
-        return DB::connection(self::CONNECTION)->select($sql, $bindings);
+        return DB::connection(self::CONNECTION)->select($sql);
     }
 
     /**
@@ -197,17 +219,17 @@ final class CyaalQueryBuilder
      */
     public function getDeactivatedCount(string $date, ?string $unit = null): int
     {
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND unidad_negocio = ?'
+        $dateLiteral = $this->escapeDate($date);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
             : '';
-        $bindings = array_filter([$date, $unit], fn ($v) => $v !== null && $v !== '');
 
         $sql = "SELECT COUNT(*) AS conteo FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.deactivate'
               AND resultado_salida = 'SUCCESS'
-              AND CAST(fch_publicacion_utc AS DATE) = ?" . $unitCondition;
+              AND CAST(fch_publicacion_utc AS DATE) = " . $dateLiteral . $unitCondition;
 
-        $row = DB::connection(self::CONNECTION)->selectOne($sql, $bindings);
+        $row = DB::connection(self::CONNECTION)->selectOne($sql);
 
         return (int) ($row->conteo ?? 0);
     }
@@ -217,18 +239,18 @@ final class CyaalQueryBuilder
      */
     public function getDeactivatedDetails(string $date, ?string $unit = null, int $limit = 100): array
     {
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND unidad_negocio = ?'
+        $dateLiteral = $this->escapeDate($date);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
             : '';
-        $bindings = array_filter([$date, $unit], fn ($v) => $v !== null && $v !== '');
 
         $sql = "SELECT * FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.deactivate'
               AND resultado_salida = 'SUCCESS'
-              AND CAST(fch_publicacion_utc AS DATE) = ?" . $unitCondition . "
+              AND CAST(fch_publicacion_utc AS DATE) = " . $dateLiteral . $unitCondition . "
             LIMIT {$limit}";
 
-        return DB::connection(self::CONNECTION)->select($sql, $bindings);
+        return DB::connection(self::CONNECTION)->select($sql);
     }
 
     /**
@@ -237,23 +259,21 @@ final class CyaalQueryBuilder
     public function getUsersAddCounts(string $endDate, ?string $unit = null): stdClass
     {
         $firstDayOfMonth = date('Y-m-01', strtotime($endDate));
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND unidad_negocio = ?'
+        $end = $this->escapeDate($endDate);
+        $first = $this->escapeDate($firstDayOfMonth);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
             : '';
-        $bindings = [$endDate, $firstDayOfMonth, $endDate];
-        if ($unit !== null && $unit !== '') {
-            $bindings[] = $unit;
-        }
 
         $sql = "SELECT
             COUNT(*) AS total_historico,
-            COUNT(CASE WHEN CAST(fch_publicacion_utc AS DATE) = ? THEN 1 END) AS total_dia,
-            COUNT(CASE WHEN CAST(fch_publicacion_utc AS DATE) BETWEEN ? AND ? THEN 1 END) AS total_mes
+            COUNT(CASE WHEN CAST(fch_publicacion_utc AS DATE) = " . $end . " THEN 1 END) AS total_dia,
+            COUNT(CASE WHEN CAST(fch_publicacion_utc AS DATE) BETWEEN " . $first . " AND " . $end . " THEN 1 END) AS total_mes
             FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.create'
               AND resultado_salida = 'SUCCESS'" . $unitCondition;
 
-        $result = DB::connection(self::CONNECTION)->selectOne($sql, $bindings);
+        $result = DB::connection(self::CONNECTION)->selectOne($sql);
 
         $obj = new stdClass;
         $obj->total_historico = (int) ($result->total_historico ?? 0);
@@ -269,22 +289,17 @@ final class CyaalQueryBuilder
     public function getUsersAddDetails(string $endDate, string $type, ?string $unit = null, int $limit = 100): array
     {
         $firstDayOfMonth = date('Y-m-01', strtotime($endDate));
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND unidad_negocio = ?'
+        $end = $this->escapeDate($endDate);
+        $first = $this->escapeDate($firstDayOfMonth);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
             : '';
 
         $dateCondition = match ($type) {
-            'dia_alta'   => "AND CAST(fch_publicacion_utc AS DATE) = ?",
-            'mes_alta'   => "AND CAST(fch_publicacion_utc AS DATE) BETWEEN ? AND ?",
+            'dia_alta'   => 'AND CAST(fch_publicacion_utc AS DATE) = ' . $end,
+            'mes_alta'   => 'AND CAST(fch_publicacion_utc AS DATE) BETWEEN ' . $first . ' AND ' . $end,
             'total_alta' => '',
             default      => '',
-        };
-
-        $bindings = match ($type) {
-            'dia_alta'   => array_values(array_filter([$endDate, $unit], fn ($v) => $v !== null && $v !== '')),
-            'mes_alta'   => array_values(array_filter([$firstDayOfMonth, $endDate, $unit], fn ($v) => $v !== null && $v !== '')),
-            'total_alta' => $unit !== null && $unit !== '' ? [$unit] : [],
-            default      => [],
         };
 
         $sql = "SELECT * FROM " . self::TABLE_LOGS . "
@@ -293,7 +308,7 @@ final class CyaalQueryBuilder
               {$dateCondition}" . $unitCondition . "
             LIMIT {$limit}";
 
-        return DB::connection(self::CONNECTION)->select($sql, $bindings);
+        return DB::connection(self::CONNECTION)->select($sql);
     }
 
     /**
@@ -301,10 +316,10 @@ final class CyaalQueryBuilder
      */
     public function getWeeklyTrend(string $endDate, ?string $unit = null): array
     {
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND unidad_negocio = ?'
+        $end = $this->escapeDate($endDate);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
             : '';
-        $bindings = array_filter([$endDate, $unit], fn ($v) => $v !== null && $v !== '');
 
         $sql = "SELECT
             CAST(fch_publicacion_utc AS DATE) AS fecha,
@@ -312,11 +327,11 @@ final class CyaalQueryBuilder
             FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.create'
               AND resultado_salida = 'SUCCESS'
-              AND CAST(fch_publicacion_utc AS DATE) BETWEEN DATE_SUB(?, 6) AND ?" . $unitCondition . "
+              AND CAST(fch_publicacion_utc AS DATE) BETWEEN DATE_SUB(" . $end . ", 6) AND " . $end . $unitCondition . "
             GROUP BY 1
             ORDER BY 1 ASC";
 
-        return DB::connection(self::CONNECTION)->select($sql, $bindings);
+        return DB::connection(self::CONNECTION)->select($sql);
     }
 
     /**
@@ -324,10 +339,10 @@ final class CyaalQueryBuilder
      */
     public function getYearlyTrend(string $endDate, ?string $unit = null): array
     {
-        $unitCondition = $unit !== null && $unit !== ''
-            ? ' AND unidad_negocio = ?'
+        $end = $this->escapeDate($endDate);
+        $unitCondition = $this->escapeUnit($unit) !== ''
+            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
             : '';
-        $bindings = array_filter([$endDate, $unit], fn ($v) => $v !== null && $v !== '');
 
         $sql = "SELECT
             TRUNC(CAST(fch_publicacion_utc AS TIMESTAMP), 'MM') AS mes_referencia,
@@ -335,11 +350,11 @@ final class CyaalQueryBuilder
             FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.create'
               AND resultado_salida = 'SUCCESS'
-              AND CAST(fch_publicacion_utc AS DATE) >= ADD_MONTHS(TRUNC(?, 'MM'), -12)" . $unitCondition . "
+              AND CAST(fch_publicacion_utc AS DATE) >= ADD_MONTHS(TRUNC(" . $end . ", 'MM'), -12)" . $unitCondition . "
             GROUP BY 1
             ORDER BY 1 ASC";
 
-        return DB::connection(self::CONNECTION)->select($sql, $bindings);
+        return DB::connection(self::CONNECTION)->select($sql);
     }
 
     public static function statusFilters(): array
