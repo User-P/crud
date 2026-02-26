@@ -6,11 +6,9 @@ use Illuminate\Support\Facades\DB;
 use stdClass;
 
 /**
- * Construye y ejecuta consultas Cyaal reutilizables.
- * Soporta conteo general y por unidad de negocio (misma lógica, condición opcional).
- *
- * Impala/Cloudera ODBC no maneja bien placeholders (?); los valores se inlined como literales
- * validados (fecha Y-m-d, unidad alfanumérica) para evitar errores de sintaxis e inyección.
+ * Unidades de negocio: clave (request/URL, sin espacio) => valor en BD (puede tener espacio).
+ * El frontend envía la clave (ej. BACK_OFFICE) y aquí se traduce al valor real (ej. BACK OFFICE).
+ * Añade o edita entradas según tus unidades en base de datos.
  */
 final class CyaalQueryBuilder
 {
@@ -18,24 +16,28 @@ final class CyaalQueryBuilder
     private const TABLE_LOGS = 'db_production.mat_cyaal_logs_usuarios';
     private const CONNECTION = 'cloudera';
 
-    /** Columna de unidad de negocio en tbl_cyaal_usuarios (ajustar si el esquema usa otro nombre) */
-    private const COL_UNIDAD = 'unidad_negocio';
+    private const COL_UNIDAD = 'compania_cyaal_usr';
 
-    /** Tipos de estatus soportados para detalles */
+    /** Clave (lo que recibe la API) => Valor en BD (como está en compania_cyaal_usr) */
+    private const UNIT_MAP = [
+        'EKT'          => 'EKT',
+        'TPE'          => 'TPE',
+        'TVA'          => 'TVA',
+        'BACK_OFFICE'  => 'BACK OFFICE',
+        'BACK OFFICE'  => 'BACK OFFICE',
+    ];
+
     private const STATUS_FILTERS = [
         'activos'    => "estatus_cyaal_usr = 'ACTIVE'",
         'locked'     => "estatus_cyaal_usr = 'LOCKED_OUT'",
         'password'   => "estatus_cyaal_usr = 'PASSWORD_EXPIRED'",
-        'provisioned'=> "estatus_cyaal_usr = 'PROVISIONED'",
+        'provisioned' => "estatus_cyaal_usr = 'PROVISIONED'",
         'restaurado' => "estatus_cyaal_usr = 'RECOVERY'",
-        'suspendidos'=> "estatus_cyaal_usr = 'SUSPENDED'",
+        'suspendidos' => "estatus_cyaal_usr = 'SUSPENDED'",
         'inactivos'  => "estatus_cyaal_usr IN ('DEACTIVATED', 'SUSPENDED', 'LOCKED_OUT')",
         'total'     => '1=1',
     ];
 
-    /**
-     * Fecha segura para Impala: solo Y-m-d, inlined como literal con comillas.
-     */
     private function escapeDate(string $date): string
     {
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
@@ -45,29 +47,53 @@ final class CyaalQueryBuilder
     }
 
     /**
-     * Unidad segura para Impala: solo letras, números y guión bajo; inlined con comillas.
+     * Normaliza el valor de unidad: si viene la clave (ej. BACK_OFFICE), devuelve el valor en BD (ej. BACK OFFICE).
+     * Así las unidades con espacio se consultan correctamente.
+     */
+    private function normalizeUnit(?string $unit): ?string
+    {
+        if ($unit === null || $unit === '') {
+            return null;
+        }
+        $trimmed = trim($unit);
+        if ($trimmed === '') {
+            return null;
+        }
+        return self::UNIT_MAP[$trimmed] ?? $trimmed;
+    }
+
+    /**
+     * Escapa el valor de unidad para SQL (permite espacios; solo rechaza caracteres peligrosos).
      */
     private function escapeUnit(?string $unit): string
     {
         if ($unit === null || $unit === '') {
             return '';
         }
-        if (! preg_match('/^[A-Za-z0-9_\-]+$/', $unit)) {
-            throw new \InvalidArgumentException('Unidad de negocio inválida: ' . $unit);
+        $trimmed = trim($unit);
+        if ($trimmed === '') {
+            return '';
         }
-        return "'" . str_replace("'", "''", $unit) . "'";
+        if (preg_match('/[\x00\x1a\'\\\\]/', $trimmed)) {
+            throw new \InvalidArgumentException('Unidad de negocio contiene caracteres no permitidos: ' . $unit);
+        }
+        return "'" . str_replace("'", "''", $trimmed) . "'";
     }
 
     /**
-     * CTE base: usuarios únicos por id_cyaal_usr y fecha de carga.
-     * Valores inlined (Impala ODBC no soporta bien placeholders).
+     * Devuelve condición SQL para filtrar por unidad usando el valor normalizado y escapado.
      */
+    private function unitCondition(?string $unit): string
+    {
+        $normalized = $this->normalizeUnit($unit);
+        $escaped = $this->escapeUnit($normalized);
+        return $escaped !== '' ? ' AND ' . self::COL_UNIDAD . ' = ' . $escaped : '';
+    }
+
     public function buildUsuariosUnicosCte(string $endDate, ?string $unit = null): string
     {
         $end = $this->escapeDate($endDate);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND ' . self::COL_UNIDAD . ' = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         return "WITH usuarios_unicos AS (
             SELECT
@@ -136,9 +162,7 @@ final class CyaalQueryBuilder
     public function getSuspendedChart(string $endDate, ?string $unit = null): array
     {
         $end = $this->escapeDate($endDate);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND ' . self::COL_UNIDAD . ' = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         $sql = "WITH usuarios_unicos AS (
             SELECT
@@ -169,7 +193,7 @@ final class CyaalQueryBuilder
 
         return [
             'labels' => $labels,
-            'values' => array_map(fn ($l) => (int) ($map[$l] ?? 0), $labels),
+            'values' => array_map(fn($l) => (int) ($map[$l] ?? 0), $labels),
         ];
     }
 
@@ -184,9 +208,7 @@ final class CyaalQueryBuilder
         }
 
         $end = $this->escapeDate($endDate);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND ' . self::COL_UNIDAD . ' = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
         $diasLiteral = "'" . str_replace("'", "''", $diasSuspendido) . "'";
 
         $sql = "WITH usuarios_unicos AS (
@@ -220,9 +242,7 @@ final class CyaalQueryBuilder
     public function getDeactivatedCount(string $date, ?string $unit = null): int
     {
         $dateLiteral = $this->escapeDate($date);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         $sql = "SELECT COUNT(*) AS conteo FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.deactivate'
@@ -240,9 +260,7 @@ final class CyaalQueryBuilder
     public function getDeactivatedDetails(string $date, ?string $unit = null, int $limit = 100): array
     {
         $dateLiteral = $this->escapeDate($date);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         $sql = "SELECT * FROM " . self::TABLE_LOGS . "
             WHERE tipo_evento = 'user.lifecycle.deactivate'
@@ -253,17 +271,12 @@ final class CyaalQueryBuilder
         return DB::connection(self::CONNECTION)->select($sql);
     }
 
-    /**
-     * Conteo de altas de usuarios (user.lifecycle.create) total, del mes y del día.
-     */
     public function getUsersAddCounts(string $endDate, ?string $unit = null): stdClass
     {
         $firstDayOfMonth = date('Y-m-01', strtotime($endDate));
         $end = $this->escapeDate($endDate);
         $first = $this->escapeDate($firstDayOfMonth);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         $sql = "SELECT
             COUNT(*) AS total_historico,
@@ -291,9 +304,7 @@ final class CyaalQueryBuilder
         $firstDayOfMonth = date('Y-m-01', strtotime($endDate));
         $end = $this->escapeDate($endDate);
         $first = $this->escapeDate($firstDayOfMonth);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         $dateCondition = match ($type) {
             'dia_alta'   => 'AND CAST(fch_publicacion_utc AS DATE) = ' . $end,
@@ -311,15 +322,10 @@ final class CyaalQueryBuilder
         return DB::connection(self::CONNECTION)->select($sql);
     }
 
-    /**
-     * Tendencia semanal (altas por día, últimos 7 días).
-     */
     public function getWeeklyTrend(string $endDate, ?string $unit = null): array
     {
         $end = $this->escapeDate($endDate);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         $sql = "SELECT
             CAST(fch_publicacion_utc AS DATE) AS fecha,
@@ -334,15 +340,10 @@ final class CyaalQueryBuilder
         return DB::connection(self::CONNECTION)->select($sql);
     }
 
-    /**
-     * Tendencia anual (altas por mes, últimos 12 meses).
-     */
     public function getYearlyTrend(string $endDate, ?string $unit = null): array
     {
         $end = $this->escapeDate($endDate);
-        $unitCondition = $this->escapeUnit($unit) !== ''
-            ? ' AND unidad_negocio = ' . $this->escapeUnit($unit)
-            : '';
+        $unitCondition = $this->unitCondition($unit);
 
         $sql = "SELECT
             TRUNC(CAST(fch_publicacion_utc AS TIMESTAMP), 'MM') AS mes_referencia,
@@ -360,6 +361,15 @@ final class CyaalQueryBuilder
     public static function statusFilters(): array
     {
         return self::STATUS_FILTERS;
+    }
+
+    /**
+     * Mapa de unidades: clave (para request/URL) => valor en BD.
+     * Útil para el frontend o para validar qué unidades están permitidas.
+     */
+    public static function getUnitMap(): array
+    {
+        return self::UNIT_MAP;
     }
 
     private function emptyStatusCounts(): stdClass
