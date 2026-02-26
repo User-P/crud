@@ -99,7 +99,7 @@ final class CyaalQueryBuilder
             SELECT
                 *,
                 ROW_NUMBER() OVER(
-                    PARTITION BY id_cyaal_usr, CAST(audit_fch_carga AS DATE)
+                    PARTITION BY id_cyaal_usr
                     ORDER BY audit_fch_carga DESC
                 ) AS orden
             FROM " . self::TABLE_USUARIOS . "
@@ -168,7 +168,7 @@ final class CyaalQueryBuilder
             SELECT
                 *,
                 ROW_NUMBER() OVER(
-                    PARTITION BY id_cyaal_usr, CAST(audit_fch_carga AS DATE)
+                    PARTITION BY id_cyaal_usr
                     ORDER BY audit_fch_carga DESC
                 ) AS orden,
                 CASE
@@ -215,7 +215,7 @@ final class CyaalQueryBuilder
             SELECT
                 *,
                 ROW_NUMBER() OVER(
-                    PARTITION BY id_cyaal_usr, CAST(audit_fch_carga AS DATE)
+                    PARTITION BY id_cyaal_usr
                     ORDER BY audit_fch_carga DESC
                 ) AS orden,
                 CASE
