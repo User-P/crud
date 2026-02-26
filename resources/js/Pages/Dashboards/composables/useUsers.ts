@@ -1,7 +1,7 @@
-import axios from "axios"
+import ApiService from "@/core/services/ApiService"
 import { ref } from "vue"
 
-const API_BASE = '/dashboard_cyaal'
+const API_BASE = '/dashboard_cyaal/users'
 
 export const useUsers = () => {
     const resumen = ref()
@@ -20,7 +20,7 @@ export const useUsers = () => {
             name: 'Vista general',
             description:
                 'KPIs principales con tendencias, sparklines y drill-down al detalle.',
-            href: 'dashboards/vista-general',
+            href: 'dashboard_cyaal/vista-general',
             icon: 'heroicons:presentation-chart-bar',
             iconBg: 'bg-indigo-100',
             iconColor: 'text-indigo-600',
@@ -55,12 +55,11 @@ export const useUsers = () => {
         },
     ];
 
-    // Misma vista general con filtro por unidad (?unit=XXX)
     const byUnits = [
         {
             name: 'Usuarios de EKT',
             description: 'Vista general filtrada por unidad de negocio EKT',
-            href: '/dashboards/vista-general?unit=EKT',
+            href: '/dashboard_cyaal/vista-general?unit=EKT',
             icon: 'streamline-plump:user-pin',
             iconBg: 'bg-indigo-100',
             iconColor: 'text-indigo-600',
@@ -69,7 +68,7 @@ export const useUsers = () => {
         {
             name: 'Usuarios de TPE',
             description: 'Vista general filtrada por unidad de negocio TPE',
-            href: '/dashboards/vista-general?unit=TPE',
+            href: '/dashboard_cyaal/vista-general?unit=TPE',
             icon: 'stash:user-id',
             iconBg: 'bg-emerald-100',
             iconColor: 'text-emerald-600',
@@ -78,7 +77,7 @@ export const useUsers = () => {
         {
             name: 'Usuarios de TVA',
             description: 'Vista general filtrada por unidad de negocio TVA',
-            href: '/dashboards/vista-general?unit=TVA',
+            href: '/dashboard_cyaal/vista-general?unit=TVA',
             icon: 'hugeicons:ai-user',
             iconBg: 'bg-amber-100',
             iconColor: 'text-amber-600',
@@ -87,7 +86,7 @@ export const useUsers = () => {
         {
             name: 'Usuarios de BACK OFFICE',
             description: 'Vista general filtrada por unidad de negocio BACK OFFICE',
-            href: '/dashboards/vista-general?unit=BACK_OFFICE',
+            href: '/dashboard_cyaal/vista-general?unit=BACK_OFFICE',
             icon: 'line-md:account',
             iconBg: 'bg-blue-100',
             iconColor: 'text-blue-600',
@@ -97,7 +96,7 @@ export const useUsers = () => {
 
     const getResumen = async () => {
         try {
-            const { data } = await axios.get(`${API_BASE}/resumen`)
+            const { data } = await ApiService.get(`${API_BASE}/resumen`, "")
             resumen.value = data
         } catch (error) {
             console.log('error al cargar')
@@ -107,7 +106,7 @@ export const useUsers = () => {
     const getIndicadores = async (date: string, unit?: string) => {
         try {
             const params = unit ? { unit } : {}
-            const { data } = await axios.get(`${API_BASE}/users/cards/${date}`, { params })
+            const { data } = await ApiService.get(`${API_BASE}/cards/${date}`, "", { params })
             users.value = data
         } catch (error) {
             console.log('error al cargar')
@@ -117,7 +116,7 @@ export const useUsers = () => {
     const getCharts = async (date: string, unit?: string) => {
         try {
             const params = unit ? { unit } : {}
-            const { data } = await axios.get(`${API_BASE}/users/charts/${date}`, { params })
+            const { data } = await ApiService.get(`${API_BASE}/charts/${date}`, "", { params })
             charts.value = data
             categories.value = data.charts?.categories
         } catch (error) {
@@ -128,7 +127,7 @@ export const useUsers = () => {
     const getSuspended = async (date: string, unit?: string) => {
         try {
             const params = unit ? { unit } : {}
-            const { data } = await axios.get(`${API_BASE}/users/suspended/${date}`, { params })
+            const { data } = await ApiService.get(`${API_BASE}/suspended/${date}`, "", { params })
             suspended.value = data
         } catch (error) {
             console.log('error al cargar')
@@ -138,7 +137,7 @@ export const useUsers = () => {
     const getUsersAdd = async (date: string, unit?: string) => {
         try {
             const params = unit ? { unit } : {}
-            const { data } = await axios.get(`${API_BASE}/users/users-add/${date}`, { params })
+            const { data } = await ApiService.get(`${API_BASE}/users-add/${date}`, "", { params })
             usersAdd.value = data
         } catch (error) {
             console.log('error al cargar')
@@ -148,7 +147,7 @@ export const useUsers = () => {
     const getDetails = async (type: string, date: string, unit?: string) => {
         try {
             isLoading.value = true
-            const { data } = await axios.post(`${API_BASE}/users/details`, {
+            const { data } = await ApiService.post(`${API_BASE}/details`, {
                 type,
                 date,
                 ...(unit && { unit }),
@@ -164,7 +163,7 @@ export const useUsers = () => {
     const getUsersAddDetails = async (type: string, date: string, unit?: string) => {
         try {
             isLoading.value = true
-            const { data } = await axios.post(`${API_BASE}/users/users-add-details`, {
+            const { data } = await ApiService.post(`${API_BASE}/users-add-details`, {
                 type,
                 date,
                 ...(unit && { unit }),
