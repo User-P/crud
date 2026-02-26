@@ -18,7 +18,7 @@ export const useUsers = () => {
             name: 'Vista general',
             description:
                 'KPIs principales con tendencias, sparklines y drill-down al detalle.',
-            href: 'dashboard_cyaal/users',
+            href: 'dashboards/vista-general',
             icon: 'heroicons:presentation-chart-bar',
             iconBg: 'bg-indigo-100',
             iconColor: 'text-indigo-600',

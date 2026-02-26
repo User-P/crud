@@ -29,7 +29,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
-import Header from '@/Components/Cyaal/Header.vue';
 import { useUsers } from './composables/useUsers';
 import DashboardCards from './components/DashboardCards.vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -38,7 +37,7 @@ const navigate = (href: string) => {
     router.visit(href);
 };
 
-const { resumen, getResumen, dashboardCards, byUnits } = useUsers();
+const {  getResumen, dashboardCards, byUnits } = useUsers();
 
 onMounted(() => {
     getResumen();
