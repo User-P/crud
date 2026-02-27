@@ -7,14 +7,14 @@ use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CollaborationSheet implements FromView, ShouldAutoSize, WithStyles, WithTitle
+class CollaborationSheet implements FromView, ShouldAutoSize, WithTitle, WithEvents
 {
 
     protected $start_date;
@@ -30,55 +30,56 @@ class CollaborationSheet implements FromView, ShouldAutoSize, WithStyles, WithTi
         $this->directivos = $directivos;
     }
 
-    public function styles(Worksheet $sheet)
+    public function registerEvents(): array
     {
-        $sheet->getStyle('A1')->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'size' => 14
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
-            ],
-        ]);
-        $sheet->mergeCells('A1:I1');
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                $lastCol = $sheet->getHighestColumn();
+                $rangeHeader = 'A1:' . $lastCol . '1';
+                $rangeDirectivos = 'A2:' . $lastCol . '2';
+                $rangeHeaders = 'A3:' . $lastCol . '3';
 
-        $sheet->getStyle('A2')->applyFromArray([
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
-            ],
-        ]);
-        $sheet->mergeCells('A2:I2');
-
-        $sheet->getStyle('A3:I3')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => false,
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'color' => ['rgb' => 'D9D9D9'],
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
-                ],
-            ],
-        ]);
-
-        $sheet->getRowDimension(3)->setRowHeight(22);
-        $sheet->getRowDimension(2)->setRowHeight(40);
+                $sheet->mergeCells($rangeHeader);
+                $sheet->mergeCells($rangeDirectivos);
+                $sheet->getStyle($rangeHeader)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 14],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'wrapText' => true,
+                    ],
+                ]);
+                $sheet->getStyle($rangeDirectivos)->applyFromArray([
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'wrapText' => true,
+                    ],
+                ]);
+                $sheet->getStyle($rangeHeaders)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'wrapText' => false,
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'color' => ['rgb' => 'D9D9D9'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ],
+                    ],
+                ]);
+                $sheet->getRowDimension(2)->setRowHeight(40);
+                $sheet->getRowDimension(3)->setRowHeight(22);
+            },
+        ];
     }
-
 
     public function title(): string
     {
@@ -94,20 +95,34 @@ class CollaborationSheet implements FromView, ShouldAutoSize, WithStyles, WithTi
             ->orderBy('fch_solicitud')
             ->get();
 
-        $headers = ['Semana', 'Fecha Solicitud', 'Acción', 'Respuesta', 'Número de empleado'];
+        // Columnas fijas + una columna por cada acción (el header es la acción, la celda es la respuesta)
+        $actionHeaders = $resultados->pluck('accion.descripcion')->filter()->unique()->values()->toArray();
+        $headers = array_merge(['Semana', 'Fecha Solicitud', 'Número de empleado'], $actionHeaders);
 
-        $registers = $resultados->map(function (TblResultadoAccionable $r) {
-            $fchSolicitud = $r->fch_solicitud
-                ? (is_string($r->fch_solicitud) ? Carbon::parse($r->fch_solicitud) : $r->fch_solicitud)
+        // Agrupar por alerta de seguimiento: un registro por empleado/caso
+        $grouped = $resultados->groupBy('id_alerta_seguimiento');
+        $registers = [];
+
+        foreach ($grouped as $idAlerta => $items) {
+            $first = $items->first();
+            $fchSolicitud = $first->fch_solicitud
+                ? (is_string($first->fch_solicitud) ? Carbon::parse($first->fch_solicitud) : $first->fch_solicitud)
                 : null;
-            return [
+
+            $row = [
                 'Semana' => $fchSolicitud ? (int) $fchSolicitud->format('W') : '',
                 'Fecha Solicitud' => $fchSolicitud ? $fchSolicitud->format('d-m-Y') : '',
-                'Acción' => $r->accion?->descripcion ?? '',
-                'Respuesta' => $r->accionRespuesta?->descripcion ?? '',
-                'Número de empleado' => $r->alertaSeguimiento?->cve_empleado ?? '',
+                'Número de empleado' => $first->alertaSeguimiento?->cve_empleado ?? '',
             ];
-        })->toArray();
+
+            // Para cada acción, poner la respuesta en su columna
+            $accionARespuesta = $items->keyBy(fn (TblResultadoAccionable $r) => $r->accion?->descripcion ?? '');
+            foreach ($actionHeaders as $actionHeader) {
+                $row[$actionHeader] = $accionARespuesta->get($actionHeader)?->accionRespuesta?->descripcion ?? '';
+            }
+
+            $registers[] = $row;
+        }
 
         return view('exports.actionables', [
             'sheetTitle' => $this->type['tipo_accionable'] ?? 'Accionables',
