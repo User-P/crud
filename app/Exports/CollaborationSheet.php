@@ -3,6 +3,7 @@
 namespace App\Exports\Monitoring;
 
 use App\Models\TblResultadoAccionable;
+use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -96,9 +97,12 @@ class CollaborationSheet implements FromView, ShouldAutoSize, WithStyles, WithTi
         $headers = ['Semana', 'Fecha Solicitud', 'Acción', 'Respuesta', 'Número de empleado'];
 
         $registers = $resultados->map(function (TblResultadoAccionable $r) {
+            $fchSolicitud = $r->fch_solicitud
+                ? (is_string($r->fch_solicitud) ? Carbon::parse($r->fch_solicitud) : $r->fch_solicitud)
+                : null;
             return [
-                'Semana' => $r->fch_solicitud ? (int) $r->fch_solicitud->format('W') : '',
-                'Fecha Solicitud' => $r->fch_solicitud?->format('d-m-Y') ?? '',
+                'Semana' => $fchSolicitud ? (int) $fchSolicitud->format('W') : '',
+                'Fecha Solicitud' => $fchSolicitud ? $fchSolicitud->format('d-m-Y') : '',
                 'Acción' => $r->accion?->descripcion ?? '',
                 'Respuesta' => $r->accionRespuesta?->descripcion ?? '',
                 'Número de empleado' => $r->alertaSeguimiento?->cve_empleado ?? '',
