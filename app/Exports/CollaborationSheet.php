@@ -7,12 +7,13 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CollaborationSheet implements FromView, ShouldAutoSize,  WithStyles
+class CollaborationSheet implements FromView, ShouldAutoSize, WithStyles, WithTitle
 {
 
     protected $start_date;
@@ -78,22 +79,37 @@ class CollaborationSheet implements FromView, ShouldAutoSize,  WithStyles
     }
 
 
+    public function title(): string
+    {
+        return $this->type['tipo_accionable'] ?? 'Hoja';
+    }
+
     public function view(): View
     {
-
-        // traen relacion id_alerta_seguimiento en ella esta cve_empleado
-        $resultados = collect(TblResultadoAccionable::query()
+        $resultados = TblResultadoAccionable::query()
+            ->with(['accion', 'accionRespuesta', 'alertaSeguimiento'])
             ->whereBetween('fch_solicitud', [$this->start_date, $this->end_date])
             ->where('uuid_tipo_accionable', $this->type['uuid_tipo_accionable'])
             ->orderBy('fch_solicitud')
-            ->get())->groupBy('id_alerta_seguimiento');
+            ->get();
 
-        dd($resultados);
+        $headers = ['Semana', 'Fecha Solicitud', 'Acción', 'Respuesta', 'Número de empleado'];
 
-        // return view('exports.actionables', [
-        //     'directivos' => $this->directivos,
-        //     'headers' => $headers,
-        //     'registers' => $registers
-        // ]);
+        $registers = $resultados->map(function (TblResultadoAccionable $r) {
+            return [
+                'Semana' => $r->fch_solicitud ? (int) $r->fch_solicitud->format('W') : '',
+                'Fecha Solicitud' => $r->fch_solicitud?->format('d-m-Y') ?? '',
+                'Acción' => $r->accion?->descripcion ?? '',
+                'Respuesta' => $r->accionRespuesta?->descripcion ?? '',
+                'Número de empleado' => $r->alertaSeguimiento?->cve_empleado ?? '',
+            ];
+        })->toArray();
+
+        return view('exports.actionables', [
+            'sheetTitle' => $this->type['tipo_accionable'] ?? 'Accionables',
+            'directivos' => $this->directivos,
+            'headers' => $headers,
+            'registers' => $registers,
+        ]);
     }
 }

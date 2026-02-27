@@ -2,9 +2,9 @@
 
 namespace App\Exports;
 
+use App\Exports\Monitoring\CollaborationSheet;
 use App\Models\CatDirectivo;
 use App\Models\CatTiposAccionables;
-use App\Models\TblResultadoAccionable;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
