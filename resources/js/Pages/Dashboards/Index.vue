@@ -5,16 +5,22 @@
     ]">
 
         <div class="space-y-12">
+            <!-- Acceso a vista consolidada -->
+            <a
+                href="/dashboards/vista-consolidada"
+                class="inline-flex items-center gap-2 rounded-xl border border-(--th-border) bg-(--th-input-bg) px-4 py-2.5 text-sm font-medium text-(--th-text-primary) shadow-sm transition-colors hover:bg-(--th-item-hover-bg) hover:text-(--th-item-active-color) focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
+                @click.prevent="navigate('/dashboards/vista-consolidada')"
+            >
+                <Icon icon="heroicons:squares-2x2" class="h-5 w-5" aria-hidden="true" />
+                Ver todo en una sola vista
+            </a>
+
             <!-- Bento: por tema -->
-            <section class="dashboard-bento">
+            <section >
                 <p class="mb-5 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
                     Explorar por tema
                 </p>
-                <div class="dashboard-bento-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-                    <div v-for="(card, i) in dashboardCards" :key="card.name" :class="i === 0 ? 'lg:row-span-2' : ''">
-                        <DashboardCards v-bind="card" :featured="i === 0" @navigate="navigate" />
-                    </div>
-                </div>
+                <DashboardBentoGrid :cards="dashboardCards" mode="navigate" @navigate="navigate" />
             </section>
 
             <!-- Unidades: strip horizontal -->
@@ -57,7 +63,7 @@ import { onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import { useUsers } from './composables/useUsers'
-import DashboardCards from './components/DashboardCards.vue'
+import DashboardBentoGrid from './components/DashboardBentoGrid.vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const navigate = (href: string) => {

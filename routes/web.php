@@ -103,6 +103,9 @@ Route::middleware('auth')->group(function () {
             'unit' => $request->query('unit'),
         ]);
     })->name('dashboards.usuarios-nuevos');
+    Route::get('/dashboards/vista-consolidada', function () {
+        return Inertia::render('Dashboards/VistaConsolidada');
+    })->name('dashboards.vista-consolidada');
 
     // API Cyaal: vista general y por unidad de negocio (?unit=EKT)
     Route::prefix('dashboard_cyaal')->group(function () {

@@ -15,6 +15,7 @@
             <template v-else>
 
                 <div class="grid gap-5 sm:grid-cols-3">
+
                     <MetricCard v-for="card in primaryCards" :key="card.id" :label="card.label" :value="card.value"
                         :icon="card.icon" :variant="card.variant" class="transition-shadow"
                         :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === card.id }"
@@ -78,7 +79,7 @@
                                 <template #body="{ data }">
                                     <span class="tabular-nums font-semibold">{{ formatValor(data.valor) }}</span>
                                     <span v-if="data.unidad" class="ml-1 text-xs text-(--th-text-muted)">{{ data.unidad
-                                    }}</span>
+                                        }}</span>
                                 </template>
                             </Column>
                             <Column v-if="hasPorcentaje" field="porcentaje" header="%" sortable />
