@@ -16,10 +16,10 @@
 
             <!-- ── Vista general ── -->
             <section :id="sectionIds.vistaGeneral" class="scroll-mt-6">
-                <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) border-b border-(--th-border) pb-2">
-                    Vista general
-                </h2>
-                <div class="space-y-6">
+                <div class="consolidated-section rounded-r-2xl border border-(--th-border) border-l-4 border-l-[#0b4261] bg-(--th-input-bg)/50 pl-6 pr-5 py-5 dark:border-l-[#5bb56a] space-y-6">
+                    <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) pb-2">
+                        Vista general
+                    </h2>
                     <div class="grid gap-5 sm:grid-cols-3">
                         <MetricCard v-for="card in primaryCards" :key="card.id" :label="card.label" :value="card.value"
                             :icon="card.icon" :variant="card.variant" class="transition-shadow"
@@ -94,9 +94,10 @@
 
             <!-- ── Usuarios activos / inactivos ── -->
             <section :id="sectionIds.activosInactivos" class="scroll-mt-6">
-                <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) border-b border-(--th-border) pb-2">
-                    Usuarios activos vs inactivos
-                </h2>
+                <div class="consolidated-section rounded-r-2xl border border-(--th-border) border-l-4 border-l-emerald-500 bg-(--th-input-bg)/50 pl-6 pr-5 py-5 dark:border-l-emerald-400">
+                    <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) pb-2">
+                        Usuarios activos vs inactivos
+                    </h2>
                 <div class="space-y-8">
                     <div
                         class="rounded-xl border border-(--th-border) bg-(--th-input-bg)/80 px-4 py-3 text-sm text-(--th-text-secondary) backdrop-blur-sm">
@@ -130,13 +131,15 @@
                         </ExpandableChart>
                     </div>
                 </div>
+                </div>
             </section>
 
             <!-- ── Días suspendidos ── -->
             <section :id="sectionIds.diasSuspendidos" class="scroll-mt-6">
-                <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) border-b border-(--th-border) pb-2">
-                    Días usuarios suspendidos
-                </h2>
+                <div class="consolidated-section rounded-r-2xl border border-(--th-border) border-l-4 border-l-amber-500 bg-(--th-input-bg)/50 pl-6 pr-5 py-5 dark:border-l-amber-400">
+                    <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) pb-2">
+                        Días usuarios suspendidos
+                    </h2>
                 <div class="space-y-8">
                     <div
                         class="rounded-xl border border-(--th-border) bg-(--th-input-bg)/80 px-4 py-3 text-sm text-(--th-text-secondary) backdrop-blur-sm">
@@ -164,13 +167,15 @@
                             :colors="['#eab308', '#f97316', '#ef4444']" />
                     </ExpandableChart>
                 </div>
+                </div>
             </section>
 
             <!-- ── Usuarios nuevos ── -->
             <section :id="sectionIds.usuariosNuevos" class="scroll-mt-6">
-                <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) border-b border-(--th-border) pb-2">
-                    Usuarios nuevos
-                </h2>
+                <div class="consolidated-section rounded-r-2xl border border-(--th-border) border-l-4 border-l-blue-500 bg-(--th-input-bg)/50 pl-6 pr-5 py-5 dark:border-l-blue-400">
+                    <h2 class="mb-6 text-lg font-semibold text-(--th-text-primary) pb-2">
+                        Usuarios nuevos
+                    </h2>
                 <div class="space-y-8">
                     <div v-if="usersAdd?.cards" class="grid gap-4 sm:grid-cols-3">
                         <MetricCard v-for="card in usersAdd.cards" :key="card.id" :label="card.label"
@@ -189,13 +194,15 @@
                         </div>
                     </ExpandableChart>
                 </div>
+                </div>
             </section>
 
             <!-- ── Por unidad de negocio ── -->
             <section :id="sectionIds.unidades" class="scroll-mt-6">
-                <h2 class="mb-5 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
-                    Por unidad de negocio
-                </h2>
+                <div class="consolidated-section rounded-r-2xl border border-(--th-border) border-l-4 border-l-[#0b4261] bg-(--th-input-bg)/50 pl-6 pr-5 py-5 dark:border-l-[#5bb56a]">
+                    <h2 class="mb-5 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
+                        Por unidad de negocio
+                    </h2>
                 <div class="flex flex-wrap gap-3">
                     <a v-for="card in byUnits" :key="card.name" :href="card.href"
                         class="unit-pill group flex items-center gap-3 rounded-2xl border border-white/20 bg-white/70 px-5 py-3.5 shadow-md backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/90 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset) dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
@@ -212,6 +219,7 @@
                             class="h-4 w-4 shrink-0 text-(--th-item-active-color) transition-transform group-hover:translate-x-0.5"
                             aria-hidden="true" />
                     </a>
+                </div>
                 </div>
             </section>
         </div>
