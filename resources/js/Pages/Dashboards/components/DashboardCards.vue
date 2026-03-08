@@ -1,6 +1,6 @@
 <template>
     <a :href="href"
-        class="glass-card group flex flex-col rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
+        class="cosmos-surface group flex flex-col rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
         @click.prevent="onNavigate(href)">
         <div class="flex items-center justify-between">
             <div class="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105 backdrop-blur"

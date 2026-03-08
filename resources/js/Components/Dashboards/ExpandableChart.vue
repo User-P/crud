@@ -9,7 +9,7 @@
         />
         <!-- Card: normal o flotante -->
         <div
-            class="glass-card rounded-2xl transition-all duration-200"
+            class="cosmos-surface rounded-2xl transition-all duration-200"
             :class="[
                 expanded
                     ? 'fixed inset-4 z-10 flex flex-col p-6 sm:inset-6 md:inset-8'

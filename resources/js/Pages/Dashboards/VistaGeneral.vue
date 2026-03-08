@@ -13,7 +13,7 @@
                         :initial-range="{ start: '2025-01-01', end: '2025-01-31' }"
                         initial-type="custom"
                         select-disabled
-                        class="glass-card rounded-xl"
+                        class="cosmos-surface rounded-xl"
                     />
                 </template>
             </DashboardHeader>
@@ -28,7 +28,7 @@
                     <button
                         v-if="heroCard"
                         type="button"
-                        class="glass-card group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+                        class="cosmos-surface group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
                         @click="openDetail(heroCard)"
                     >
                         <div class="flex items-center gap-3">

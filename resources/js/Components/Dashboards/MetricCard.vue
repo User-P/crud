@@ -1,7 +1,7 @@
 <template>
     <button
         type="button"
-        class="glass-card group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
+        class="cosmos-surface group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
         @click="$emit('click')"
     >
         <div class="flex items-start justify-between gap-2">

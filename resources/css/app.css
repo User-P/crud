@@ -47,6 +47,22 @@
 .glass { background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
 .glass-card { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px rgba(99,102,241,0.1), 0 2px 8px rgba(0,0,0,0.06); }
 .glass-card:hover { background: rgba(255,255,255,0.75); box-shadow: 0 12px 40px rgba(99,102,241,0.1), 0 4px 12px rgba(0,0,0,0.06); }
+/* Clase de sistema: superficie glass por defecto (usa variables del tema en .cosmos-app) */
+.cosmos-app .cosmos-surface {
+    background: var(--th-surface-glass-bg) !important;
+    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    border: 1px solid var(--th-surface-glass-border) !important;
+    box-shadow: var(--th-surface-glass-shadow) !important;
+    transition: box-shadow 200ms, border-color 200ms, background 200ms !important;
+}
+.cosmos-app .cosmos-surface:hover {
+    box-shadow: var(--th-surface-glass-shadow-hover) !important;
+    border-color: rgba(139, 92, 246, 0.2) !important;
+}
+[data-theme="dark"] .cosmos-app .cosmos-surface:hover {
+    border-color: rgba(139, 92, 246, 0.18) !important;
+}
 .glass-sidebar { background: rgba(255,255,255,0.45); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-right: 1px solid rgba(255,255,255,0.5); box-shadow: 4px 0 24px rgba(99,102,241,0.12); }
 .glass-nav { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 24px rgba(99,102,241,0.1); }
 .glass-drawer { background: rgba(255,255,255,0.75); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-left: 1px solid rgba(255,255,255,0.5); box-shadow: -8px 0 40px rgba(15,23,42,0.08); }
@@ -151,6 +167,13 @@
     /* kbd en búsqueda */
     --th-kbd-bg: rgba(255, 255, 255, 0.55);
     --th-kbd-border: rgba(139, 92, 246, 0.15);
+
+    /* Superficie glass por defecto (cards, panels, etc.) */
+    --th-surface-glass-bg: rgba(255, 255, 255, 0.6);
+    --th-surface-glass-border: rgba(139, 92, 246, 0.1);
+    --th-surface-glass-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+    --th-surface-glass-shadow-hover: 0 8px 36px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+    --th-surface-glass-blur: 20px;
 }
 
 /* === Tema oscuro === */
@@ -224,6 +247,13 @@
 
     --th-kbd-bg: rgba(255, 255, 255, 0.05);
     --th-kbd-border: rgba(255, 255, 255, 0.1);
+
+    /* Superficie glass en dark */
+    --th-surface-glass-bg: rgba(13, 13, 26, 0.72);
+    --th-surface-glass-border: rgba(255, 255, 255, 0.07);
+    --th-surface-glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+    --th-surface-glass-shadow-hover: 0 12px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1);
+    --th-surface-glass-blur: 24px;
 }
 
 /* ── Fondo principal ── */
@@ -587,17 +617,15 @@
     overflow: hidden !important;
 }
 .cosmos-app .p-datatable-table-container {
-    background: rgba(255, 255, 255, 0.55) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(139, 92, 246, 0.1) !important;
+    background: var(--th-surface-glass-bg) !important;
+    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    border: 1px solid var(--th-surface-glass-border) !important;
     border-radius: 1rem !important;
-    box-shadow: 0 4px 32px rgba(99, 102, 241, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: var(--th-surface-glass-shadow) !important;
 }
 [data-theme="dark"] .cosmos-app .p-datatable-table-container {
-    background: rgba(13, 13, 26, 0.7) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: var(--th-surface-glass-shadow) !important;
 }
 .cosmos-app .p-datatable-header {
     background: transparent !important;
@@ -773,33 +801,75 @@
 
 /* ── Card ── */
 .cosmos-app .p-card {
-    background: rgba(255, 255, 255, 0.6) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(139, 92, 246, 0.1) !important;
+    background: var(--th-surface-glass-bg) !important;
+    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    border: 1px solid var(--th-surface-glass-border) !important;
     border-radius: 1rem !important;
-    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: var(--th-surface-glass-shadow) !important;
     transition: box-shadow 200ms, border-color 200ms !important;
     color: var(--th-text-primary) !important;
 }
 .cosmos-app .p-card:hover {
     border-color: rgba(139, 92, 246, 0.2) !important;
-    box-shadow: 0 8px 36px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
-}
-[data-theme="dark"] .cosmos-app .p-card {
-    background: rgba(13, 13, 26, 0.72) !important;
-    border-color: rgba(255, 255, 255, 0.07) !important;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: var(--th-surface-glass-shadow-hover) !important;
 }
 [data-theme="dark"] .cosmos-app .p-card:hover {
     border-color: rgba(139, 92, 246, 0.18) !important;
-    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
 }
 .cosmos-app .p-card-header { border-bottom: 1px solid var(--th-border) !important; padding: 1.25rem 1.5rem !important; }
 .cosmos-app .p-card-body { padding: 1.5rem !important; }
 .cosmos-app .p-card-title { color: var(--th-text-primary) !important; font-size: 1rem !important; font-weight: 600 !important; }
 .cosmos-app .p-card-subtitle { color: var(--th-text-secondary) !important; font-size: 0.875rem !important; }
 .cosmos-app .p-card-footer { border-top: 1px solid var(--th-border) !important; padding: 1rem 1.5rem !important; }
+
+/* ── Panel ── */
+.cosmos-app .p-panel {
+    background: var(--th-surface-glass-bg) !important;
+    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    border: 1px solid var(--th-surface-glass-border) !important;
+    border-radius: 1rem !important;
+    box-shadow: var(--th-surface-glass-shadow) !important;
+    overflow: hidden !important;
+    color: var(--th-text-primary) !important;
+}
+.cosmos-app .p-panel-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--th-border) !important;
+    padding: 1rem 1.25rem !important;
+}
+.cosmos-app .p-panel-title { color: var(--th-text-primary) !important; font-weight: 600 !important; }
+.cosmos-app .p-panel-content {
+    background: transparent !important;
+    padding: 1rem 1.25rem !important;
+    color: var(--th-text-primary) !important;
+}
+.cosmos-app .p-panel-footer {
+    border-top: 1px solid var(--th-border) !important;
+    padding: 0.75rem 1.25rem !important;
+}
+
+/* ── Fieldset ── */
+.cosmos-app .p-fieldset {
+    background: var(--th-surface-glass-bg) !important;
+    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
+    border: 1px solid var(--th-surface-glass-border) !important;
+    border-radius: 1rem !important;
+    box-shadow: var(--th-surface-glass-shadow) !important;
+    overflow: hidden !important;
+    color: var(--th-text-primary) !important;
+}
+.cosmos-app .p-fieldset-legend {
+    background: transparent !important;
+    border: none !important;
+    color: var(--th-text-primary) !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 0 !important;
+}
+.cosmos-app .p-fieldset-content { padding: 1rem 0 !important; }
+.cosmos-app .p-fieldset-toggleable .p-fieldset-legend { padding: 0.75rem 0 !important; }
 
 /* ── Tabs ── */
 .cosmos-app .p-tabs { background: transparent !important; }
