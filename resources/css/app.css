@@ -1,111 +1,28 @@
 @import "tailwindcss";
 
-/* Declara el orden de capas para que los overrides de PrimeVue
-   y las utilidades de Tailwind no colisionen */
+/* Capas: PrimeVue y Tailwind sin colisionar */
 @layer tailwind-base, primevue, tailwind-utilities;
 
-/* Hace que la variante dark: de Tailwind use nuestro toggle (data-theme en html) */
+/* Variante dark según data-theme en html (toggle manual) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* ========== Glassmorphism legacy (otros componentes) ========== */
-@theme {
-    --color-glass: rgba(255, 255, 255, 0.65);
-    --color-glass-border: rgba(255, 255, 255, 0.35);
-    --color-glass-strong: rgba(255, 255, 255, 0.85);
-    --color-glass-sidebar: rgba(255, 255, 255, 0.55);
-    --color-glass-nav: rgba(255, 255, 255, 0.7);
-    --color-glass-card: rgba(255, 255, 255, 0.6);
-    --color-glass-hover: rgba(255, 255, 255, 0.9);
-
-}
+/* =============================================================================
+   TEMA — Variables CSS (--th-* = theme, --p-* = PrimeVue)
+   Para migrar: copia el bloque :root y [data-theme="dark"] a tu proyecto.
+   ============================================================================= */
 
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.35);
-    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
-    --glass-blur: 16px;
-    --app-bg-start: #ddd6fe;
-    --app-bg-mid: #e0e7ff;
-    --app-bg-end: #cffafe;
-}
-
-.glass-app-bg {
-    background: linear-gradient(135deg, var(--app-bg-start) 0%, var(--app-bg-mid) 50%, var(--app-bg-end) 100%);
-    min-height: 100vh;
-    position: relative;
-}
-
-.glass-app-bg::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle at 1px 1px, rgba(99, 102, 241, 0.06) 1px, transparent 0);
-    background-size: 24px 24px;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.glass { background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
-.glass-card { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px rgba(99,102,241,0.1), 0 2px 8px rgba(0,0,0,0.06); }
-.glass-card:hover { background: rgba(255,255,255,0.75); box-shadow: 0 12px 40px rgba(99,102,241,0.1), 0 4px 12px rgba(0,0,0,0.06); }
-
-
-.glass-sidebar { background: rgba(255,255,255,0.45); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-right: 1px solid rgba(255,255,255,0.5); box-shadow: 4px 0 24px rgba(99,102,241,0.12); }
-.glass-nav { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 24px rgba(99,102,241,0.1); }
-.glass-drawer { background: rgba(255,255,255,0.75); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-left: 1px solid rgba(255,255,255,0.5); box-shadow: -8px 0 40px rgba(15,23,42,0.08); }
-/* Drawer del sistema (DetailDrawer): overlay y panel con tema */
-.cosmos-drawer-overlay,
-.drawer-overlay {
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-[data-theme="dark"] .cosmos-drawer-overlay,
-[data-theme="dark"] .drawer-overlay {
-    background: rgba(0, 0, 0, 0.6);
-}
-.cosmos-drawer-panel,
-.drawer-panel {
-    background: var(--th-sidebar-bg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-left: 1px solid var(--th-sidebar-border);
-    box-shadow: -8px 0 40px rgba(99, 102, 241, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.03);
-}
-[data-theme="dark"] .cosmos-drawer-panel,
-[data-theme="dark"] .drawer-panel {
-    box-shadow: -12px 0 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.08);
-}
-.cosmos-drawer-header,
-.drawer-header {
-    border-color: var(--th-border);
-}
-.glass-input { background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.5); }
-.glass-input:focus { background: rgba(255,255,255,0.9); border-color: rgba(99,102,241,0.4); outline: none; }
-
-/* PrimeVue: estilos base sustituidos por overrides con tema más abajo (usa --th-*) */
-
-/* ========================================================
-   SISTEMA DE TEMAS — light + dark
-   ======================================================== */
-
-/* === Tema claro (predeterminado) === */
-:root {
-    /* Fondo — gradiente suave y sofisticado */
     --th-app-bg: linear-gradient(145deg, #f0eeff 0%, #f5f3ff 30%, #eef2ff 65%, #f0f9ff 100%);
     --th-dot: rgba(99, 102, 241, 0.04);
 
-    /* Sidebar */
     --th-sidebar-bg: rgba(255, 255, 255, 0.78);
     --th-sidebar-border: rgba(139, 92, 246, 0.12);
     --th-sidebar-shadow: 4px 0 32px rgba(99, 102, 241, 0.08), 1px 0 0 rgba(139, 92, 246, 0.06);
 
-    /* Navbar */
     --th-nav-bg: rgba(255, 255, 255, 0.72);
     --th-nav-border: rgba(139, 92, 246, 0.08);
     --th-nav-shadow: 0 1px 0 rgba(139, 92, 246, 0.08), 0 4px 32px rgba(99, 102, 241, 0.06);
 
-    /* Items de navegación */
     --th-item-color: #475569;
     --th-item-hover-bg: rgba(255, 255, 255, 0.6);
     --th-item-hover-color: #0f172a;
@@ -115,23 +32,19 @@
     --th-icon-color: #94a3b8;
     --th-icon-active-color: #7c3aed;
 
-    /* Subitems */
     --th-child-color: #64748b;
     --th-child-hover-color: #0f172a;
     --th-child-active-color: #6d28d9;
 
-    /* Botones genéricos */
     --th-btn-color: #64748b;
     --th-btn-hover-bg: rgba(255, 255, 255, 0.65);
     --th-btn-hover-color: #0f172a;
 
-    /* Separadores */
     --th-border: rgba(139, 92, 246, 0.1);
     --th-group-label: #94a3b8;
     --th-group-line: rgba(148, 163, 184, 0.3);
     --th-divider: rgba(203, 213, 225, 0.5);
 
-    /* Input */
     --th-input-bg: rgba(255, 255, 255, 0.72);
     --th-input-border: rgba(255, 255, 255, 0.6);
     --th-input-text: #1e293b;
@@ -139,7 +52,6 @@
     --th-input-focus-bg: rgba(255, 255, 255, 0.92);
     --th-input-focus-border: rgba(139, 92, 246, 0.45);
 
-    /* Menú PrimeVue */
     --th-menu-bg: rgba(255, 255, 255, 0.97);
     --th-menu-border: rgba(139, 92, 246, 0.15);
     --th-menu-shadow: 0 12px 40px rgba(99, 102, 241, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -153,11 +65,9 @@
     --th-text-secondary: #64748b;
     --th-text-muted: #94a3b8;
 
-    /* Logo */
     --th-logo-text: #0f172a;
     --th-logo-sub: rgba(109, 40, 217, 0.65);
 
-    /* Breadcrumb / título */
     --th-title-gradient: linear-gradient(135deg, #1e293b 0%, #7c3aed 55%, #4f46e5 100%);
     --th-crumb-link: #64748b;
     --th-crumb-hover: #7c3aed;
@@ -168,7 +78,6 @@
     --th-ring-offset: #f8fafc;
     --th-status-ring: white;
     --th-notification-badge: #7c3aed;
-
     --th-kbd-bg: rgba(255, 255, 255, 0.55);
     --th-kbd-border: rgba(139, 92, 246, 0.15);
 
@@ -178,7 +87,6 @@
     --p-focus-ring-color: rgba(139, 92, 246, 0.35);
 }
 
-/* === Tema oscuro === */
 [data-theme="dark"] {
     --th-app-bg: #060611;
     --th-dot: rgba(139, 92, 246, 0.07);
@@ -246,19 +154,19 @@
     --th-ring-offset: #060611;
     --th-status-ring: #060611;
     --th-notification-badge: #8b5cf6;
-
     --th-kbd-bg: rgba(255, 255, 255, 0.05);
     --th-kbd-border: rgba(255, 255, 255, 0.1);
 
-
-    /* PrimeVue: tema oscuro para todos los componentes */
     --p-primary-color: #a78bfa;
     --p-primary-contrast-color: #2e1065;
     --p-primary-hover-color: #c4b5fd;
     --p-focus-ring-color: rgba(167, 139, 250, 0.4);
 }
 
-/* ── Fondo principal ── */
+/* =============================================================================
+   APP SHELL — Contenedor principal + blobs (solo dark)
+   ============================================================================= */
+
 .cosmos-app {
     background: var(--th-app-bg);
     min-height: 100vh;
@@ -275,73 +183,6 @@
     z-index: 0;
 }
 
-/* ========== DEFAULTS DEL TEMA: sin clases en componentes ==========
-   Color y tipografía por elemento dentro del app y del drawer.
-   Así no hace falta escribir cosmos-* en cada componente. */
-.cosmos-app,
-.drawer-panel {
-    color: var(--th-text-primary);
-}
-.cosmos-app p,
-.drawer-panel p {
-    color: var(--th-text-secondary);
-}
-.cosmos-app small,
-.drawer-panel small {
-    color: var(--th-text-muted);
-}
-.cosmos-app h1, .cosmos-app h2, .cosmos-app h3, .cosmos-app h4, .cosmos-app h5, .cosmos-app h6,
-.drawer-panel h1, .drawer-panel h2, .drawer-panel h3, .drawer-panel h4, .drawer-panel h5, .drawer-panel h6 {
-    color: var(--th-text-primary);
-}
-.cosmos-app section h3,
-.drawer-panel section h3 {
-    color: var(--th-group-label);
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-.cosmos-app strong,
-.drawer-panel strong {
-    color: var(--th-text-primary);
-    font-weight: 600;
-}
-/* Tablas: th y td con colores del tema */
-.cosmos-app th, .drawer-panel th {
-    color: var(--th-text-secondary);
-}
-.cosmos-app td, .drawer-panel td {
-    color: inherit;
-}
-/* Caja de icono (headers, hero cards): mismo estilo sin nombre cosmos */
-.cosmos-app .cosmos-icon-box,
-.cosmos-app .icon-box,
-.drawer-panel .icon-box {
-    background: rgba(139, 92, 246, 0.12);
-    color: var(--th-item-active-color);
-}
-[data-theme="dark"] .cosmos-app .cosmos-icon-box,
-[data-theme="dark"] .cosmos-app .icon-box,
-[data-theme="dark"] .drawer-panel .icon-box {
-    background: rgba(139, 92, 246, 0.18);
-    color: var(--th-icon-active-color);
-}
-/* Botón genérico (drawer close, nav): hereda del tema */
-.drawer-panel button,
-.drawer-panel button.ghost-btn,
-.cosmos-app .cosmos-btn {
-    color: var(--th-btn-color);
-    transition: background-color 150ms, color 150ms;
-}
-.drawer-panel button:hover,
-.drawer-panel button.ghost-btn:hover,
-.cosmos-app .cosmos-btn:hover {
-    background-color: var(--th-btn-hover-bg);
-    color: var(--th-btn-hover-color);
-}
-
-/* ── Blobs animados (solo modo oscuro) ── */
 .cosmos-blob {
     position: fixed;
     border-radius: 50%;
@@ -349,7 +190,6 @@
     z-index: 0;
     display: none;
 }
-
 [data-theme="dark"] .cosmos-blob { display: block; }
 
 .cosmos-blob-1 {
@@ -371,14 +211,44 @@
     animation: cosmos-pulse 16s ease-in-out infinite;
     animation-delay: -5s;
 }
-
 @keyframes cosmos-pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.1); opacity: 0.75; }
 }
 
-/* ── Sidebar ── */
-.cosmos-sidebar,
+/* =============================================================================
+   TIPOGRAFÍA Y COLORES POR DEFECTO (app + drawer)
+   ============================================================================= */
+
+.cosmos-app,
+.drawer-panel {
+    color: var(--th-text-primary);
+}
+.cosmos-app p, .drawer-panel p { color: var(--th-text-secondary); }
+.cosmos-app small, .drawer-panel small { color: var(--th-text-muted); }
+.cosmos-app h1, .cosmos-app h2, .cosmos-app h3, .cosmos-app h4, .cosmos-app h5, .cosmos-app h6,
+.drawer-panel h1, .drawer-panel h2, .drawer-panel h3, .drawer-panel h4, .drawer-panel h5, .drawer-panel h6 {
+    color: var(--th-text-primary);
+}
+.cosmos-app section h3, .drawer-panel section h3 {
+    color: var(--th-group-label);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.cosmos-app strong, .drawer-panel strong { color: var(--th-text-primary); font-weight: 600; }
+.cosmos-app th, .drawer-panel th { color: var(--th-text-secondary); }
+.cosmos-app td, .drawer-panel td { color: inherit; }
+
+.cosmos-app .text-primary, .drawer-panel .text-primary { color: var(--th-text-primary) !important; }
+.cosmos-app .text-secondary, .drawer-panel .text-secondary { color: var(--th-text-secondary) !important; }
+.cosmos-app .text-muted, .drawer-panel .text-muted { color: var(--th-text-muted) !important; }
+
+/* =============================================================================
+   LAYOUT — Sidebar y Navbar (glass)
+   ============================================================================= */
+
 .cosmos-app .sidebar {
     background: var(--th-sidebar-bg);
     backdrop-filter: blur(24px);
@@ -387,8 +257,6 @@
     box-shadow: var(--th-sidebar-shadow);
 }
 
-/* ── Navbar ── */
-.cosmos-nav,
 .cosmos-app .nav {
     background: var(--th-nav-bg);
     backdrop-filter: blur(24px);
@@ -397,38 +265,33 @@
     box-shadow: var(--th-nav-shadow);
 }
 
-/* ── Botón genérico con tema ── */
-.cosmos-btn,
-.cosmos-app .btn {
+/* =============================================================================
+   UI — Botones, navegación, búsqueda, breadcrumb, títulos
+   ============================================================================= */
+
+.cosmos-app .btn,
+.drawer-panel button {
     color: var(--th-btn-color);
     transition: background-color 150ms, color 150ms;
 }
-.cosmos-btn:hover,
-.cosmos-app .btn:hover {
+.cosmos-app .btn:hover,
+.drawer-panel button:hover {
     background-color: var(--th-btn-hover-bg);
     color: var(--th-btn-hover-color);
 }
 
-/* ── Items de navegación ── */
-.cosmos-nav-item,
-.cosmos-app .nav-item {
-    color: var(--th-item-color);
-}
-.cosmos-nav-item:hover,
+.cosmos-app .nav-item { color: var(--th-item-color); }
 .cosmos-app .nav-item:hover {
     background-color: var(--th-item-hover-bg);
     color: var(--th-item-hover-color);
 }
 
-/* Item activo con acento izquierdo y glow */
-.cosmos-item-active,
 .cosmos-app .item-active {
     background: var(--th-item-active-bg);
     color: var(--th-item-active-color);
     position: relative;
     overflow: hidden;
 }
-.cosmos-item-active::before,
 .cosmos-app .item-active::before {
     content: '';
     position: absolute;
@@ -438,17 +301,13 @@
     box-shadow: 0 0 10px var(--th-item-active-glow);
 }
 
-/* Iconos */
-.cosmos-icon, .cosmos-app .nav-icon { color: var(--th-icon-color); }
-.cosmos-icon-active, .cosmos-app .nav-icon-active { color: var(--th-icon-active-color); }
+.cosmos-app .nav-icon { color: var(--th-icon-color); }
+.cosmos-app .nav-icon-active { color: var(--th-icon-active-color); }
 
-/* Subitems */
-.cosmos-child-item, .cosmos-app .child-item { color: var(--th-child-color); }
-.cosmos-child-item:hover, .cosmos-app .child-item:hover { color: var(--th-child-hover-color); }
-.cosmos-child-active, .cosmos-app .child-active { color: var(--th-child-active-color); font-weight: 500; }
+.cosmos-app .child-item { color: var(--th-child-color); }
+.cosmos-app .child-item:hover { color: var(--th-child-hover-color); }
+.cosmos-app .child-active { color: var(--th-child-active-color); font-weight: 500; }
 
-/* ── Input de búsqueda ── */
-.cosmos-input,
 .cosmos-app .search-input {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
@@ -456,9 +315,7 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-.cosmos-input::placeholder,
 .cosmos-app .search-input::placeholder { color: var(--th-input-placeholder) !important; }
-.cosmos-input:focus,
 .cosmos-app .search-input:focus {
     background: var(--th-input-focus-bg) !important;
     border-color: var(--th-input-focus-border) !important;
@@ -466,7 +323,6 @@
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
 }
 
-.cosmos-gradient-text,
 .cosmos-app .gradient-text {
     background: var(--th-title-gradient);
     -webkit-background-clip: text;
@@ -474,42 +330,40 @@
     background-clip: text;
 }
 
-/* ── Clases semánticas de color ── */
-.cosmos-logo-text, .cosmos-app .logo-text { color: var(--th-logo-text); }
-.cosmos-logo-sub, .cosmos-app .logo-sub { color: var(--th-logo-sub); }
-.cosmos-group-label, .cosmos-app .group-label { color: var(--th-group-label); }
-.cosmos-group-line, .cosmos-app .group-line { background-color: var(--th-group-line); }
-.cosmos-separator, .cosmos-app .separator { background-color: var(--th-divider); }
-.cosmos-user-name, .cosmos-app .user-name { color: var(--th-text-primary); }
-.cosmos-user-sub, .cosmos-app .user-sub { color: var(--th-text-muted); }
-.cosmos-crumb-link, .cosmos-app .crumb-link { color: var(--th-crumb-link); }
-.cosmos-crumb-link:hover, .cosmos-app .crumb-link:hover { color: var(--th-crumb-hover); }
-.cosmos-crumb-current, .cosmos-app .crumb-current { color: var(--th-crumb-current); }
-.cosmos-crumb-separator, .cosmos-app .crumb-separator { color: var(--th-crumb-separator); }
-.cosmos-subtitle, .cosmos-app .subtitle { color: var(--th-subtitle); }
-/* Texto por rol (uso en cualquier componente) */
-.cosmos-text-primary { color: var(--th-text-primary) !important; }
-.cosmos-text-secondary { color: var(--th-text-secondary) !important; }
-.cosmos-text-muted { color: var(--th-text-muted) !important; }
-/* Alias sin prefijo cosmos (para no escribir cosmos en componentes) */
-.cosmos-app .text-primary, .drawer-panel .text-primary { color: var(--th-text-primary) !important; }
-.cosmos-app .text-secondary, .drawer-panel .text-secondary { color: var(--th-text-secondary) !important; }
-.cosmos-app .text-muted, .drawer-panel .text-muted { color: var(--th-text-muted) !important; }
-/* Caja de icono con acento primario (hero, headers) */
-.cosmos-icon-box {
+.cosmos-app .logo-text { color: var(--th-logo-text); }
+.cosmos-app .logo-sub { color: var(--th-logo-sub); }
+.cosmos-app .group-label { color: var(--th-group-label); }
+.cosmos-app .group-line { background-color: var(--th-group-line); }
+.cosmos-app .separator { background-color: var(--th-divider); }
+.cosmos-app .crumb-link { color: var(--th-crumb-link); }
+.cosmos-app .crumb-link:hover { color: var(--th-crumb-hover); }
+.cosmos-app .crumb-current { color: var(--th-crumb-current); }
+.cosmos-app .crumb-separator { color: var(--th-crumb-separator); }
+.cosmos-app .subtitle { color: var(--th-subtitle); }
+
+.cosmos-app .icon-box,
+.drawer-panel .icon-box {
     background: rgba(139, 92, 246, 0.12);
     color: var(--th-item-active-color);
 }
-[data-theme="dark"] .cosmos-icon-box {
+[data-theme="dark"] .cosmos-app .icon-box,
+[data-theme="dark"] .drawer-panel .icon-box {
     background: rgba(139, 92, 246, 0.18);
     color: var(--th-icon-active-color);
 }
-.cosmos-kbd, .cosmos-app .kbd { background: var(--th-kbd-bg); border-color: var(--th-kbd-border); color: var(--th-text-muted); }
-.cosmos-notification-dot, .cosmos-app .notification-dot { background-color: var(--th-notification-badge); }
-/* Status dot — usa --tw-ring-color de Tailwind */
-.cosmos-status-ring, .cosmos-app .status-ring { --tw-ring-color: var(--th-status-ring); }
 
-/* ── Index: tiles tipo bento (glass) ── */
+.cosmos-app .kbd {
+    background: var(--th-kbd-bg);
+    border: 1px solid var(--th-kbd-border);
+    color: var(--th-text-muted);
+}
+.cosmos-app .notification-dot { background-color: var(--th-notification-badge); }
+.cosmos-app .status-ring { --tw-ring-color: var(--th-status-ring); }
+
+/* =============================================================================
+   DASHBOARD — Bento tiles + billboard hero
+   ============================================================================= */
+
 .cosmos-app .dashboard-tile {
     box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -523,7 +377,6 @@
     box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.15), 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 60px rgba(139, 92, 246, 0.08);
 }
 
-/* ── Vista general: billboard hero (banda con gradiente) ── */
 .cosmos-app .billboard-hero__bg {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(243, 232, 255, 0.5) 50%, rgba(238, 242, 255, 0.6) 100%);
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -541,9 +394,36 @@
     background: radial-gradient(circle, rgba(167, 139, 250, 0.25) 0%, transparent 70%);
 }
 
-/* ── PrimeVue overrides con tema ── */
+/* =============================================================================
+   DRAWER (DetailDrawer) — Overlay y panel glass
+   ============================================================================= */
 
-/* Drawer móvil: fondo glass + sin padding extra (Drawer se renderiza en body) */
+.drawer-overlay {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+[data-theme="dark"] .drawer-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.drawer-panel {
+    background: var(--th-sidebar-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-left: 1px solid var(--th-sidebar-border);
+    box-shadow: -8px 0 40px rgba(99, 102, 241, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+[data-theme="dark"] .drawer-panel {
+    box-shadow: -12px 0 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.08);
+}
+
+.drawer-header { border-color: var(--th-border); }
+
+/* =============================================================================
+   PRIMEVUE — Overrides para tema (glass + --th-*)
+   ============================================================================= */
+
 .p-sidebar,
 .p-drawer.p-component {
     background: var(--th-sidebar-bg) !important;
@@ -555,15 +435,8 @@
     display: flex !important;
     flex-direction: column !important;
 }
-
-/* Ocultar el header por defecto de PrimeVue
-   (nuestro componente Sidebar ya tiene su propio header con botón de cierre) */
 .p-sidebar .p-sidebar-header,
-.p-drawer .p-drawer-header {
-    display: none !important;
-}
-
-/* El contenido ocupa todo el espacio restante, sin padding y transparente para que se vea el glass */
+.p-drawer .p-drawer-header { display: none !important; }
 .p-sidebar .p-sidebar-content,
 .p-drawer .p-drawer-content {
     background: transparent !important;
@@ -575,8 +448,6 @@
     height: 100% !important;
     border: none !important;
 }
-
-/* Overlay/backdrop del drawer: menos oscuro, con ligero blur */
 .p-sidebar-mask.p-component-overlay,
 .p-drawer-mask.p-component-overlay {
     background: rgba(0, 0, 0, 0.4) !important;
@@ -602,36 +473,20 @@
 .p-menu .p-menuitem-link:hover .p-menuitem-icon { color: var(--th-menu-hover-icon) !important; }
 .p-menu hr { border-color: var(--th-divider) !important; }
 
-/* =====================================================================
-   COSMOS — PrimeVue Component Overrides (v4)
-   Aplicados globalmente para que menús, diálogos, toasts y overlays
-   (renderizados en body) también usen tema claro/oscuro.
-   ===================================================================== */
-
-/* Variables --p-* ya definidas en :root y [data-theme="dark"] */
-
-/* ── Button ── */
+/* Button */
 .p-button {
     border-radius: 0.625rem !important;
     font-weight: 500 !important;
     transition: background-color 150ms, border-color 150ms, box-shadow 150ms, transform 100ms !important;
 }
 .p-button:active { transform: scale(0.97) !important; }
-.p-button:focus-visible {
-    outline: none !important;
-    box-shadow: 0 0 0 3px var(--p-focus-ring-color) !important;
-}
-/* Outlined buttons — bordes más sutiles */
-.p-button-outlined {
-    border-width: 1px !important;
-}
-/* Ghost / text buttons */
+.p-button:focus-visible { outline: none !important; box-shadow: 0 0 0 3px var(--p-focus-ring-color) !important; }
+.p-button-outlined { border-width: 1px !important; }
 .p-button-text:not(:hover) { background: transparent !important; }
-/* Sizes */
 .p-button-sm { font-size: 0.75rem !important; padding: 0.375rem 0.75rem !important; }
-.p-button-lg { font-size: 1rem   !important; padding: 0.625rem 1.25rem !important; }
+.p-button-lg { font-size: 1rem !important; padding: 0.625rem 1.25rem !important; }
 
-/* ── InputText / Textarea / InputNumber ── */
+/* InputText / Textarea */
 .p-inputtext,
 .p-textarea {
     background: var(--th-input-bg) !important;
@@ -644,14 +499,9 @@
     box-shadow: none !important;
 }
 .p-inputtext::placeholder,
-.p-textarea::placeholder {
-    color: var(--th-input-placeholder) !important;
-    font-style: italic;
-}
+.p-textarea::placeholder { color: var(--th-input-placeholder) !important; font-style: italic; }
 .p-inputtext:hover,
-.p-textarea:hover {
-    border-color: rgba(139, 92, 246, 0.3) !important;
-}
+.p-textarea:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
 .p-inputtext:focus,
 .p-inputtext.p-focused,
 .p-textarea:focus {
@@ -660,19 +510,15 @@
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important;
     outline: none !important;
 }
-/* InputNumber inner input */
-.p-inputnumber-input {
-    border-radius: 0.625rem !important;
-}
+.p-inputnumber-input { border-radius: 0.625rem !important; }
 
-/* ── Select (Dropdown) ── */
+/* Select (Dropdown) */
 .p-select {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
     border-radius: 0.625rem !important;
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
-    transition: border-color 150ms, box-shadow 150ms !important;
     box-shadow: none !important;
 }
 .p-select:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
@@ -683,7 +529,6 @@
 }
 .p-select-label { color: var(--th-input-text) !important; }
 .p-select-placeholder { color: var(--th-input-placeholder) !important; font-style: italic; }
-/* Dropdown panel */
 .p-select-overlay {
     background: var(--th-menu-bg) !important;
     border: 1px solid var(--th-menu-border) !important;
@@ -693,21 +538,15 @@
     -webkit-backdrop-filter: blur(24px) !important;
     padding: 0.375rem !important;
 }
-.p-select-option {
-    border-radius: 0.5rem !important;
-    color: var(--th-menu-text) !important;
-    transition: background-color 120ms !important;
-}
+.p-select-option { border-radius: 0.5rem !important; color: var(--th-menu-text) !important; }
 .p-select-option:hover,
 .p-select-option.p-select-option-selected {
     background: var(--th-menu-item-hover) !important;
     color: var(--th-menu-hover-text) !important;
 }
-.p-select-option.p-select-option-selected {
-    font-weight: 500 !important;
-}
+.p-select-option.p-select-option-selected { font-weight: 500 !important; }
 
-/* ── MultiSelect ── */
+/* MultiSelect */
 .p-multiselect {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
@@ -728,17 +567,9 @@
     padding: 0.375rem !important;
 }
 
-/* ── DataTable ── */
-.p-datatable {
-    border-radius: 1rem !important;
-    overflow: hidden !important;
-}
-
-.p-datatable-header {
-    background: transparent !important;
-    border-bottom: 1px solid var(--th-border) !important;
-    padding: 1rem 1.25rem !important;
-}
+/* DataTable */
+.p-datatable { border-radius: 1rem !important; overflow: hidden !important; }
+.p-datatable-header { background: transparent !important; border-bottom: 1px solid var(--th-border) !important; padding: 1rem 1.25rem !important; }
 .p-datatable-thead > tr > th {
     background: transparent !important;
     border-bottom: 1px solid var(--th-border) !important;
@@ -750,7 +581,6 @@
     text-transform: uppercase !important;
     padding: 0.875rem 1rem !important;
 }
-.p-datatable-thead > tr > th:first-child { border-radius: 0 !important; }
 .p-datatable-sort-icon { color: var(--th-text-muted) !important; }
 .p-datatable-column-sorted .p-datatable-sort-icon { color: var(--th-item-active-color) !important; }
 .p-datatable-tbody > tr {
@@ -759,31 +589,21 @@
     transition: background-color 120ms !important;
 }
 .p-datatable-tbody > tr:last-child { border-bottom: none !important; }
-.p-datatable-tbody > tr:hover {
-    background: var(--th-item-hover-bg) !important;
-}
+.p-datatable-tbody > tr:hover { background: var(--th-item-hover-bg) !important; }
 .p-datatable-tbody > tr > td {
     background: transparent !important;
     border: none !important;
     color: var(--th-text-primary) !important;
     padding: 0.875rem 1rem !important;
 }
-.p-datatable-footer {
-    background: transparent !important;
-    border-top: 1px solid var(--th-border) !important;
-    padding: 0.75rem 1.25rem !important;
-}
-/* Row selection */
+.p-datatable-footer { background: transparent !important; border-top: 1px solid var(--th-border) !important; padding: 0.75rem 1.25rem !important; }
 .p-datatable-tbody > tr.p-highlight {
     background: var(--th-item-active-bg) !important;
     color: var(--th-item-active-color) !important;
 }
-/* Striped rows */
-.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
-    background: rgba(139, 92, 246, 0.025) !important;
-}
+.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) { background: rgba(139, 92, 246, 0.025) !important; }
 
-/* ── Paginator ── */
+/* Paginator */
 .p-paginator {
     background: transparent !important;
     border: none !important;
@@ -814,12 +634,8 @@
     color: var(--th-item-active-color) !important;
     font-weight: 600 !important;
 }
-.p-paginator-rpp-dropdown .p-select,
-.p-paginator-rpp-options {
-    border-radius: 0.5rem !important;
-}
 
-/* ── Dialog / Modal ── */
+/* Dialog */
 .p-dialog,
 .p-dialog.p-component {
     border-radius: 1rem !important;
@@ -840,11 +656,7 @@
     padding: 1.25rem 1.5rem !important;
 }
 .p-dialog-title,
-.p-dialog .p-dialog-title {
-    color: var(--th-text-primary) !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-}
+.p-dialog .p-dialog-title { color: var(--th-text-primary) !important; font-weight: 600 !important; font-size: 1rem !important; }
 .p-dialog-content,
 .p-dialog .p-dialog-content {
     background: var(--th-sidebar-bg) !important;
@@ -862,7 +674,6 @@
     padding: 1rem 1.5rem !important;
     gap: 0.5rem !important;
 }
-/* Overlay / mask */
 .p-dialog-mask.p-component-overlay,
 .p-overlay-modal {
     background: rgba(0, 0, 0, 0.45) !important;
@@ -870,11 +681,8 @@
     -webkit-backdrop-filter: blur(6px) !important;
 }
 
-/* ── Toast ── */
-.p-toast,
-.p-toast.p-component {
-    z-index: 9999 !important;
-}
+/* Toast */
+.p-toast, .p-toast.p-component { z-index: 9999 !important; }
 .p-toast-message,
 .p-toast .p-toast-message {
     background: var(--th-menu-bg) !important;
@@ -888,61 +696,32 @@
 [data-theme="dark"] .p-toast .p-toast-message {
     box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
 }
-.p-toast .p-toast-message-content {
-    padding: 1rem 1.25rem !important;
-    gap: 0.75rem !important;
-}
-.p-toast .p-toast-summary {
-    font-weight: 600 !important;
-    color: var(--th-text-primary) !important;
-}
-.p-toast .p-toast-detail {
-    color: var(--th-text-secondary) !important;
-    font-size: 0.875rem !important;
-}
-/* Toast accent bar */
-.p-toast .p-toast-message-success  { border-left: 3px solid #10b981 !important; }
-.p-toast .p-toast-message-info     { border-left: 3px solid #6d28d9 !important; }
-.p-toast .p-toast-message-warn     { border-left: 3px solid #f59e0b !important; }
-.p-toast .p-toast-message-error    { border-left: 3px solid #ef4444 !important; }
+.p-toast .p-toast-message-content { padding: 1rem 1.25rem !important; gap: 0.75rem !important; }
+.p-toast .p-toast-summary { font-weight: 600 !important; color: var(--th-text-primary) !important; }
+.p-toast .p-toast-detail { color: var(--th-text-secondary) !important; font-size: 0.875rem !important; }
+.p-toast .p-toast-message-success { border-left: 3px solid #10b981 !important; }
+.p-toast .p-toast-message-info { border-left: 3px solid #6d28d9 !important; }
+.p-toast .p-toast-message-warn { border-left: 3px solid #f59e0b !important; }
+.p-toast .p-toast-message-error { border-left: 3px solid #ef4444 !important; }
 
-[data-theme="dark"] .p-card:hover {
-    border-color: rgba(139, 92, 246, 0.18) !important;
-}
+/* Card, Panel, Fieldset */
+[data-theme="dark"] .p-card:hover { border-color: rgba(139, 92, 246, 0.18) !important; }
 .p-card-header { border-bottom: 1px solid var(--th-border) !important; padding: 1.25rem 1.5rem !important; }
 .p-card-body { padding: 1.5rem !important; }
 .p-card-title { color: var(--th-text-primary) !important; font-size: 1rem !important; font-weight: 600 !important; }
 .p-card-subtitle { color: var(--th-text-secondary) !important; font-size: 0.875rem !important; }
 .p-card-footer { border-top: 1px solid var(--th-border) !important; padding: 1rem 1.5rem !important; }
 
-.p-panel-header {
-    background: transparent !important;
-    border-bottom: 1px solid var(--th-border) !important;
-    padding: 1rem 1.25rem !important;
-}
+.p-panel-header { background: transparent !important; border-bottom: 1px solid var(--th-border) !important; padding: 1rem 1.25rem !important; }
 .p-panel-title { color: var(--th-text-primary) !important; font-weight: 600 !important; }
-.p-panel-content {
-    background: transparent !important;
-    padding: 1rem 1.25rem !important;
-    color: var(--th-text-primary) !important;
-}
-.p-panel-footer {
-    border-top: 1px solid var(--th-border) !important;
-    padding: 0.75rem 1.25rem !important;
-}
+.p-panel-content { background: transparent !important; padding: 1rem 1.25rem !important; color: var(--th-text-primary) !important; }
+.p-panel-footer { border-top: 1px solid var(--th-border) !important; padding: 0.75rem 1.25rem !important; }
 
-.p-fieldset-legend {
-    background: transparent !important;
-    border: none !important;
-    color: var(--th-text-primary) !important;
-    font-weight: 600 !important;
-    padding: 0.5rem 0 !important;
-}
-
+.p-fieldset-legend { background: transparent !important; border: none !important; color: var(--th-text-primary) !important; font-weight: 600 !important; padding: 0.5rem 0 !important; }
 .p-fieldset-content { padding: 1rem 0 !important; }
 .p-fieldset-toggleable .p-fieldset-legend { padding: 0.75rem 0 !important; }
 
-/* ── Tabs ── */
+/* Tabs */
 .p-tabs { background: transparent !important; }
 .p-tablist {
     background: var(--th-input-bg) !important;
@@ -974,32 +753,12 @@
 .p-tablist-active-bar { display: none !important; }
 .p-tabpanels { background: transparent !important; padding: 1rem 0 0 !important; }
 
-/* ── Badge / Tag / Chip ── */
-.p-badge {
-    border-radius: 0.5rem !important;
-    font-size: 0.65rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.02em !important;
-    min-width: 1.25rem !important;
-    height: 1.25rem !important;
-    line-height: 1.25rem !important;
-    padding: 0 0.375rem !important;
-}
-.p-tag {
-    border-radius: 0.5rem !important;
-    font-size: 0.72rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.03em !important;
-    padding: 0.2rem 0.5rem !important;
-}
-.p-chip {
-    border-radius: 0.5rem !important;
-    border: 1px solid var(--th-border) !important;
-    background: var(--th-item-hover-bg) !important;
-    color: var(--th-text-primary) !important;
-}
+/* Badge, Tag, Chip */
+.p-badge { border-radius: 0.5rem !important; font-size: 0.65rem !important; font-weight: 600 !important; letter-spacing: 0.02em !important; min-width: 1.25rem !important; height: 1.25rem !important; line-height: 1.25rem !important; padding: 0 0.375rem !important; }
+.p-tag { border-radius: 0.5rem !important; font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0.03em !important; padding: 0.2rem 0.5rem !important; }
+.p-chip { border-radius: 0.5rem !important; border: 1px solid var(--th-border) !important; background: var(--th-item-hover-bg) !important; color: var(--th-text-primary) !important; }
 
-/* ── Popover / OverlayPanel ── */
+/* Popover / OverlayPanel */
 .p-popover,
 .p-popover.p-component,
 .p-overlaypanel.p-component {
@@ -1012,53 +771,27 @@
     padding: 0.5rem !important;
 }
 
-/* ── ProgressBar ── */
-.p-progressbar {
-    background: var(--th-input-bg) !important;
-    border-radius: 999px !important;
-    height: 0.5rem !important;
-    border: 1px solid var(--th-input-border) !important;
-    overflow: hidden !important;
-}
-.p-progressbar-value {
-    background: linear-gradient(90deg, #8b5cf6, #6d28d9) !important;
-    border-radius: 999px !important;
-}
+/* ProgressBar */
+.p-progressbar { background: var(--th-input-bg) !important; border-radius: 999px !important; height: 0.5rem !important; border: 1px solid var(--th-input-border) !important; overflow: hidden !important; }
+.p-progressbar-value { background: linear-gradient(90deg, #8b5cf6, #6d28d9) !important; border-radius: 999px !important; }
 
-/* ── Checkbox ── */
-.p-checkbox-box {
-    border-radius: 0.375rem !important;
-    border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
-    background: var(--th-input-bg) !important;
-    transition: border-color 150ms, background-color 150ms !important;
-}
+/* Checkbox, Radio, ToggleSwitch */
+.p-checkbox-box { border-radius: 0.375rem !important; border: 1.5px solid rgba(139, 92, 246, 0.3) !important; background: var(--th-input-bg) !important; transition: border-color 150ms, background-color 150ms !important; }
 .p-checkbox-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
-.p-checkbox.p-highlight .p-checkbox-box {
-    background: #7c3aed !important;
-    border-color: #7c3aed !important;
-}
+.p-checkbox.p-highlight .p-checkbox-box { background: #7c3aed !important; border-color: #7c3aed !important; }
 
-/* ── RadioButton ── */
-.p-radiobutton-box {
-    border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
-    background: var(--th-input-bg) !important;
-    transition: border-color 150ms !important;
-}
+.p-radiobutton-box { border: 1.5px solid rgba(139, 92, 246, 0.3) !important; background: var(--th-input-bg) !important; transition: border-color 150ms !important; }
 .p-radiobutton-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
 .p-radiobutton.p-highlight .p-radiobutton-box { border-color: #7c3aed !important; }
 .p-radiobutton.p-highlight .p-radiobutton-box .p-radiobutton-icon { background: #7c3aed !important; }
 
-/* ── ToggleSwitch / InputSwitch ── */
 .p-toggleswitch-slider { background: var(--th-divider) !important; transition: background-color 200ms !important; }
 .p-toggleswitch.p-highlight .p-toggleswitch-slider { background: #7c3aed !important; }
 
-/* ── Scrollbar personalizado (global: aplica en toda la app cuando el tema está activo) ── */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.25);
-    border-radius: 999px;
-}
+::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.25); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.45); }
 [data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.4); }
