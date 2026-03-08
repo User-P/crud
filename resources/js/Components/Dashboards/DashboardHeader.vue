@@ -1,16 +1,14 @@
 <template>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-3">
-            <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-400/20 text-indigo-600 backdrop-blur"
-            >
+            <div class="icon-box flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl backdrop-blur">
                 <Icon :icon="icon" class="h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-                <h2 class="text-xl font-semibold tracking-tight text-slate-800">
+                <h2 class="text-xl font-semibold tracking-tight text-primary">
                     {{ title }}
                 </h2>
-                <p v-if="subtitle" class="mt-0.5 text-sm text-slate-600">
+                <p v-if="subtitle" class="mt-0.5 text-sm text-secondary">
                     {{ subtitle }}
                 </p>
             </div>

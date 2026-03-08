@@ -16,7 +16,7 @@
                     <CustomPicker
                         initial-preset="lastMonth"
                         select-disabled
-                        class="cosmos-surface rounded-xl shadow-sm"
+                        class="surface rounded-xl shadow-sm"
                     />
                 </template>
             </DashboardHeader>

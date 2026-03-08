@@ -1,7 +1,7 @@
 <template>
     <button
         type="button"
-        class="cosmos-surface group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
+        class="surface group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
         @click="$emit('click')"
     >
         <div class="flex items-start justify-between gap-2">
@@ -27,23 +27,23 @@
                 <Icon
                     v-else-if="trend === 'neutral'"
                     icon="heroicons:minus"
-                    class="h-4 w-4 text-slate-400"
+                    class="h-4 w-4 text-muted"
                     aria-hidden="true"
                 />
                 <span
                     v-if="trendPercent != null"
                     class="text-xs font-medium"
-                    :class="trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-600' : 'text-slate-500'"
+                    :class="trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-600' : 'text-muted'"
                 >
                     {{ trendPercent > 0 ? '+' : '' }}{{ trendPercent }}%
                 </span>
             </div>
         </div>
 
-        <p class="mt-3 text-2xl font-bold tabular-nums tracking-tight text-slate-800">
+        <p class="mt-3 text-2xl font-bold tabular-nums tracking-tight text-primary">
             {{ value }}
         </p>
-        <p class="mt-0.5 text-sm font-medium text-slate-600">
+        <p class="mt-0.5 text-sm font-medium text-secondary">
             {{ label }}
         </p>
 
@@ -53,7 +53,7 @@
         </div>
 
         <!-- Comparación (vs. período anterior) -->
-        <p v-if="comparison" class="mt-2 text-xs text-slate-500">
+        <p v-if="comparison" class="mt-2 text-xs text-muted">
             {{ comparison }}
         </p>
 
@@ -96,18 +96,18 @@ defineEmits<{
 
 const variants: Record<'blue' | 'green' | 'red', { iconBg: string; iconColor: string; bar: string }> = {
     blue: {
-        iconBg: 'bg-blue-50',
-        iconColor: 'text-blue-600',
+        iconBg: 'bg-blue-500/15 dark:bg-blue-400/20',
+        iconColor: 'text-blue-600 dark:text-blue-400',
         bar: 'bg-blue-500',
     },
     green: {
-        iconBg: 'bg-emerald-50',
-        iconColor: 'text-emerald-600',
+        iconBg: 'bg-emerald-500/15 dark:bg-emerald-400/20',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
         bar: 'bg-emerald-500',
     },
     red: {
-        iconBg: 'bg-rose-50',
-        iconColor: 'text-rose-600',
+        iconBg: 'bg-rose-500/15 dark:bg-rose-400/20',
+        iconColor: 'text-rose-600 dark:text-rose-400',
         bar: 'bg-rose-500',
     },
 }

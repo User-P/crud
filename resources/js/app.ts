@@ -8,6 +8,21 @@ import CosmosPreset from "./primevue-preset";
 import "primeicons/primeicons.css";
 import { createPinia } from "pinia";
 
+/* Aplicar tema al cargar para que PrimeVue y todos los componentes usen light/dark desde el primer paint */
+function initTheme() {
+    const saved = (typeof localStorage !== "undefined" && localStorage.getItem("admin-theme")) || "system";
+    const resolved =
+        saved === "system"
+            ? (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light")
+            : saved;
+    if (typeof document !== "undefined" && document.documentElement) {
+        document.documentElement.setAttribute("data-theme", resolved);
+    }
+}
+initTheme();
+
 interface PageModule {
     default: DefineComponent;
 }
@@ -32,6 +47,7 @@ createInertiaApp({
                             name: 'primevue',
                             order: 'tailwind-base, primevue, tailwind-utilities',
                         },
+                        darkModeSelector: '[data-theme="dark"]',
                     },
                 },
             })

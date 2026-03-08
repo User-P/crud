@@ -1,6 +1,6 @@
 <template>
     <aside
-        class="cosmos-sidebar flex h-full flex-col transition-[width] duration-300 ease-in-out"
+        class="sidebar flex h-full flex-col transition-[width] duration-300 ease-in-out"
         :class="effectiveExpanded ? 'w-64' : 'w-[4.5rem]'"
         @mouseenter="onMouseEnter"
         @mouseleave="onMouseLeave"
@@ -19,11 +19,11 @@
             >
                 <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
                     <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
-                    <span class="cosmos-status-ring absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 shadow-sm shadow-emerald-400/50" aria-hidden="true" />
+                    <span class="status-ring absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 shadow-sm shadow-emerald-400/50" aria-hidden="true" />
                 </div>
                 <div class="min-w-0">
-                    <span class="cosmos-logo-text block truncate text-sm font-semibold">Analytics</span>
-                    <span class="cosmos-logo-sub block truncate text-[10px] font-medium uppercase tracking-widest">Panel</span>
+                    <span class="logo-text block truncate text-sm font-semibold">Analytics</span>
+                    <span class="logo-sub block truncate text-[10px] font-medium uppercase tracking-widest">Panel</span>
                 </div>
             </a>
 
@@ -32,13 +32,13 @@
                 class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30"
             >
                 <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
-                <span class="cosmos-status-ring absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 shadow-sm shadow-emerald-400/50" aria-hidden="true" />
+                <span class="status-ring absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 shadow-sm shadow-emerald-400/50" aria-hidden="true" />
             </div>
 
             <div v-if="effectiveExpanded" class="flex items-center gap-0.5">
                 <button
                     type="button"
-                    class="cosmos-btn rounded-lg p-2"
+                    class="btn rounded-lg p-2"
                     :title="collapsed ? 'Expandir' : 'Contraer'"
                     aria-label="Contraer menú"
                     @click="$emit('toggle-collapse')"
@@ -47,7 +47,7 @@
                 </button>
                 <button
                     type="button"
-                    class="cosmos-btn rounded-lg p-2"
+                    class="btn rounded-lg p-2"
                     title="Ocultar menú"
                     aria-label="Ocultar menú"
                     @click="$emit('close')"
@@ -63,15 +63,15 @@
                 <template v-for="group in navGroups" :key="group.label">
                     <!-- Etiqueta de grupo (expandido) -->
                     <li v-if="effectiveExpanded" class="px-3 pb-1 pt-5 first:pt-2">
-                        <p class="cosmos-group-label flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest">
-                            <span class="cosmos-group-line h-px flex-1" />
+                        <p class="group-label flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest">
+                            <span class="group-line h-px flex-1" />
                             {{ group.label }}
-                            <span class="cosmos-group-line h-px flex-1" />
+                            <span class="group-line h-px flex-1" />
                         </p>
                     </li>
                     <!-- Separador (colapsado) -->
                     <li v-else class="py-2">
-                        <div class="cosmos-group-line mx-auto h-px w-6" />
+                        <div class="group-line mx-auto h-px w-6" />
                     </li>
 
                     <template v-for="item in group.items" :key="item.name">
@@ -81,7 +81,7 @@
                                 type="button"
                                 :title="!effectiveExpanded ? item.name : undefined"
                                 :class="[
-                                    isGroupActive(item) ? 'cosmos-item-active' : 'cosmos-nav-item',
+                                    isGroupActive(item) ? 'item-active' : 'nav-item',
                                     'flex w-full items-center gap-3 rounded-xl py-2.5 text-left text-sm font-medium transition-colors duration-150',
                                     effectiveExpanded ? 'px-3' : 'justify-center px-2',
                                 ]"
@@ -90,14 +90,14 @@
                                 <Icon
                                     :icon="item.icon"
                                     class="h-[18px] w-[18px] shrink-0"
-                                    :class="isGroupActive(item) ? 'cosmos-icon-active' : 'cosmos-icon'"
+                                    :class="isGroupActive(item) ? 'nav-icon-active' : 'nav-icon'"
                                     aria-hidden="true"
                                 />
                                 <span v-if="effectiveExpanded" class="truncate">{{ item.name }}</span>
                                 <Icon
                                     v-if="effectiveExpanded"
                                     icon="heroicons:chevron-down"
-                                    class="cosmos-icon ml-auto h-4 w-4 shrink-0 transition-transform duration-200"
+                                    class="nav-icon ml-auto h-4 w-4 shrink-0 transition-transform duration-200"
                                     :class="{ 'rotate-180': expandedItems.includes(item.name) }"
                                     aria-hidden="true"
                                 />
@@ -112,7 +112,7 @@
                                     <a
                                         :href="child.href"
                                         :class="[
-                                            isCurrentRoute(child.href) ? 'cosmos-child-active' : 'cosmos-child-item',
+                                            isCurrentRoute(child.href) ? 'child-active' : 'child-item',
                                             'block rounded-lg px-2 py-1.5 text-sm transition-colors duration-150',
                                         ]"
                                         @click.prevent="navigate(child.href)"
@@ -130,7 +130,7 @@
                                 :href="item.href"
                                 :title="!effectiveExpanded ? item.name : undefined"
                                 :class="[
-                                    isCurrentRoute(item.href) ? 'cosmos-item-active' : 'cosmos-nav-item',
+                                    isCurrentRoute(item.href) ? 'item-active' : 'nav-item',
                                     'flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition-colors duration-150',
                                     effectiveExpanded ? 'px-3' : 'justify-center px-2',
                                 ]"
@@ -139,7 +139,7 @@
                                 <Icon
                                     :icon="item.icon"
                                     class="h-[18px] w-[18px] shrink-0"
-                                    :class="isCurrentRoute(item.href) ? 'cosmos-icon-active' : 'cosmos-icon'"
+                                    :class="isCurrentRoute(item.href) ? 'nav-icon-active' : 'nav-icon'"
                                     aria-hidden="true"
                                 />
                                 <span v-if="effectiveExpanded" class="truncate">{{ item.name }}</span>
@@ -155,7 +155,7 @@
             <div v-if="!effectiveExpanded" class="flex justify-center">
                 <button
                     type="button"
-                    class="cosmos-btn rounded-lg p-2"
+                    class="btn rounded-lg p-2"
                     title="Expandir menú"
                     aria-label="Expandir menú"
                     @click="$emit('toggle-collapse')"

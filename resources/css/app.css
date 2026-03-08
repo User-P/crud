@@ -48,7 +48,9 @@
 .glass-card { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px rgba(99,102,241,0.1), 0 2px 8px rgba(0,0,0,0.06); }
 .glass-card:hover { background: rgba(255,255,255,0.75); box-shadow: 0 12px 40px rgba(99,102,241,0.1), 0 4px 12px rgba(0,0,0,0.06); }
 /* Clase de sistema: superficie glass por defecto (usa variables del tema en .cosmos-app) */
-.cosmos-app .cosmos-surface {
+.cosmos-app .cosmos-surface,
+.cosmos-app .surface,
+.cosmos-app .surface-area > * {
     background: var(--th-surface-glass-bg) !important;
     backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
     -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
@@ -56,27 +58,74 @@
     box-shadow: var(--th-surface-glass-shadow) !important;
     transition: box-shadow 200ms, border-color 200ms, background 200ms !important;
 }
-.cosmos-app .cosmos-surface:hover {
+.cosmos-app .cosmos-surface:hover,
+.cosmos-app .surface:hover,
+.cosmos-app .surface-area > *:hover {
     box-shadow: var(--th-surface-glass-shadow-hover) !important;
     border-color: rgba(139, 92, 246, 0.2) !important;
 }
-[data-theme="dark"] .cosmos-app .cosmos-surface:hover {
+[data-theme="dark"] .cosmos-app .cosmos-surface:hover,
+[data-theme="dark"] .cosmos-app .surface:hover,
+[data-theme="dark"] .cosmos-app .surface-area > *:hover {
     border-color: rgba(139, 92, 246, 0.18) !important;
+}
+/* Superficie más sutil para áreas internas (placeholder, tablas dentro de drawer) */
+.cosmos-app .cosmos-surface-subtle,
+.cosmos-app .surface-subtle,
+.drawer-panel .surface-subtle {
+    background: var(--th-input-bg) !important;
+    border: 1px solid var(--th-border) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+/* Filas de tabla en superficies sutiles */
+.cosmos-app .cosmos-surface-subtle thead tr,
+.cosmos-app .surface-subtle thead tr,
+.cosmos-drawer-panel .cosmos-surface-subtle thead tr,
+.drawer-panel .surface-subtle thead tr {
+    background: var(--th-input-bg);
+    border-bottom: 1px solid var(--th-border);
+}
+.cosmos-app .cosmos-surface-subtle tbody tr,
+.cosmos-app .surface-subtle tbody tr,
+.cosmos-drawer-panel .cosmos-surface-subtle tbody tr,
+.drawer-panel .surface-subtle tbody tr {
+    border-top: 1px solid var(--th-border);
 }
 .glass-sidebar { background: rgba(255,255,255,0.45); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-right: 1px solid rgba(255,255,255,0.5); box-shadow: 4px 0 24px rgba(99,102,241,0.12); }
 .glass-nav { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 24px rgba(99,102,241,0.1); }
 .glass-drawer { background: rgba(255,255,255,0.75); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-left: 1px solid rgba(255,255,255,0.5); box-shadow: -8px 0 40px rgba(15,23,42,0.08); }
+/* Drawer del sistema (DetailDrawer): overlay y panel con tema */
+.cosmos-drawer-overlay,
+.drawer-overlay {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+[data-theme="dark"] .cosmos-drawer-overlay,
+[data-theme="dark"] .drawer-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+.cosmos-drawer-panel,
+.drawer-panel {
+    background: var(--th-sidebar-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-left: 1px solid var(--th-sidebar-border);
+    box-shadow: -8px 0 40px rgba(99, 102, 241, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.03);
+}
+[data-theme="dark"] .cosmos-drawer-panel,
+[data-theme="dark"] .drawer-panel {
+    box-shadow: -12px 0 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.08);
+}
+.cosmos-drawer-header,
+.drawer-header {
+    border-color: var(--th-border);
+}
 .glass-input { background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.5); }
 .glass-input:focus { background: rgba(255,255,255,0.9); border-color: rgba(99,102,241,0.4); outline: none; }
 
-/* PrimeVue legacy */
-.p-sidebar { background: rgba(255,255,255,0.65) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; border-right: 1px solid rgba(255,255,255,0.4) !important; box-shadow: 4px 0 32px rgba(99,102,241,0.08) !important; }
-.p-sidebar .p-sidebar-header { background: transparent !important; border-bottom: 1px solid rgba(255,255,255,0.3) !important; }
-.p-sidebar .p-sidebar-content { background: transparent !important; }
-.p-menu { background: rgba(255,255,255,0.8) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; border: 1px solid rgba(255,255,255,0.5) !important; border-radius: 12px !important; box-shadow: 0 12px 40px rgba(99,102,241,0.1), 0 4px 12px rgba(0,0,0,0.06) !important; padding: 6px !important; }
-.p-menu .p-menuitem-link { border-radius: 8px !important; }
-.p-menu .p-menuitem-link:hover { background: rgba(99,102,241,0.08) !important; }
-.p-menu .p-menuitem-link:focus { box-shadow: none !important; }
+/* PrimeVue: estilos base sustituidos por overrides con tema más abajo (usa --th-*) */
 
 /* ========================================================
    SISTEMA DE TEMAS — light + dark
@@ -174,6 +223,12 @@
     --th-surface-glass-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
     --th-surface-glass-shadow-hover: 0 8px 36px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
     --th-surface-glass-blur: 20px;
+
+    /* PrimeVue: variables globales para que todos los componentes usen el tema */
+    --p-primary-color: #6d28d9;
+    --p-primary-contrast-color: #ffffff;
+    --p-primary-hover-color: #5b21b6;
+    --p-focus-ring-color: rgba(139, 92, 246, 0.35);
 }
 
 /* === Tema oscuro === */
@@ -254,6 +309,12 @@
     --th-surface-glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
     --th-surface-glass-shadow-hover: 0 12px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1);
     --th-surface-glass-blur: 24px;
+
+    /* PrimeVue: tema oscuro para todos los componentes */
+    --p-primary-color: #a78bfa;
+    --p-primary-contrast-color: #2e1065;
+    --p-primary-hover-color: #c4b5fd;
+    --p-focus-ring-color: rgba(167, 139, 250, 0.4);
 }
 
 /* ── Fondo principal ── */
@@ -271,6 +332,72 @@
     background-size: 28px 28px;
     pointer-events: none;
     z-index: 0;
+}
+
+/* ========== DEFAULTS DEL TEMA: sin clases en componentes ==========
+   Color y tipografía por elemento dentro del app y del drawer.
+   Así no hace falta escribir cosmos-* en cada componente. */
+.cosmos-app,
+.drawer-panel {
+    color: var(--th-text-primary);
+}
+.cosmos-app p,
+.drawer-panel p {
+    color: var(--th-text-secondary);
+}
+.cosmos-app small,
+.drawer-panel small {
+    color: var(--th-text-muted);
+}
+.cosmos-app h1, .cosmos-app h2, .cosmos-app h3, .cosmos-app h4, .cosmos-app h5, .cosmos-app h6,
+.drawer-panel h1, .drawer-panel h2, .drawer-panel h3, .drawer-panel h4, .drawer-panel h5, .drawer-panel h6 {
+    color: var(--th-text-primary);
+}
+.cosmos-app section h3,
+.drawer-panel section h3 {
+    color: var(--th-group-label);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.cosmos-app strong,
+.drawer-panel strong {
+    color: var(--th-text-primary);
+    font-weight: 600;
+}
+/* Tablas: th y td con colores del tema */
+.cosmos-app th, .drawer-panel th {
+    color: var(--th-text-secondary);
+}
+.cosmos-app td, .drawer-panel td {
+    color: inherit;
+}
+/* Caja de icono (headers, hero cards): mismo estilo sin nombre cosmos */
+.cosmos-app .cosmos-icon-box,
+.cosmos-app .icon-box,
+.drawer-panel .icon-box {
+    background: rgba(139, 92, 246, 0.12);
+    color: var(--th-item-active-color);
+}
+[data-theme="dark"] .cosmos-app .cosmos-icon-box,
+[data-theme="dark"] .cosmos-app .icon-box,
+[data-theme="dark"] .drawer-panel .icon-box {
+    background: rgba(139, 92, 246, 0.18);
+    color: var(--th-icon-active-color);
+}
+/* Botón genérico (drawer close, nav): hereda del tema */
+.drawer-panel button,
+.drawer-panel button.ghost-btn,
+.cosmos-app .cosmos-btn {
+    color: var(--th-btn-color);
+    transition: background-color 150ms, color 150ms;
+}
+.drawer-panel button:hover,
+.drawer-panel button.ghost-btn:hover,
+.cosmos-app .cosmos-btn:hover {
+    background-color: var(--th-btn-hover-bg);
+    color: var(--th-btn-hover-color);
 }
 
 /* ── Blobs animados (solo modo oscuro) ── */
@@ -310,7 +437,8 @@
 }
 
 /* ── Sidebar ── */
-.cosmos-sidebar {
+.cosmos-sidebar,
+.cosmos-app .sidebar {
     background: var(--th-sidebar-bg);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -319,7 +447,8 @@
 }
 
 /* ── Navbar ── */
-.cosmos-nav {
+.cosmos-nav,
+.cosmos-app .nav {
     background: var(--th-nav-bg);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -328,32 +457,38 @@
 }
 
 /* ── Botón genérico con tema ── */
-.cosmos-btn {
+.cosmos-btn,
+.cosmos-app .btn {
     color: var(--th-btn-color);
     transition: background-color 150ms, color 150ms;
 }
-.cosmos-btn:hover {
+.cosmos-btn:hover,
+.cosmos-app .btn:hover {
     background-color: var(--th-btn-hover-bg);
     color: var(--th-btn-hover-color);
 }
 
 /* ── Items de navegación ── */
-.cosmos-nav-item {
+.cosmos-nav-item,
+.cosmos-app .nav-item {
     color: var(--th-item-color);
 }
-.cosmos-nav-item:hover {
+.cosmos-nav-item:hover,
+.cosmos-app .nav-item:hover {
     background-color: var(--th-item-hover-bg);
     color: var(--th-item-hover-color);
 }
 
 /* Item activo con acento izquierdo y glow */
-.cosmos-item-active {
+.cosmos-item-active,
+.cosmos-app .item-active {
     background: var(--th-item-active-bg);
     color: var(--th-item-active-color);
     position: relative;
     overflow: hidden;
 }
-.cosmos-item-active::before {
+.cosmos-item-active::before,
+.cosmos-app .item-active::before {
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
@@ -363,32 +498,35 @@
 }
 
 /* Iconos */
-.cosmos-icon { color: var(--th-icon-color); }
-.cosmos-icon-active { color: var(--th-icon-active-color); }
+.cosmos-icon, .cosmos-app .nav-icon { color: var(--th-icon-color); }
+.cosmos-icon-active, .cosmos-app .nav-icon-active { color: var(--th-icon-active-color); }
 
 /* Subitems */
-.cosmos-child-item { color: var(--th-child-color); }
-.cosmos-child-item:hover { color: var(--th-child-hover-color); }
-.cosmos-child-active { color: var(--th-child-active-color); font-weight: 500; }
+.cosmos-child-item, .cosmos-app .child-item { color: var(--th-child-color); }
+.cosmos-child-item:hover, .cosmos-app .child-item:hover { color: var(--th-child-hover-color); }
+.cosmos-child-active, .cosmos-app .child-active { color: var(--th-child-active-color); font-weight: 500; }
 
 /* ── Input de búsqueda ── */
-.cosmos-input {
+.cosmos-input,
+.cosmos-app .search-input {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
     color: var(--th-input-text) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-.cosmos-input::placeholder { color: var(--th-input-placeholder) !important; }
-.cosmos-input:focus {
+.cosmos-input::placeholder,
+.cosmos-app .search-input::placeholder { color: var(--th-input-placeholder) !important; }
+.cosmos-input:focus,
+.cosmos-app .search-input:focus {
     background: var(--th-input-focus-bg) !important;
     border-color: var(--th-input-focus-border) !important;
     outline: none;
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
 }
 
-/* ── Título con gradiente ── */
-.cosmos-gradient-text {
+.cosmos-gradient-text,
+.cosmos-app .gradient-text {
     background: var(--th-title-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -396,27 +534,44 @@
 }
 
 /* ── Clases semánticas de color ── */
-.cosmos-logo-text { color: var(--th-logo-text); }
-.cosmos-logo-sub { color: var(--th-logo-sub); }
-.cosmos-group-label { color: var(--th-group-label); }
-.cosmos-group-line { background-color: var(--th-group-line); }
-.cosmos-separator { background-color: var(--th-divider); }
-.cosmos-user-name { color: var(--th-text-primary); }
-.cosmos-user-sub { color: var(--th-text-muted); }
-.cosmos-crumb-link { color: var(--th-crumb-link); }
-.cosmos-crumb-link:hover { color: var(--th-crumb-hover); }
-.cosmos-crumb-current { color: var(--th-crumb-current); }
-.cosmos-crumb-separator { color: var(--th-crumb-separator); }
-.cosmos-subtitle { color: var(--th-subtitle); }
-.cosmos-kbd { background: var(--th-kbd-bg); border-color: var(--th-kbd-border); color: var(--th-text-muted); }
-.cosmos-notification-dot { background-color: var(--th-notification-badge); }
+.cosmos-logo-text, .cosmos-app .logo-text { color: var(--th-logo-text); }
+.cosmos-logo-sub, .cosmos-app .logo-sub { color: var(--th-logo-sub); }
+.cosmos-group-label, .cosmos-app .group-label { color: var(--th-group-label); }
+.cosmos-group-line, .cosmos-app .group-line { background-color: var(--th-group-line); }
+.cosmos-separator, .cosmos-app .separator { background-color: var(--th-divider); }
+.cosmos-user-name, .cosmos-app .user-name { color: var(--th-text-primary); }
+.cosmos-user-sub, .cosmos-app .user-sub { color: var(--th-text-muted); }
+.cosmos-crumb-link, .cosmos-app .crumb-link { color: var(--th-crumb-link); }
+.cosmos-crumb-link:hover, .cosmos-app .crumb-link:hover { color: var(--th-crumb-hover); }
+.cosmos-crumb-current, .cosmos-app .crumb-current { color: var(--th-crumb-current); }
+.cosmos-crumb-separator, .cosmos-app .crumb-separator { color: var(--th-crumb-separator); }
+.cosmos-subtitle, .cosmos-app .subtitle { color: var(--th-subtitle); }
+/* Texto por rol (uso en cualquier componente) */
+.cosmos-text-primary { color: var(--th-text-primary) !important; }
+.cosmos-text-secondary { color: var(--th-text-secondary) !important; }
+.cosmos-text-muted { color: var(--th-text-muted) !important; }
+/* Alias sin prefijo cosmos (para no escribir cosmos en componentes) */
+.cosmos-app .text-primary, .drawer-panel .text-primary { color: var(--th-text-primary) !important; }
+.cosmos-app .text-secondary, .drawer-panel .text-secondary { color: var(--th-text-secondary) !important; }
+.cosmos-app .text-muted, .drawer-panel .text-muted { color: var(--th-text-muted) !important; }
+/* Caja de icono con acento primario (hero, headers) */
+.cosmos-icon-box {
+    background: rgba(139, 92, 246, 0.12);
+    color: var(--th-item-active-color);
+}
+[data-theme="dark"] .cosmos-icon-box {
+    background: rgba(139, 92, 246, 0.18);
+    color: var(--th-icon-active-color);
+}
+.cosmos-kbd, .cosmos-app .kbd { background: var(--th-kbd-bg); border-color: var(--th-kbd-border); color: var(--th-text-muted); }
+.cosmos-notification-dot, .cosmos-app .notification-dot { background-color: var(--th-notification-badge); }
 /* Status dot — usa --tw-ring-color de Tailwind */
-.cosmos-status-ring { --tw-ring-color: var(--th-status-ring); }
+.cosmos-status-ring, .cosmos-app .status-ring { --tw-ring-color: var(--th-status-ring); }
 
 /* ── PrimeVue overrides con tema ── */
 
 /* Drawer móvil: fondo glass + sin padding extra (Drawer se renderiza en body) */
-.cosmos-app .p-sidebar,
+.p-sidebar,
 .p-drawer.p-component {
     background: var(--th-sidebar-bg) !important;
     backdrop-filter: blur(24px) !important;
@@ -430,13 +585,13 @@
 
 /* Ocultar el header por defecto de PrimeVue
    (nuestro componente Sidebar ya tiene su propio header con botón de cierre) */
-.cosmos-app .p-sidebar .p-sidebar-header,
+.p-sidebar .p-sidebar-header,
 .p-drawer .p-drawer-header {
     display: none !important;
 }
 
 /* El contenido ocupa todo el espacio restante, sin padding y transparente para que se vea el glass */
-.cosmos-app .p-sidebar .p-sidebar-content,
+.p-sidebar .p-sidebar-content,
 .p-drawer .p-drawer-content {
     background: transparent !important;
     padding: 0 !important;
@@ -456,7 +611,7 @@
     -webkit-backdrop-filter: blur(4px) !important;
 }
 
-.cosmos-app .p-menu {
+.p-menu {
     background: var(--th-menu-bg) !important;
     backdrop-filter: blur(24px) !important;
     -webkit-backdrop-filter: blur(24px) !important;
@@ -465,58 +620,47 @@
     box-shadow: var(--th-menu-shadow) !important;
     padding: 6px !important;
 }
-.cosmos-app .p-menu .p-menuitem-link { border-radius: 8px !important; }
-.cosmos-app .p-menu .p-menuitem-link:hover { background: var(--th-menu-item-hover) !important; }
-.cosmos-app .p-menu .p-menuitem-link:focus { box-shadow: none !important; }
-.cosmos-app .p-menu .p-menuitem-text { color: var(--th-menu-text) !important; }
-.cosmos-app .p-menu .p-menuitem-icon { color: var(--th-menu-icon) !important; }
-.cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-text { color: var(--th-menu-hover-text) !important; }
-.cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-icon { color: var(--th-menu-hover-icon) !important; }
-.cosmos-app .p-menu hr { border-color: var(--th-divider) !important; }
+.p-menu .p-menuitem-link { border-radius: 8px !important; }
+.p-menu .p-menuitem-link:hover { background: var(--th-menu-item-hover) !important; }
+.p-menu .p-menuitem-link:focus { box-shadow: none !important; }
+.p-menu .p-menuitem-text { color: var(--th-menu-text) !important; }
+.p-menu .p-menuitem-icon { color: var(--th-menu-icon) !important; }
+.p-menu .p-menuitem-link:hover .p-menuitem-text { color: var(--th-menu-hover-text) !important; }
+.p-menu .p-menuitem-link:hover .p-menuitem-icon { color: var(--th-menu-hover-icon) !important; }
+.p-menu hr { border-color: var(--th-divider) !important; }
 
 /* =====================================================================
    COSMOS — PrimeVue Component Overrides (v4)
-   Todos los componentes siguen la misma paleta violeta + glass del tema
+   Aplicados globalmente para que menús, diálogos, toasts y overlays
+   (renderizados en body) también usen tema claro/oscuro.
    ===================================================================== */
 
-/* ── Variables PrimeVue derivadas del tema ── */
-.cosmos-app {
-    --p-primary-color:          var(--th-item-active-color);
-    --p-primary-contrast-color: #ffffff;
-    --p-primary-hover-color:    #5b21b6;
-    --p-focus-ring-color:       rgba(139, 92, 246, 0.35);
-}
-[data-theme="dark"] .cosmos-app {
-    --p-primary-color:          #a78bfa;
-    --p-primary-contrast-color: #2e1065;
-    --p-primary-hover-color:    #c4b5fd;
-    --p-focus-ring-color:       rgba(167, 139, 250, 0.4);
-}
+/* Variables --p-* ya definidas en :root y [data-theme="dark"] */
 
 /* ── Button ── */
-.cosmos-app .p-button {
+.p-button {
     border-radius: 0.625rem !important;
     font-weight: 500 !important;
     transition: background-color 150ms, border-color 150ms, box-shadow 150ms, transform 100ms !important;
 }
-.cosmos-app .p-button:active { transform: scale(0.97) !important; }
-.cosmos-app .p-button:focus-visible {
+.p-button:active { transform: scale(0.97) !important; }
+.p-button:focus-visible {
     outline: none !important;
     box-shadow: 0 0 0 3px var(--p-focus-ring-color) !important;
 }
 /* Outlined buttons — bordes más sutiles */
-.cosmos-app .p-button-outlined {
+.p-button-outlined {
     border-width: 1px !important;
 }
 /* Ghost / text buttons */
-.cosmos-app .p-button-text:not(:hover) { background: transparent !important; }
+.p-button-text:not(:hover) { background: transparent !important; }
 /* Sizes */
-.cosmos-app .p-button-sm { font-size: 0.75rem !important; padding: 0.375rem 0.75rem !important; }
-.cosmos-app .p-button-lg { font-size: 1rem   !important; padding: 0.625rem 1.25rem !important; }
+.p-button-sm { font-size: 0.75rem !important; padding: 0.375rem 0.75rem !important; }
+.p-button-lg { font-size: 1rem   !important; padding: 0.625rem 1.25rem !important; }
 
 /* ── InputText / Textarea / InputNumber ── */
-.cosmos-app .p-inputtext,
-.cosmos-app .p-textarea {
+.p-inputtext,
+.p-textarea {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
     color: var(--th-input-text) !important;
@@ -526,30 +670,30 @@
     transition: background-color 150ms, border-color 150ms, box-shadow 150ms !important;
     box-shadow: none !important;
 }
-.cosmos-app .p-inputtext::placeholder,
-.cosmos-app .p-textarea::placeholder {
+.p-inputtext::placeholder,
+.p-textarea::placeholder {
     color: var(--th-input-placeholder) !important;
     font-style: italic;
 }
-.cosmos-app .p-inputtext:hover,
-.cosmos-app .p-textarea:hover {
+.p-inputtext:hover,
+.p-textarea:hover {
     border-color: rgba(139, 92, 246, 0.3) !important;
 }
-.cosmos-app .p-inputtext:focus,
-.cosmos-app .p-inputtext.p-focused,
-.cosmos-app .p-textarea:focus {
+.p-inputtext:focus,
+.p-inputtext.p-focused,
+.p-textarea:focus {
     background: var(--th-input-focus-bg) !important;
     border-color: var(--th-input-focus-border) !important;
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important;
     outline: none !important;
 }
 /* InputNumber inner input */
-.cosmos-app .p-inputnumber-input {
+.p-inputnumber-input {
     border-radius: 0.625rem !important;
 }
 
 /* ── Select (Dropdown) ── */
-.cosmos-app .p-select {
+.p-select {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
     border-radius: 0.625rem !important;
@@ -558,16 +702,16 @@
     transition: border-color 150ms, box-shadow 150ms !important;
     box-shadow: none !important;
 }
-.cosmos-app .p-select:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
-.cosmos-app .p-select.p-focused,
-.cosmos-app .p-select:focus-within {
+.p-select:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
+.p-select.p-focused,
+.p-select:focus-within {
     border-color: var(--th-input-focus-border) !important;
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important;
 }
-.cosmos-app .p-select-label { color: var(--th-input-text) !important; }
-.cosmos-app .p-select-placeholder { color: var(--th-input-placeholder) !important; font-style: italic; }
+.p-select-label { color: var(--th-input-text) !important; }
+.p-select-placeholder { color: var(--th-input-placeholder) !important; font-style: italic; }
 /* Dropdown panel */
-.cosmos-app .p-select-overlay {
+.p-select-overlay {
     background: var(--th-menu-bg) !important;
     border: 1px solid var(--th-menu-border) !important;
     border-radius: 0.875rem !important;
@@ -576,22 +720,22 @@
     -webkit-backdrop-filter: blur(24px) !important;
     padding: 0.375rem !important;
 }
-.cosmos-app .p-select-option {
+.p-select-option {
     border-radius: 0.5rem !important;
     color: var(--th-menu-text) !important;
     transition: background-color 120ms !important;
 }
-.cosmos-app .p-select-option:hover,
-.cosmos-app .p-select-option.p-select-option-selected {
+.p-select-option:hover,
+.p-select-option.p-select-option-selected {
     background: var(--th-menu-item-hover) !important;
     color: var(--th-menu-hover-text) !important;
 }
-.cosmos-app .p-select-option.p-select-option-selected {
+.p-select-option.p-select-option-selected {
     font-weight: 500 !important;
 }
 
 /* ── MultiSelect ── */
-.cosmos-app .p-multiselect {
+.p-multiselect {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
     border-radius: 0.625rem !important;
@@ -599,9 +743,9 @@
     -webkit-backdrop-filter: blur(8px) !important;
     box-shadow: none !important;
 }
-.cosmos-app .p-multiselect:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
-.cosmos-app .p-multiselect.p-focused { border-color: var(--th-input-focus-border) !important; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important; }
-.cosmos-app .p-multiselect-overlay {
+.p-multiselect:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
+.p-multiselect.p-focused { border-color: var(--th-input-focus-border) !important; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important; }
+.p-multiselect-overlay {
     background: var(--th-menu-bg) !important;
     border: 1px solid var(--th-menu-border) !important;
     border-radius: 0.875rem !important;
@@ -612,11 +756,11 @@
 }
 
 /* ── DataTable ── */
-.cosmos-app .p-datatable {
+.p-datatable {
     border-radius: 1rem !important;
     overflow: hidden !important;
 }
-.cosmos-app .p-datatable-table-container {
+.p-datatable-table-container {
     background: var(--th-surface-glass-bg) !important;
     backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
     -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
@@ -624,15 +768,15 @@
     border-radius: 1rem !important;
     box-shadow: var(--th-surface-glass-shadow) !important;
 }
-[data-theme="dark"] .cosmos-app .p-datatable-table-container {
+[data-theme="dark"] .p-datatable-table-container {
     box-shadow: var(--th-surface-glass-shadow) !important;
 }
-.cosmos-app .p-datatable-header {
+.p-datatable-header {
     background: transparent !important;
     border-bottom: 1px solid var(--th-border) !important;
     padding: 1rem 1.25rem !important;
 }
-.cosmos-app .p-datatable-thead > tr > th {
+.p-datatable-thead > tr > th {
     background: transparent !important;
     border-bottom: 1px solid var(--th-border) !important;
     border-top: none !important;
@@ -643,41 +787,41 @@
     text-transform: uppercase !important;
     padding: 0.875rem 1rem !important;
 }
-.cosmos-app .p-datatable-thead > tr > th:first-child { border-radius: 0 !important; }
-.cosmos-app .p-datatable-sort-icon { color: var(--th-text-muted) !important; }
-.cosmos-app .p-datatable-column-sorted .p-datatable-sort-icon { color: var(--th-item-active-color) !important; }
-.cosmos-app .p-datatable-tbody > tr {
+.p-datatable-thead > tr > th:first-child { border-radius: 0 !important; }
+.p-datatable-sort-icon { color: var(--th-text-muted) !important; }
+.p-datatable-column-sorted .p-datatable-sort-icon { color: var(--th-item-active-color) !important; }
+.p-datatable-tbody > tr {
     background: transparent !important;
     border-bottom: 1px solid var(--th-border) !important;
     transition: background-color 120ms !important;
 }
-.cosmos-app .p-datatable-tbody > tr:last-child { border-bottom: none !important; }
-.cosmos-app .p-datatable-tbody > tr:hover {
+.p-datatable-tbody > tr:last-child { border-bottom: none !important; }
+.p-datatable-tbody > tr:hover {
     background: var(--th-item-hover-bg) !important;
 }
-.cosmos-app .p-datatable-tbody > tr > td {
+.p-datatable-tbody > tr > td {
     background: transparent !important;
     border: none !important;
     color: var(--th-text-primary) !important;
     padding: 0.875rem 1rem !important;
 }
-.cosmos-app .p-datatable-footer {
+.p-datatable-footer {
     background: transparent !important;
     border-top: 1px solid var(--th-border) !important;
     padding: 0.75rem 1.25rem !important;
 }
 /* Row selection */
-.cosmos-app .p-datatable-tbody > tr.p-highlight {
+.p-datatable-tbody > tr.p-highlight {
     background: var(--th-item-active-bg) !important;
     color: var(--th-item-active-color) !important;
 }
 /* Striped rows */
-.cosmos-app .p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
     background: rgba(139, 92, 246, 0.025) !important;
 }
 
 /* ── Paginator ── */
-.cosmos-app .p-paginator {
+.p-paginator {
     background: transparent !important;
     border: none !important;
     border-top: 1px solid var(--th-border) !important;
@@ -685,46 +829,46 @@
     padding: 0.75rem 1rem !important;
     gap: 0.25rem !important;
 }
-.cosmos-app .p-paginator-page,
-.cosmos-app .p-paginator-prev,
-.cosmos-app .p-paginator-next,
-.cosmos-app .p-paginator-first,
-.cosmos-app .p-paginator-last {
+.p-paginator-page,
+.p-paginator-prev,
+.p-paginator-next,
+.p-paginator-first,
+.p-paginator-last {
     border-radius: 0.5rem !important;
     min-width: 2rem !important;
     height: 2rem !important;
     color: var(--th-text-secondary) !important;
     transition: background-color 120ms, color 120ms !important;
 }
-.cosmos-app .p-paginator-page:hover,
-.cosmos-app .p-paginator-prev:hover,
-.cosmos-app .p-paginator-next:hover {
+.p-paginator-page:hover,
+.p-paginator-prev:hover,
+.p-paginator-next:hover {
     background: var(--th-item-hover-bg) !important;
     color: var(--th-item-hover-color) !important;
 }
-.cosmos-app .p-paginator-page.p-highlight {
+.p-paginator-page.p-highlight {
     background: var(--th-item-active-bg) !important;
     color: var(--th-item-active-color) !important;
     font-weight: 600 !important;
 }
-.cosmos-app .p-paginator-rpp-dropdown .p-select,
-.cosmos-app .p-paginator-rpp-options {
+.p-paginator-rpp-dropdown .p-select,
+.p-paginator-rpp-options {
     border-radius: 0.5rem !important;
 }
 
 /* ── Dialog / Modal ── */
-.cosmos-app .p-dialog,
+.p-dialog,
 .p-dialog.p-component {
     border-radius: 1rem !important;
     border: 1px solid var(--th-menu-border) !important;
     box-shadow: 0 24px 60px rgba(99, 102, 241, 0.14), 0 8px 20px rgba(0, 0, 0, 0.1) !important;
     overflow: hidden !important;
 }
-[data-theme="dark"] .cosmos-app .p-dialog,
+[data-theme="dark"] .p-dialog,
 [data-theme="dark"] .p-dialog.p-component {
     box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
 }
-.cosmos-app .p-dialog-header,
+.p-dialog-header,
 .p-dialog .p-dialog-header {
     background: var(--th-nav-bg) !important;
     backdrop-filter: blur(24px) !important;
@@ -732,13 +876,13 @@
     border-bottom: 1px solid var(--th-border) !important;
     padding: 1.25rem 1.5rem !important;
 }
-.cosmos-app .p-dialog-title,
+.p-dialog-title,
 .p-dialog .p-dialog-title {
     color: var(--th-text-primary) !important;
     font-weight: 600 !important;
     font-size: 1rem !important;
 }
-.cosmos-app .p-dialog-content,
+.p-dialog-content,
 .p-dialog .p-dialog-content {
     background: var(--th-sidebar-bg) !important;
     backdrop-filter: blur(24px) !important;
@@ -746,7 +890,7 @@
     padding: 1.5rem !important;
     color: var(--th-text-primary) !important;
 }
-.cosmos-app .p-dialog-footer,
+.p-dialog-footer,
 .p-dialog .p-dialog-footer {
     background: var(--th-nav-bg) !important;
     backdrop-filter: blur(24px) !important;
@@ -764,11 +908,11 @@
 }
 
 /* ── Toast ── */
-.cosmos-app .p-toast,
+.p-toast,
 .p-toast.p-component {
     z-index: 9999 !important;
 }
-.cosmos-app .p-toast-message,
+.p-toast-message,
 .p-toast .p-toast-message {
     background: var(--th-menu-bg) !important;
     backdrop-filter: blur(24px) !important;
@@ -800,7 +944,7 @@
 .p-toast .p-toast-message-error    { border-left: 3px solid #ef4444 !important; }
 
 /* ── Card ── */
-.cosmos-app .p-card {
+.p-card {
     background: var(--th-surface-glass-bg) !important;
     backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
     -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
@@ -810,21 +954,21 @@
     transition: box-shadow 200ms, border-color 200ms !important;
     color: var(--th-text-primary) !important;
 }
-.cosmos-app .p-card:hover {
+.p-card:hover {
     border-color: rgba(139, 92, 246, 0.2) !important;
     box-shadow: var(--th-surface-glass-shadow-hover) !important;
 }
-[data-theme="dark"] .cosmos-app .p-card:hover {
+[data-theme="dark"] .p-card:hover {
     border-color: rgba(139, 92, 246, 0.18) !important;
 }
-.cosmos-app .p-card-header { border-bottom: 1px solid var(--th-border) !important; padding: 1.25rem 1.5rem !important; }
-.cosmos-app .p-card-body { padding: 1.5rem !important; }
-.cosmos-app .p-card-title { color: var(--th-text-primary) !important; font-size: 1rem !important; font-weight: 600 !important; }
-.cosmos-app .p-card-subtitle { color: var(--th-text-secondary) !important; font-size: 0.875rem !important; }
-.cosmos-app .p-card-footer { border-top: 1px solid var(--th-border) !important; padding: 1rem 1.5rem !important; }
+.p-card-header { border-bottom: 1px solid var(--th-border) !important; padding: 1.25rem 1.5rem !important; }
+.p-card-body { padding: 1.5rem !important; }
+.p-card-title { color: var(--th-text-primary) !important; font-size: 1rem !important; font-weight: 600 !important; }
+.p-card-subtitle { color: var(--th-text-secondary) !important; font-size: 0.875rem !important; }
+.p-card-footer { border-top: 1px solid var(--th-border) !important; padding: 1rem 1.5rem !important; }
 
 /* ── Panel ── */
-.cosmos-app .p-panel {
+.p-panel {
     background: var(--th-surface-glass-bg) !important;
     backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
     -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
@@ -834,24 +978,24 @@
     overflow: hidden !important;
     color: var(--th-text-primary) !important;
 }
-.cosmos-app .p-panel-header {
+.p-panel-header {
     background: transparent !important;
     border-bottom: 1px solid var(--th-border) !important;
     padding: 1rem 1.25rem !important;
 }
-.cosmos-app .p-panel-title { color: var(--th-text-primary) !important; font-weight: 600 !important; }
-.cosmos-app .p-panel-content {
+.p-panel-title { color: var(--th-text-primary) !important; font-weight: 600 !important; }
+.p-panel-content {
     background: transparent !important;
     padding: 1rem 1.25rem !important;
     color: var(--th-text-primary) !important;
 }
-.cosmos-app .p-panel-footer {
+.p-panel-footer {
     border-top: 1px solid var(--th-border) !important;
     padding: 0.75rem 1.25rem !important;
 }
 
 /* ── Fieldset ── */
-.cosmos-app .p-fieldset {
+.p-fieldset {
     background: var(--th-surface-glass-bg) !important;
     backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
     -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
@@ -861,19 +1005,19 @@
     overflow: hidden !important;
     color: var(--th-text-primary) !important;
 }
-.cosmos-app .p-fieldset-legend {
+.p-fieldset-legend {
     background: transparent !important;
     border: none !important;
     color: var(--th-text-primary) !important;
     font-weight: 600 !important;
     padding: 0.5rem 0 !important;
 }
-.cosmos-app .p-fieldset-content { padding: 1rem 0 !important; }
-.cosmos-app .p-fieldset-toggleable .p-fieldset-legend { padding: 0.75rem 0 !important; }
+.p-fieldset-content { padding: 1rem 0 !important; }
+.p-fieldset-toggleable .p-fieldset-legend { padding: 0.75rem 0 !important; }
 
 /* ── Tabs ── */
-.cosmos-app .p-tabs { background: transparent !important; }
-.cosmos-app .p-tablist {
+.p-tabs { background: transparent !important; }
+.p-tablist {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
     border-radius: 0.75rem !important;
@@ -881,7 +1025,7 @@
     gap: 0.125rem !important;
     backdrop-filter: blur(8px) !important;
 }
-.cosmos-app .p-tab {
+.p-tab {
     border-radius: 0.5rem !important;
     color: var(--th-text-secondary) !important;
     font-size: 0.875rem !important;
@@ -890,21 +1034,21 @@
     transition: background-color 150ms, color 150ms !important;
     border: none !important;
 }
-.cosmos-app .p-tab:hover { color: var(--th-text-primary) !important; background: var(--th-item-hover-bg) !important; }
-.cosmos-app .p-tab.p-tab-active {
+.p-tab:hover { color: var(--th-text-primary) !important; background: var(--th-item-hover-bg) !important; }
+.p-tab.p-tab-active {
     background: rgba(255, 255, 255, 0.9) !important;
     color: var(--th-item-active-color) !important;
     box-shadow: 0 1px 4px rgba(99, 102, 241, 0.15) !important;
 }
-[data-theme="dark"] .cosmos-app .p-tab.p-tab-active {
+[data-theme="dark"] .p-tab.p-tab-active {
     background: rgba(139, 92, 246, 0.18) !important;
     color: #c4b5fd !important;
 }
-.cosmos-app .p-tablist-active-bar { display: none !important; }
-.cosmos-app .p-tabpanels { background: transparent !important; padding: 1rem 0 0 !important; }
+.p-tablist-active-bar { display: none !important; }
+.p-tabpanels { background: transparent !important; padding: 1rem 0 0 !important; }
 
 /* ── Badge / Tag / Chip ── */
-.cosmos-app .p-badge {
+.p-badge {
     border-radius: 0.5rem !important;
     font-size: 0.65rem !important;
     font-weight: 600 !important;
@@ -914,14 +1058,14 @@
     line-height: 1.25rem !important;
     padding: 0 0.375rem !important;
 }
-.cosmos-app .p-tag {
+.p-tag {
     border-radius: 0.5rem !important;
     font-size: 0.72rem !important;
     font-weight: 600 !important;
     letter-spacing: 0.03em !important;
     padding: 0.2rem 0.5rem !important;
 }
-.cosmos-app .p-chip {
+.p-chip {
     border-radius: 0.5rem !important;
     border: 1px solid var(--th-border) !important;
     background: var(--th-item-hover-bg) !important;
@@ -929,7 +1073,7 @@
 }
 
 /* ── Popover / OverlayPanel ── */
-.cosmos-app .p-popover,
+.p-popover,
 .p-popover.p-component,
 .p-overlaypanel.p-component {
     background: var(--th-menu-bg) !important;
@@ -942,52 +1086,52 @@
 }
 
 /* ── ProgressBar ── */
-.cosmos-app .p-progressbar {
+.p-progressbar {
     background: var(--th-input-bg) !important;
     border-radius: 999px !important;
     height: 0.5rem !important;
     border: 1px solid var(--th-input-border) !important;
     overflow: hidden !important;
 }
-.cosmos-app .p-progressbar-value {
+.p-progressbar-value {
     background: linear-gradient(90deg, #8b5cf6, #6d28d9) !important;
     border-radius: 999px !important;
 }
 
 /* ── Checkbox ── */
-.cosmos-app .p-checkbox-box {
+.p-checkbox-box {
     border-radius: 0.375rem !important;
     border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
     background: var(--th-input-bg) !important;
     transition: border-color 150ms, background-color 150ms !important;
 }
-.cosmos-app .p-checkbox-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
-.cosmos-app .p-checkbox.p-highlight .p-checkbox-box {
+.p-checkbox-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
+.p-checkbox.p-highlight .p-checkbox-box {
     background: #7c3aed !important;
     border-color: #7c3aed !important;
 }
 
 /* ── RadioButton ── */
-.cosmos-app .p-radiobutton-box {
+.p-radiobutton-box {
     border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
     background: var(--th-input-bg) !important;
     transition: border-color 150ms !important;
 }
-.cosmos-app .p-radiobutton-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
-.cosmos-app .p-radiobutton.p-highlight .p-radiobutton-box { border-color: #7c3aed !important; }
-.cosmos-app .p-radiobutton.p-highlight .p-radiobutton-box .p-radiobutton-icon { background: #7c3aed !important; }
+.p-radiobutton-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
+.p-radiobutton.p-highlight .p-radiobutton-box { border-color: #7c3aed !important; }
+.p-radiobutton.p-highlight .p-radiobutton-box .p-radiobutton-icon { background: #7c3aed !important; }
 
 /* ── ToggleSwitch / InputSwitch ── */
-.cosmos-app .p-toggleswitch-slider { background: var(--th-divider) !important; transition: background-color 200ms !important; }
-.cosmos-app .p-toggleswitch.p-highlight .p-toggleswitch-slider { background: #7c3aed !important; }
+.p-toggleswitch-slider { background: var(--th-divider) !important; transition: background-color 200ms !important; }
+.p-toggleswitch.p-highlight .p-toggleswitch-slider { background: #7c3aed !important; }
 
-/* ── Scrollbar personalizado ── */
-.cosmos-app ::-webkit-scrollbar { width: 5px; height: 5px; }
-.cosmos-app ::-webkit-scrollbar-track { background: transparent; }
-.cosmos-app ::-webkit-scrollbar-thumb {
+/* ── Scrollbar personalizado (global: aplica en toda la app cuando el tema está activo) ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
     background: rgba(139, 92, 246, 0.25);
     border-radius: 999px;
 }
-.cosmos-app ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.45); }
-[data-theme="dark"] .cosmos-app ::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); }
-[data-theme="dark"] .cosmos-app ::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.4); }
+::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.45); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.4); }

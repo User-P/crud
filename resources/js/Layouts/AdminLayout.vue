@@ -61,18 +61,18 @@
                                     <Icon
                                         v-if="index > 0"
                                         icon="heroicons:chevron-right"
-                                        class="cosmos-crumb-separator h-3.5 w-3.5 shrink-0"
+                                        class="crumb-separator h-3.5 w-3.5 shrink-0"
                                         aria-hidden="true"
                                     />
                                     <a
                                         v-if="crumb.href"
                                         :href="crumb.href"
-                                        class="cosmos-crumb-link transition"
+                                        class="crumb-link transition"
                                         @click.prevent="router.visit(crumb.href)"
                                     >
                                         {{ crumb.name }}
                                     </a>
-                                    <span v-else class="cosmos-crumb-current font-medium">
+                                    <span v-else class="crumb-current font-medium">
                                         {{ crumb.name }}
                                     </span>
                                 </li>
@@ -81,10 +81,10 @@
 
                         <!-- Título -->
                         <div v-if="title" class="mb-8">
-                            <h1 class="cosmos-gradient-text text-2xl font-bold tracking-tight sm:text-3xl">
+                            <h1 class="gradient-text text-2xl font-bold tracking-tight sm:text-3xl">
                                 {{ title }}
                             </h1>
-                            <p v-if="subtitle" class="cosmos-subtitle mt-1.5 text-sm">
+                            <p v-if="subtitle" class="subtitle mt-1.5 text-sm">
                                 {{ subtitle }}
                             </p>
                         </div>

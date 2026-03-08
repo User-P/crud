@@ -1,7 +1,5 @@
 <template>
-    <AdminLayout
-        :breadcrumbs="breadcrumbs"
-    >
+    <AdminLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-8">
             <DashboardHeader
                 :title="title"
@@ -13,13 +11,13 @@
                         :initial-range="{ start: '2025-01-01', end: '2025-01-31' }"
                         initial-type="custom"
                         select-disabled
-                        class="cosmos-surface rounded-xl"
+                        class="surface rounded-xl"
                     />
                 </template>
             </DashboardHeader>
 
             <div v-if="isLoading" class="flex justify-center py-12">
-                <p class="text-sm text-slate-500">Cargando indicadores…</p>
+                <p class="text-sm text-muted">Cargando indicadores…</p>
             </div>
 
             <template v-else>
@@ -28,20 +26,20 @@
                     <button
                         v-if="heroCard"
                         type="button"
-                        class="cosmos-surface group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+                        class="surface group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
                         @click="openDetail(heroCard)"
                     >
                         <div class="flex items-center gap-3">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-400/20 text-indigo-600 backdrop-blur">
+                            <div class="icon-box flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl backdrop-blur">
                                 <Icon :icon="heroCard.icon" class="h-6 w-6" aria-hidden="true" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-slate-600">Métrica principal</p>
-                                <p class="text-3xl font-bold tabular-nums text-slate-800">{{ heroCard.value }}</p>
-                                <p class="text-sm font-medium text-slate-600">{{ heroCard.label }}</p>
+                                <p class="text-sm font-medium text-secondary">Métrica principal</p>
+                                <p class="text-3xl font-bold tabular-nums"> {{ heroCard.value }}</p>
+                                <p class="text-sm font-medium text-secondary">{{ heroCard.label }}</p>
                             </div>
                         </div>
-                        <span class="absolute right-4 top-4 text-xs text-slate-500">Clic para detalle →</span>
+                        <span class="absolute right-4 top-4 text-xs text-muted">Clic para detalle →</span>
                     </button>
 
                     <MetricCard
@@ -57,7 +55,7 @@
 
                 <!-- Otras métricas -->
                 <section>
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
+                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider">
                         Otras métricas
                     </h3>
                     <div ref="gridRef" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -73,11 +71,10 @@
                     </div>
                 </section>
 
-                <p class="text-xs text-slate-500">
+                <p class="text-xs text-muted">
                     Clic en cualquier tarjeta para ver detalle (gráficas + tabla)
                 </p>
             </template>
-
         </div>
 
         <DetailDrawer
@@ -86,22 +83,25 @@
             @close="selectedCard = null"
         >
             <template v-if="selectedCard">
-                <p class="mb-4 text-sm text-slate-600">
+                <p class="mb-4 text-sm text-secondary">
                     Detalle de <strong>{{ selectedCard.label }}</strong>. Aquí se mostrarían gráficas y tabla según el tipo de métrica.
                 </p>
-                <div class="mb-4 h-48 rounded-xl bg-white/50 flex items-center justify-center text-slate-500 text-sm backdrop-blur">
+                <div class="surface-subtle mb-4 flex h-48 items-center justify-center rounded-xl text-sm text-muted">
                     Gráfica de tendencia (placeholder)
                 </div>
-                <div class="rounded-xl overflow-hidden border border-white/40 bg-white/40 backdrop-blur">
+                <div class="surface-subtle overflow-hidden rounded-xl">
                     <table class="w-full text-sm">
-                        <thead class="bg-white/50">
+                        <thead>
                             <tr>
-                                <th class="px-4 py-2 text-left font-medium text-slate-600">Concepto</th>
-                                <th class="px-4 py-2 text-right font-medium text-slate-600">Valor</th>
+                                <th class="px-4 py-2.5 text-left font-medium">Concepto</th>
+                                <th class="px-4 py-2.5 text-right font-medium">Valor</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-t border-white/30"><td class="px-4 py-2 text-slate-600">Total</td><td class="px-4 py-2 text-right font-medium">{{ selectedCard.value }}</td></tr>
+                            <tr>
+                                <td class="px-4 py-2.5">Total</td>
+                                <td class="px-4 py-2.5 text-right font-medium">{{ selectedCard.value }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
