@@ -7,14 +7,14 @@ const DUMMY_RESUMEN = { ok: true, message: "Datos de demostración" }
 
 // Respuesta de /cards/:date (VistaGeneral: hero, primary, secondary)
 const DUMMY_USERS_CARDS = {
-    hero: {
-        id: "total",
-        label: "Usuarios totales",
-        value: 142000,
-        variant: "blue",
-        iconKey: "heroicons:globe-alt",
-    },
     primary: [
+        {
+            id: "total",
+            label: "Usuarios totales",
+            value: 142000,
+            variant: "blue",
+            iconKey: "heroicons:globe-alt",
+        },
         { id: "activos", label: "Usuarios activos", value: 132000, variant: "green", iconKey: "heroicons:check-circle" },
         { id: "inactivos", label: "Usuarios inactivos", value: 10000, variant: "red", iconKey: "heroicons:x-circle" },
     ],
