@@ -46,27 +46,51 @@
                         <div
                             class="flex flex-wrap items-center justify-between gap-3 border-b border-(--th-border) px-4 py-3">
                             <h3 class="text-sm font-semibold text-(--th-text-primary)">
-                                {{ selectedCard ? `Detalle: ${selectedCard.label}` : 'Detalle de la métrica' }}
+                                {{ useTestData1M ? 'Detalle: Prueba 1.000.000 registros' : (selectedCard ? `Detalle: ${selectedCard.label}` : 'Detalle de la métrica') }}
                             </h3>
-                            <button v-if="selectedCard" type="button"
-                                class="text-xs font-medium text-(--th-text-muted) hover:text-(--th-item-active-color) transition-colors"
-                                @click="selectedCard = null">
-                                Limpiar selección
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button v-if="useTestData1M" type="button"
+                                    class="text-xs font-medium text-(--th-text-muted) hover:text-(--th-item-active-color) transition-colors"
+                                    @click="useTestData1M = false">
+                                    Volver a datos reales
+                                </button>
+                                <button v-else-if="selectedCard" type="button"
+                                    class="text-xs font-medium text-(--th-text-muted) hover:text-(--th-item-active-color) transition-colors"
+                                    @click="selectedCard = null">
+                                    Limpiar selección
+                                </button>
+                                <button
+                                    v-if="!useTestData1M && !loadingTestData"
+                                    type="button"
+                                    class="text-xs font-medium text-(--th-item-active-color) hover:underline"
+                                    @click="loadTestData1M"
+                                >
+                                    Cargar 1M registros de prueba
+                                </button>
+                                <span v-else-if="loadingTestData" class="text-xs text-(--th-text-muted)">
+                                    Generando 1.000.000 registros…
+                                </span>
+                            </div>
                         </div>
-                        <div v-if="!selectedCard"
+                        <div v-if="!selectedCard && !useTestData1M"
                             class="flex flex-col items-center justify-center gap-2 px-4 py-12 text-center">
                             <Icon icon="heroicons:table-cells" class="h-10 w-10 text-(--th-text-muted)"
                                 aria-hidden="true" />
                             <p class="text-sm text-(--th-text-muted)">Selecciona una métrica arriba para ver el detalle.
                             </p>
+                            <p class="text-xs text-(--th-text-muted)">O usa «Cargar 1M registros de prueba» para pruebas de rendimiento y exportación.</p>
+                        </div>
+                        <div v-else-if="loadingTestData" class="flex flex-col items-center justify-center gap-2 px-4 py-12 text-center">
+                            <Icon icon="heroicons:arrow-path" class="h-10 w-10 animate-spin text-(--th-text-muted)" aria-hidden="true" />
+                            <p class="text-sm text-(--th-text-muted)">Generando 1.000.000 de filas con 10 columnas…</p>
+                            <p class="text-xs text-(--th-text-muted)">Puede tardar unos segundos.</p>
                         </div>
                         <div v-else class="overflow-x-auto px-4 pb-4">
                             <DetailMetricTable
-                                :rows="detailRows as Record<string, unknown>[]"
-                                :columns="detailTableColumns"
-                                search-placeholder="Buscar en concepto, valor, %..."
-                                :export-label="selectedCard?.label"
+                                :rows="detailRowsForTable"
+                                :columns="detailTableColumnsForTable"
+                                search-placeholder="Buscar en la tabla…"
+                                :export-label="useTestData1M ? 'prueba-1m-registros' : selectedCard?.label"
                             />
                         </div>
                     </div>
@@ -208,7 +232,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -219,7 +243,7 @@ import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import PieChart from '@/Components/Charts/PieChart.vue'
 import HorizontalBarChart from '@/Components/Charts/HorizontalBarChart.vue'
 import SemaphoreBarChart from '@/Components/Charts/SemaphoreBarChart.vue'
-import { useUsers } from './composables/useUsers'
+import { useUsers, generateDummyDetailRows } from './composables/useUsers'
 import type { DetailTableRow } from './composables/useUsers'
 
 const sectionIds = {
@@ -259,6 +283,51 @@ const secondaryCards = computed<CardItem[]>(() => {
 const detailRows = computed<DetailTableRow[]>(() => {
     if (!selectedCard.value) return []
     return detailsByCard[selectedCard.value.id] ?? []
+})
+
+const useTestData1M = ref(false)
+const loadingTestData = ref(false)
+const testData1M = shallowRef<Record<string, unknown>[] | null>(null)
+
+async function loadTestData1M() {
+    if (loadingTestData.value || testData1M.value) {
+        useTestData1M.value = true
+        return
+    }
+    loadingTestData.value = true
+    try {
+        const data = await generateDummyDetailRows(2_000_000)
+        testData1M.value = data
+        useTestData1M.value = true
+    } finally {
+        loadingTestData.value = false
+    }
+}
+
+/** Filas a mostrar: 1M de prueba o detalle real */
+const detailRowsForTable = computed<Record<string, unknown>[]>(() => {
+    if (useTestData1M.value && testData1M.value) return testData1M.value
+    return detailRows.value as Record<string, unknown>[]
+})
+
+/** Columnas para datos de prueba (10 headers) */
+const detailTableColumnsTest: DetailMetricColumn[] = [
+    { key: 'concepto', header: 'Concepto', sortable: true, class: 'font-medium' },
+    { key: 'valor', header: 'Valor', sortable: true, numeric: true, format: (v) => formatValor(v as number | string) },
+    { key: 'porcentaje', header: 'Porcentaje', sortable: true },
+    { key: 'fecha', header: 'Fecha', sortable: true, class: 'text-(--th-text-secondary)' },
+    { key: 'estado', header: 'Estado', sortable: true },
+    { key: 'tipo', header: 'Tipo', sortable: true },
+    { key: 'unidad', header: 'Unidad', sortable: true },
+    { key: 'codigo', header: 'Código', sortable: true },
+    { key: 'descripcion', header: 'Descripción', sortable: true },
+    { key: 'observaciones', header: 'Observaciones', sortable: true, class: 'text-(--th-text-secondary)' },
+]
+
+/** Columnas a usar: 10 para prueba o las dinámicas para detalle real */
+const detailTableColumnsForTable = computed<DetailMetricColumn[]>(() => {
+    if (useTestData1M.value && testData1M.value) return detailTableColumnsTest
+    return detailTableColumns.value
 })
 
 const hasPorcentaje = computed(() => detailRows.value.some((r) => r.porcentaje != null))

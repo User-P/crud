@@ -89,6 +89,56 @@ const DUMMY_DETAILS = [
 /** Detalle por métrica para la DataTable (tabla inline en VistaGeneral) */
 export type DetailTableRow = { concepto: string; valor: number | string; porcentaje?: string; unidad?: string; actualizado?: string }
 
+/** Claves para datos dummy de prueba (10 columnas) */
+export const DUMMY_DETAIL_KEYS = [
+    'concepto', 'valor', 'porcentaje', 'fecha', 'estado', 'tipo', 'unidad', 'codigo', 'descripcion', 'observaciones',
+] as const
+
+const ESTADOS = ['Activo', 'Inactivo', 'Pendiente', 'Cerrado', 'En revisión']
+const TIPOS = ['A', 'B', 'C', 'D', 'E']
+const UNIDADES = ['u', 'kg', 'm', 'litros', 'unidad']
+
+export function generateDummyDetailRows(count: number): Promise<Record<string, unknown>[]> {
+    const total = Math.floor(count)
+    const CHUNK = 50_000
+    const result: Record<string, unknown>[] = []
+    let index = 0
+
+    function pad(n: number, len: number) {
+        return String(n).padStart(len, '0')
+    }
+
+    function nextChunk(): Promise<void> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const end = Math.min(index + CHUNK, total)
+                for (let i = index; i < end; i++) {
+                    result.push({
+                        concepto: `Concepto-${pad(i + 1, 7)}`,
+                        valor: Math.floor(Math.random() * 1_000_000) + 1000,
+                        porcentaje: `${(Math.random() * 100).toFixed(2)}%`,
+                        fecha: `2025-${pad((i % 12) + 1, 2)}-${pad((i % 28) + 1, 2)} ${pad(i % 24, 2)}:${pad(i % 60, 2)}`,
+                        estado: ESTADOS[i % ESTADOS.length],
+                        tipo: TIPOS[i % TIPOS.length],
+                        unidad: UNIDADES[i % UNIDADES.length],
+                        codigo: `COD-${pad(i, 6)}`,
+                        descripcion: `Descripción del registro número ${i + 1}`,
+                        observaciones: i % 5 === 0 ? `Obs. ${i + 1}` : '',
+                    })
+                }
+                index = end
+                resolve()
+            }, 0)
+        })
+    }
+
+    async function run() {
+        while (index < total) await nextChunk()
+        return result
+    }
+    return run()
+}
+
 const DUMMY_DETAILS_BY_CARD: Record<string, DetailTableRow[]> = {
     total: [
         { concepto: "Total", valor: 142000, porcentaje: "100%", actualizado: "2025-01-31 08:00" },

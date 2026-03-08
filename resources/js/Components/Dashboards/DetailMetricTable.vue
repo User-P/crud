@@ -178,6 +178,16 @@ function escapeCsvCell(value: string): string {
     return value
 }
 
+/**
+ * Export CSV: no hay límite de filas en el código.
+ * Límites reales:
+ * - Longitud máxima de string en JS (V8): ~268 millones de caracteres (2^28 - 1).
+ *   Si cada fila tiene ~L caracteres, máximo teórico ≈ 268e6 / L (ej. L=150 → ~1,8M filas).
+ * - Memoria: se construye el CSV como un string completo; el navegador puede fallar por RAM
+ *   antes del límite de string (p. ej. 1–2M filas con columnas normales suele ser viable).
+ * - Descarga: el archivo puede ser grande; depende de disco y del navegador.
+ */
+/** Export propio: CSV sin formato (PrimeVue DataTable tiene exportCSV() en el ref, pero usamos columnas dinámicas). */
 function exportCSV() {
     if (filteredRows.value.length === 0) return
     const cols = props.columns
