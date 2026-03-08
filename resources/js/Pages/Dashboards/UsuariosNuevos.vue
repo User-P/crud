@@ -1,36 +1,22 @@
 <template>
-    <AdminLayout
-        :breadcrumbs="[
-            { name: 'Dashboard', href: '/dashboard' },
-            { name: 'Dashboards de métricas', href: '/dashboards' },
-            { name: 'Usuarios nuevos' },
-        ]"
-    >
+    <AdminLayout :breadcrumbs="[
+        { name: 'Dashboard', href: '/dashboard' },
+        { name: 'Dashboards de métricas', href: '/dashboards' },
+        { name: 'Usuarios nuevos' },
+    ]">
         <div class="space-y-8">
-            <DashboardHeader
-                title="Usuarios nuevos"
-                subtitle="Altas de usuarios y tendencias"
-                icon="heroicons:user-plus"
-            >
+            <DashboardHeader title="Usuarios nuevos" subtitle="Altas de usuarios y tendencias"
+                icon="heroicons:user-plus">
                 <template #actions>
-                    <CustomPicker
-                        initial-preset="lastMonth"
-                        select-disabled
-                        class="surface rounded-xl shadow-sm"
-                    />
+                    <CustomPicker initial-preset="lastMonth" select-disabled class="  rounded-xl shadow-sm" />
                 </template>
             </DashboardHeader>
 
             <!-- Cards de altas -->
             <div v-if="usersAdd?.cards" class="grid gap-4 sm:grid-cols-3">
-                <MetricCard
-                    v-for="card in usersAdd.cards"
-                    :key="card.id"
-                    :label="card.label"
-                    :value="formatValue(card.value)"
-                    :icon="card.icon"
-                    :variant="card.variant === 'yellow' ? 'blue' : card.variant"
-                />
+                <MetricCard v-for="card in usersAdd.cards" :key="card.id" :label="card.label"
+                    :value="formatValue(card.value)" :icon="card.icon"
+                    :variant="card.variant === 'yellow' ? 'blue' : card.variant" />
             </div>
 
             <!-- Gráfica lineal (tendencia mensual) -->

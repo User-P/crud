@@ -1,40 +1,21 @@
 <template>
-    <button
-        type="button"
-        class="surface group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
-        @click="$emit('click')"
-    >
+    <button type="button"
+        class="  group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
+        @click="$emit('click')">
         <div class="flex items-start justify-between gap-2">
-            <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 backdrop-blur"
-                :class="v.iconBg"
-            >
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 backdrop-blur"
+                :class="v.iconBg">
                 <Icon :icon="icon" class="h-5 w-5" :class="v.iconColor" aria-hidden="true" />
             </div>
             <div v-if="trend !== undefined" class="flex shrink-0 items-center gap-0.5">
-                <Icon
-                    v-if="trend === 'up'"
-                    icon="heroicons:arrow-trending-up"
-                    class="h-4 w-4 text-emerald-500"
-                    aria-hidden="true"
-                />
-                <Icon
-                    v-else-if="trend === 'down'"
-                    icon="heroicons:arrow-trending-down"
-                    class="h-4 w-4 text-rose-500"
-                    aria-hidden="true"
-                />
-                <Icon
-                    v-else-if="trend === 'neutral'"
-                    icon="heroicons:minus"
-                    class="h-4 w-4 text-muted"
-                    aria-hidden="true"
-                />
-                <span
-                    v-if="trendPercent != null"
-                    class="text-xs font-medium"
-                    :class="trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-600' : 'text-muted'"
-                >
+                <Icon v-if="trend === 'up'" icon="heroicons:arrow-trending-up" class="h-4 w-4 text-emerald-500"
+                    aria-hidden="true" />
+                <Icon v-else-if="trend === 'down'" icon="heroicons:arrow-trending-down" class="h-4 w-4 text-rose-500"
+                    aria-hidden="true" />
+                <Icon v-else-if="trend === 'neutral'" icon="heroicons:minus" class="h-4 w-4 text-muted"
+                    aria-hidden="true" />
+                <span v-if="trendPercent != null" class="text-xs font-medium"
+                    :class="trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-600' : 'text-muted'">
                     {{ trendPercent > 0 ? '+' : '' }}{{ trendPercent }}%
                 </span>
             </div>
@@ -57,10 +38,8 @@
             {{ comparison }}
         </p>
 
-        <div
-            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl transition-all duration-300 group-hover:h-1"
-            :class="v.bar"
-        />
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl transition-all duration-300 group-hover:h-1"
+            :class="v.bar" />
     </button>
 </template>
 

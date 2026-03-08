@@ -1,18 +1,10 @@
 <template>
     <AdminLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-8">
-            <DashboardHeader
-                :title="title"
-                :subtitle="subtitle"
-                icon="heroicons:user-group"
-            >
+            <DashboardHeader :title="title" :subtitle="subtitle" icon="heroicons:user-group">
                 <template #actions>
-                    <CustomPicker
-                        :initial-range="{ start: '2025-01-01', end: '2025-01-31' }"
-                        initial-type="custom"
-                        select-disabled
-                        class="surface rounded-xl"
-                    />
+                    <CustomPicker :initial-range="{ start: '2025-01-01', end: '2025-01-31' }" initial-type="custom"
+                        select-disabled class="rounded-xl" />
                 </template>
             </DashboardHeader>
 
@@ -23,14 +15,12 @@
             <template v-else>
                 <!-- Hero KPI -->
                 <div class="grid gap-6 lg:grid-cols-3">
-                    <button
-                        v-if="heroCard"
-                        type="button"
-                        class="surface group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
-                        @click="openDetail(heroCard)"
-                    >
+                    <button v-if="heroCard" type="button"
+                        class="group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
+                        @click="openDetail(heroCard)">
                         <div class="flex items-center gap-3">
-                            <div class="icon-box flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl backdrop-blur">
+                            <div
+                                class="icon-box flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl backdrop-blur">
                                 <Icon :icon="heroCard.icon" class="h-6 w-6" aria-hidden="true" />
                             </div>
                             <div>
@@ -42,15 +32,8 @@
                         <span class="absolute right-4 top-4 text-xs text-muted">Clic para detalle →</span>
                     </button>
 
-                    <MetricCard
-                        v-for="card in primaryCards"
-                        :key="card.id"
-                        :label="card.label"
-                        :value="card.value"
-                        :icon="card.icon"
-                        :variant="card.variant"
-                        @click="openDetail(card)"
-                    />
+                    <MetricCard v-for="card in primaryCards" :key="card.id" :label="card.label" :value="card.value"
+                        :icon="card.icon" :variant="card.variant" @click="openDetail(card)" />
                 </div>
 
                 <!-- Otras métricas -->
@@ -59,15 +42,8 @@
                         Otras métricas
                     </h3>
                     <div ref="gridRef" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <MetricCard
-                            v-for="card in secondaryCards"
-                            :key="card.id"
-                            :label="card.label"
-                            :value="card.value"
-                            :icon="card.icon"
-                            :variant="card.variant"
-                            @click="openDetail(card)"
-                        />
+                        <MetricCard v-for="card in secondaryCards" :key="card.id" :label="card.label"
+                            :value="card.value" :icon="card.icon" :variant="card.variant" @click="openDetail(card)" />
                     </div>
                 </section>
 
@@ -77,19 +53,17 @@
             </template>
         </div>
 
-        <DetailDrawer
-            :visible="!!selectedCard"
-            :title="selectedCard ? selectedCard.label : ''"
-            @close="selectedCard = null"
-        >
+        <DetailDrawer :visible="!!selectedCard" :title="selectedCard ? selectedCard.label : ''"
+            @close="selectedCard = null">
             <template v-if="selectedCard">
                 <p class="mb-4 text-sm text-secondary">
-                    Detalle de <strong>{{ selectedCard.label }}</strong>. Aquí se mostrarían gráficas y tabla según el tipo de métrica.
+                    Detalle de <strong>{{ selectedCard.label }}</strong>. Aquí se mostrarían gráficas y tabla según el
+                    tipo de métrica.
                 </p>
-                <div class="surface-subtle mb-4 flex h-48 items-center justify-center rounded-xl text-sm text-muted">
+                <div class="mb-4 flex h-48 items-center justify-center rounded-xl text-sm text-muted">
                     Gráfica de tendencia (placeholder)
                 </div>
-                <div class="surface-subtle overflow-hidden rounded-xl">
+                <div class="overflow-hidden rounded-xl">
                     <table class="w-full text-sm">
                         <thead>
                             <tr>

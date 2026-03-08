@@ -4,7 +4,6 @@ import Aura from '@primeuix/themes/aura'
 /**
  * CosmosPreset — PrimeVue theme aligned with the Cosmos design system.
  * Primary palette: violet (matches CSS variables --th-item-active-color, etc.)
- * Surface palette: slate (neutral, pairs well with glass backgrounds)
  *
  * Component tokens must use the section shape expected by @primeuix/themes:
  * e.g. button: { root: { ... } }, inputtext: { root: { ... } }
@@ -64,20 +63,7 @@ const CosmosPreset = definePreset(Aura, {
                     color:           '{primary.700}',
                     focusColor:      '{primary.800}',
                 },
-                surface: {
-                    0:   '#ffffff',
-                    50:  '#f8fafc',
-                    100: '#f1f5f9',
-                    200: '#e2e8f0',
-                    300: '#cbd5e1',
-                    400: '#94a3b8',
-                    500: '#64748b',
-                    600: '#475569',
-                    700: '#334155',
-                    800: '#1e293b',
-                    900: '#0f172a',
-                    950: '#020617',
-                },
+       
             },
             dark: {
                 primary: {
@@ -92,20 +78,7 @@ const CosmosPreset = definePreset(Aura, {
                     color:           '{primary.300}',
                     focusColor:      '{primary.200}',
                 },
-                surface: {
-                    0:   '#ffffff',
-                    50:  '#08080f',
-                    100: '#0d0d1a',
-                    200: '#14142b',
-                    300: '#1c1c36',
-                    400: '#2d2d4a',
-                    500: '#4b5563',
-                    600: '#6b7280',
-                    700: '#9ca3af',
-                    800: '#d1d5db',
-                    900: '#f3f4f6',
-                    950: '#f9fafb',
-                },
+
             },
         },
     },

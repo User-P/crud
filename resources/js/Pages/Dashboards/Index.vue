@@ -4,9 +4,9 @@
         { name: 'Dashboards de métricas' },
     ]">
 
-        <div class="space-y-8">
+        <div class="space-y-10">
             <section>
-                <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
+                <h2 class="group-label mb-4 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
                     Explorar por tema
                 </h2>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -15,7 +15,7 @@
                 </div>
             </section>
             <section>
-                <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
+                <h2 class="group-label mb-4 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
                     Explorar por unidad de negocio
                 </h2>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

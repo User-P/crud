@@ -4,6 +4,9 @@
    y las utilidades de Tailwind no colisionen */
 @layer tailwind-base, primevue, tailwind-utilities;
 
+/* Hace que la variante dark: de Tailwind use nuestro toggle (data-theme en html) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* ========== Glassmorphism legacy (otros componentes) ========== */
 @theme {
     --color-glass: rgba(255, 255, 255, 0.65);
@@ -13,9 +16,7 @@
     --color-glass-nav: rgba(255, 255, 255, 0.7);
     --color-glass-card: rgba(255, 255, 255, 0.6);
     --color-glass-hover: rgba(255, 255, 255, 0.9);
-    --color-surface: #ffffff;
-    --color-surface-subtle: #f8fafc;
-    --color-surface-muted: #f1f5f9;
+
 }
 
 :root {
@@ -47,51 +48,8 @@
 .glass { background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
 .glass-card { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px rgba(99,102,241,0.1), 0 2px 8px rgba(0,0,0,0.06); }
 .glass-card:hover { background: rgba(255,255,255,0.75); box-shadow: 0 12px 40px rgba(99,102,241,0.1), 0 4px 12px rgba(0,0,0,0.06); }
-/* Clase de sistema: superficie glass por defecto (usa variables del tema en .cosmos-app) */
-.cosmos-app .cosmos-surface,
-.cosmos-app .surface,
-.cosmos-app .surface-area > * {
-    background: var(--th-surface-glass-bg) !important;
-    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    border: 1px solid var(--th-surface-glass-border) !important;
-    box-shadow: var(--th-surface-glass-shadow) !important;
-    transition: box-shadow 200ms, border-color 200ms, background 200ms !important;
-}
-.cosmos-app .cosmos-surface:hover,
-.cosmos-app .surface:hover,
-.cosmos-app .surface-area > *:hover {
-    box-shadow: var(--th-surface-glass-shadow-hover) !important;
-    border-color: rgba(139, 92, 246, 0.2) !important;
-}
-[data-theme="dark"] .cosmos-app .cosmos-surface:hover,
-[data-theme="dark"] .cosmos-app .surface:hover,
-[data-theme="dark"] .cosmos-app .surface-area > *:hover {
-    border-color: rgba(139, 92, 246, 0.18) !important;
-}
-/* Superficie más sutil para áreas internas (placeholder, tablas dentro de drawer) */
-.cosmos-app .cosmos-surface-subtle,
-.cosmos-app .surface-subtle,
-.drawer-panel .surface-subtle {
-    background: var(--th-input-bg) !important;
-    border: 1px solid var(--th-border) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-/* Filas de tabla en superficies sutiles */
-.cosmos-app .cosmos-surface-subtle thead tr,
-.cosmos-app .surface-subtle thead tr,
-.cosmos-drawer-panel .cosmos-surface-subtle thead tr,
-.drawer-panel .surface-subtle thead tr {
-    background: var(--th-input-bg);
-    border-bottom: 1px solid var(--th-border);
-}
-.cosmos-app .cosmos-surface-subtle tbody tr,
-.cosmos-app .surface-subtle tbody tr,
-.cosmos-drawer-panel .cosmos-surface-subtle tbody tr,
-.drawer-panel .surface-subtle tbody tr {
-    border-top: 1px solid var(--th-border);
-}
+
+
 .glass-sidebar { background: rgba(255,255,255,0.45); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-right: 1px solid rgba(255,255,255,0.5); box-shadow: 4px 0 24px rgba(99,102,241,0.12); }
 .glass-nav { background: rgba(255,255,255,0.5); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 24px rgba(99,102,241,0.1); }
 .glass-drawer { background: rgba(255,255,255,0.75); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-left: 1px solid rgba(255,255,255,0.5); box-shadow: -8px 0 40px rgba(15,23,42,0.08); }
@@ -191,7 +149,6 @@
     --th-menu-hover-text: #6d28d9;
     --th-menu-hover-icon: #6d28d9;
 
-    /* Texto */
     --th-text-primary: #0f172a;
     --th-text-secondary: #64748b;
     --th-text-muted: #94a3b8;
@@ -208,23 +165,13 @@
     --th-crumb-separator: #94a3b8;
     --th-subtitle: #64748b;
 
-    /* Misc */
     --th-ring-offset: #f8fafc;
     --th-status-ring: white;
     --th-notification-badge: #7c3aed;
 
-    /* kbd en búsqueda */
     --th-kbd-bg: rgba(255, 255, 255, 0.55);
     --th-kbd-border: rgba(139, 92, 246, 0.15);
 
-    /* Superficie glass por defecto (cards, panels, etc.) */
-    --th-surface-glass-bg: rgba(255, 255, 255, 0.6);
-    --th-surface-glass-border: rgba(139, 92, 246, 0.1);
-    --th-surface-glass-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-    --th-surface-glass-shadow-hover: 0 8px 36px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-    --th-surface-glass-blur: 20px;
-
-    /* PrimeVue: variables globales para que todos los componentes usen el tema */
     --p-primary-color: #6d28d9;
     --p-primary-contrast-color: #ffffff;
     --p-primary-hover-color: #5b21b6;
@@ -303,12 +250,6 @@
     --th-kbd-bg: rgba(255, 255, 255, 0.05);
     --th-kbd-border: rgba(255, 255, 255, 0.1);
 
-    /* Superficie glass en dark */
-    --th-surface-glass-bg: rgba(13, 13, 26, 0.72);
-    --th-surface-glass-border: rgba(255, 255, 255, 0.07);
-    --th-surface-glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
-    --th-surface-glass-shadow-hover: 0 12px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1);
-    --th-surface-glass-blur: 24px;
 
     /* PrimeVue: tema oscuro para todos los componentes */
     --p-primary-color: #a78bfa;
@@ -568,6 +509,20 @@
 /* Status dot — usa --tw-ring-color de Tailwind */
 .cosmos-status-ring, .cosmos-app .status-ring { --tw-ring-color: var(--th-status-ring); }
 
+/* ── Tarjetas de dashboard (Index): sombra y hover según tema ── */
+.cosmos-app .dashboard-card {
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+.cosmos-app .dashboard-card:hover {
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+[data-theme="dark"] .cosmos-app .dashboard-card {
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+[data-theme="dark"] .cosmos-app .dashboard-card:hover {
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.12), 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(139, 92, 246, 0.06);
+}
+
 /* ── PrimeVue overrides con tema ── */
 
 /* Drawer móvil: fondo glass + sin padding extra (Drawer se renderiza en body) */
@@ -760,17 +715,7 @@
     border-radius: 1rem !important;
     overflow: hidden !important;
 }
-.p-datatable-table-container {
-    background: var(--th-surface-glass-bg) !important;
-    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    border: 1px solid var(--th-surface-glass-border) !important;
-    border-radius: 1rem !important;
-    box-shadow: var(--th-surface-glass-shadow) !important;
-}
-[data-theme="dark"] .p-datatable-table-container {
-    box-shadow: var(--th-surface-glass-shadow) !important;
-}
+
 .p-datatable-header {
     background: transparent !important;
     border-bottom: 1px solid var(--th-border) !important;
@@ -943,21 +888,6 @@
 .p-toast .p-toast-message-warn     { border-left: 3px solid #f59e0b !important; }
 .p-toast .p-toast-message-error    { border-left: 3px solid #ef4444 !important; }
 
-/* ── Card ── */
-.p-card {
-    background: var(--th-surface-glass-bg) !important;
-    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    border: 1px solid var(--th-surface-glass-border) !important;
-    border-radius: 1rem !important;
-    box-shadow: var(--th-surface-glass-shadow) !important;
-    transition: box-shadow 200ms, border-color 200ms !important;
-    color: var(--th-text-primary) !important;
-}
-.p-card:hover {
-    border-color: rgba(139, 92, 246, 0.2) !important;
-    box-shadow: var(--th-surface-glass-shadow-hover) !important;
-}
 [data-theme="dark"] .p-card:hover {
     border-color: rgba(139, 92, 246, 0.18) !important;
 }
@@ -967,17 +897,6 @@
 .p-card-subtitle { color: var(--th-text-secondary) !important; font-size: 0.875rem !important; }
 .p-card-footer { border-top: 1px solid var(--th-border) !important; padding: 1rem 1.5rem !important; }
 
-/* ── Panel ── */
-.p-panel {
-    background: var(--th-surface-glass-bg) !important;
-    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    border: 1px solid var(--th-surface-glass-border) !important;
-    border-radius: 1rem !important;
-    box-shadow: var(--th-surface-glass-shadow) !important;
-    overflow: hidden !important;
-    color: var(--th-text-primary) !important;
-}
 .p-panel-header {
     background: transparent !important;
     border-bottom: 1px solid var(--th-border) !important;
@@ -994,17 +913,6 @@
     padding: 0.75rem 1.25rem !important;
 }
 
-/* ── Fieldset ── */
-.p-fieldset {
-    background: var(--th-surface-glass-bg) !important;
-    backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    -webkit-backdrop-filter: blur(var(--th-surface-glass-blur)) !important;
-    border: 1px solid var(--th-surface-glass-border) !important;
-    border-radius: 1rem !important;
-    box-shadow: var(--th-surface-glass-shadow) !important;
-    overflow: hidden !important;
-    color: var(--th-text-primary) !important;
-}
 .p-fieldset-legend {
     background: transparent !important;
     border: none !important;
@@ -1012,6 +920,7 @@
     font-weight: 600 !important;
     padding: 0.5rem 0 !important;
 }
+
 .p-fieldset-content { padding: 1rem 0 !important; }
 .p-fieldset-toggleable .p-fieldset-legend { padding: 0.75rem 0 !important; }
 

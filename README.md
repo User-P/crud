@@ -156,7 +156,6 @@ Rutas bajo `/dashboards` (menú **Dashboards de métricas**):
 ### Estilos y tema
 
 - Variables CSS (`@theme`) para colores de superficie y sidebar (paleta coherente).
-- Estilo “premium” para análisis: bordes suaves, sombras ligeras, fondos `surface-subtle`.
 
 ### Otras páginas del frontend
 

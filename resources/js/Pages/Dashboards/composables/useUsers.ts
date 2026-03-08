@@ -111,8 +111,9 @@ export const useUsers = () => {
             description: "KPIs principales con tendencias, sparklines y drill-down al detalle.",
             href: "/dashboards/vista-general",
             icon: "heroicons:presentation-chart-bar",
-            iconBg: "bg-indigo-100",
-            iconColor: "text-indigo-600",
+            iconBg: "bg-indigo-100 dark:bg-indigo-400/25",
+            iconColor: "text-indigo-600 dark:text-indigo-400",
+            accentBar: "bg-indigo-500 dark:bg-indigo-400",
             badge: "KPIs",
         },
         {
@@ -120,8 +121,9 @@ export const useUsers = () => {
             description: "Distribución y estatus con gráficos interactivos.",
             href: "/dashboards/usuarios-activos-inactivos",
             icon: "heroicons:user-group",
-            iconBg: "bg-emerald-100",
-            iconColor: "text-emerald-600",
+            iconBg: "bg-emerald-100 dark:bg-emerald-400/25",
+            iconColor: "text-emerald-600 dark:text-emerald-400",
+            accentBar: "bg-emerald-500 dark:bg-emerald-400",
             badge: "Gráficos",
         },
         {
@@ -129,8 +131,9 @@ export const useUsers = () => {
             description: "Semáforo de riesgo por tiempo de suspensión.",
             href: "/dashboards/dias-suspendidos",
             icon: "heroicons:exclamation-triangle",
-            iconBg: "bg-amber-100",
-            iconColor: "text-amber-600",
+            iconBg: "bg-amber-100 dark:bg-amber-400/25",
+            iconColor: "text-amber-600 dark:text-amber-400",
+            accentBar: "bg-amber-500 dark:bg-amber-400",
             badge: "Riesgo",
         },
         {
@@ -138,17 +141,18 @@ export const useUsers = () => {
             description: "Alta de usuarios",
             href: "/dashboards/usuarios-nuevos",
             icon: "heroicons:user-plus",
-            iconBg: "bg-blue-100",
-            iconColor: "text-blue-600",
+            iconBg: "bg-blue-100 dark:bg-blue-400/25",
+            iconColor: "text-blue-600 dark:text-blue-400",
+            accentBar: "bg-blue-500 dark:bg-blue-400",
             badge: "Riesgo",
         },
     ]
 
     const byUnits = [
-        { name: "Usuarios de EKT", description: "Vista general filtrada por unidad de negocio EKT", href: "/dashboards/vista-general?unit=EKT", icon: "streamline-plump:user-pin", iconBg: "bg-indigo-100", iconColor: "text-indigo-600", badge: "EKT" },
-        { name: "Usuarios de TPE", description: "Vista general filtrada por unidad de negocio TPE", href: "/dashboards/vista-general?unit=TPE", icon: "stash:user-id", iconBg: "bg-emerald-100", iconColor: "text-emerald-600", badge: "TPE" },
-        { name: "Usuarios de TVA", description: "Vista general filtrada por unidad de negocio TVA", href: "/dashboards/vista-general?unit=TVA", icon: "hugeicons:ai-user", iconBg: "bg-amber-100", iconColor: "text-amber-600", badge: "TVA" },
-        { name: "Usuarios de BACK OFFICE", description: "Vista general filtrada por unidad de negocio BACK OFFICE", href: "/dashboards/vista-general?unit=BACK_OFFICE", icon: "line-md:account", iconBg: "bg-blue-100", iconColor: "text-blue-600", badge: "BACK OFFICE" },
+        { name: "Usuarios de EKT", description: "Vista general filtrada por unidad de negocio EKT", href: "/dashboards/vista-general?unit=EKT", icon: "streamline-plump:user-pin", iconBg: "bg-indigo-100 dark:bg-indigo-400/25", iconColor: "text-indigo-600 dark:text-indigo-400", accentBar: "bg-indigo-500 dark:bg-indigo-400", badge: "EKT" },
+        { name: "Usuarios de TPE", description: "Vista general filtrada por unidad de negocio TPE", href: "/dashboards/vista-general?unit=TPE", icon: "stash:user-id", iconBg: "bg-emerald-100 dark:bg-emerald-400/25", iconColor: "text-emerald-600 dark:text-emerald-400", accentBar: "bg-emerald-500 dark:bg-emerald-400", badge: "TPE" },
+        { name: "Usuarios de TVA", description: "Vista general filtrada por unidad de negocio TVA", href: "/dashboards/vista-general?unit=TVA", icon: "hugeicons:ai-user", iconBg: "bg-amber-100 dark:bg-amber-400/25", iconColor: "text-amber-600 dark:text-amber-400", accentBar: "bg-amber-500 dark:bg-amber-400", badge: "TVA" },
+        { name: "Usuarios de BACK OFFICE", description: "Vista general filtrada por unidad de negocio BACK OFFICE", href: "/dashboards/vista-general?unit=BACK_OFFICE", icon: "line-md:account", iconBg: "bg-blue-100 dark:bg-blue-400/25", iconColor: "text-blue-600 dark:text-blue-400", accentBar: "bg-blue-500 dark:bg-blue-400", badge: "BACK OFFICE" },
     ]
 
     const getResumen = async () => {
