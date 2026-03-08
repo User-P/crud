@@ -27,9 +27,9 @@
                         Otras métricas
                     </p>
                     <div ref="gridRef"
-                        class="metric-strip flex flex-col overflow-hidden rounded-2xl border border-(--th-border) bg-(--th-input-bg) shadow-sm">
+                        class="  flex flex-col overflow-hidden rounded-2xl border border-(--th-border) bg-(--th-input-bg) shadow-sm">
                         <button v-for="card in secondaryCards" :key="card.id" type="button"
-                            class="metric-strip__row group flex w-full items-center gap-4 border-b border-(--th-border) px-5 py-4 text-left last:border-b-0 transition-colors hover:bg-(--th-item-hover-bg) focus:outline-none focus:ring-2 focus:ring-inset focus:ring-(--p-focus-ring-color)"
+                            class="group flex w-full items-center gap-4 border-b border-(--th-border) px-5 py-4 text-left last:border-b-0 transition-colors hover:bg-(--th-item-hover-bg) focus:outline-none focus:ring-2 focus:ring-inset focus:ring-(--p-focus-ring-color)"
                             :class="{ 'bg-(--th-item-hover-bg)': selectedCard?.id === card.id }"
                             @click="openDetail(card)">
                             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
@@ -78,7 +78,7 @@
                                 <template #body="{ data }">
                                     <span class="tabular-nums font-semibold">{{ formatValor(data.valor) }}</span>
                                     <span v-if="data.unidad" class="ml-1 text-xs text-(--th-text-muted)">{{ data.unidad
-                                        }}</span>
+                                    }}</span>
                                 </template>
                             </Column>
                             <Column v-if="hasPorcentaje" field="porcentaje" header="%" sortable />
