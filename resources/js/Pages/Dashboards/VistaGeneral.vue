@@ -13,11 +13,12 @@
             </div>
 
             <template v-else>
-                <!-- Billboard hero: banda full-width, número gigante -->
+                <!-- Billboard hero -->
                 <button
                     v-if="heroCard"
                     type="button"
                     class="billboard-hero group relative w-full overflow-hidden rounded-3xl px-8 py-10 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset) sm:px-10 sm:py-12"
+                    :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === heroCard.id }"
                     @click="openDetail(heroCard)"
                 >
                     <span class="billboard-hero__bg absolute inset-0 rounded-3xl" aria-hidden="true" />
@@ -38,12 +39,12 @@
                             </div>
                         </div>
                         <span class="text-sm font-medium text-(--th-text-muted) group-hover:text-(--th-item-active-color)">
-                            Clic para detalle →
+                            Clic para ver detalle en tabla →
                         </span>
                     </div>
                 </button>
 
-                <!-- Dos KPIs principales: glass con barra lateral -->
+                <!-- Dos KPIs principales -->
                 <div class="grid gap-5 sm:grid-cols-2">
                     <MetricCard
                         v-for="card in primaryCards"
@@ -52,11 +53,13 @@
                         :value="card.value"
                         :icon="card.icon"
                         :variant="card.variant"
+                        class="transition-shadow"
+                        :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === card.id }"
                         @click="openDetail(card)"
                     />
                 </div>
 
-                <!-- Otras métricas: lista compacta clickeable -->
+                <!-- Otras métricas: lista compacta -->
                 <section>
                     <p class="mb-4 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
                         Otras métricas
@@ -67,6 +70,7 @@
                             :key="card.id"
                             type="button"
                             class="metric-strip__row group flex w-full items-center gap-4 border-b border-(--th-border) px-5 py-4 text-left last:border-b-0 transition-colors hover:bg-(--th-item-hover-bg) focus:outline-none focus:ring-2 focus:ring-inset focus:ring-(--p-focus-ring-color)"
+                            :class="{ 'bg-(--th-item-hover-bg)': selectedCard?.id === card.id }"
                             @click="openDetail(card)"
                         >
                             <div
@@ -82,53 +86,72 @@
                     </div>
                 </section>
 
+                <!-- Tabla de detalle (inline, sin panel lateral) -->
+                <section class="detail-table-section rounded-2xl border border-(--th-border) bg-(--th-input-bg) overflow-hidden shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-(--th-border) bg-(--th-input-bg) px-4 py-3">
+                        <h3 class="text-sm font-semibold text-(--th-text-primary)">
+                            {{ selectedCard ? `Detalle: ${selectedCard.label}` : 'Detalle de la métrica' }}
+                        </h3>
+                        <button
+                            v-if="selectedCard"
+                            type="button"
+                            class="text-xs font-medium text-(--th-text-muted) hover:text-(--th-item-active-color) transition-colors"
+                            @click="selectedCard = null"
+                        >
+                            Limpiar selección
+                        </button>
+                    </div>
+                    <div v-if="!selectedCard" class="flex flex-col items-center justify-center gap-2 px-4 py-12 text-center">
+                        <Icon icon="heroicons:table-cells" class="h-10 w-10 text-(--th-text-muted)" aria-hidden="true" />
+                        <p class="text-sm text-(--th-text-muted)">Selecciona una métrica arriba para ver el detalle en la tabla.</p>
+                    </div>
+                    <div v-else class="overflow-x-auto">
+                        <DataTable
+                            :value="detailRows"
+                            size="small"
+                            striped-rows
+                            :rows="5"
+                            :rows-per-page-options="[5, 10, 15]"
+                            paginator
+                            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                            current-page-report-template="{first} a {last} de {totalRecords}"
+                            responsive-layout="scroll"
+                            class="detail-datatable text-(--th-text-primary)"
+                        >
+                            <Column field="concepto" header="Concepto" sortable class="font-medium" />
+                            <Column field="valor" header="Valor" sortable>
+                                <template #body="{ data }">
+                                    <span class="tabular-nums font-semibold">{{ formatValor(data.valor) }}</span>
+                                    <span v-if="data.unidad" class="ml-1 text-xs text-(--th-text-muted)">{{ data.unidad }}</span>
+                                </template>
+                            </Column>
+                            <Column v-if="hasPorcentaje" field="porcentaje" header="%" sortable />
+                            <Column v-if="hasActualizado" field="actualizado" header="Última actualización" sortable class="text-(--th-text-secondary)" />
+                        </DataTable>
+                    </div>
+                </section>
+
                 <p class="text-xs text-(--th-text-muted)">
-                    Clic en cualquier elemento para ver detalle (gráficas + tabla)
+                    Clic en cualquier métrica para ver el detalle en la tabla debajo.
                 </p>
             </template>
         </div>
-
-        <DetailDrawer :visible="!!selectedCard" :title="selectedCard ? selectedCard.label : ''"
-            @close="selectedCard = null">
-            <template v-if="selectedCard">
-                <p class="mb-4 text-sm text-(--th-text-secondary)">
-                    Detalle de <strong class="text-(--th-text-primary)">{{ selectedCard.label }}</strong>. Aquí se mostrarían gráficas y tabla según el tipo de métrica.
-                </p>
-                <div class="mb-4 flex h-48 items-center justify-center rounded-xl border border-(--th-border) bg-(--th-input-bg) text-sm text-(--th-text-muted)">
-                    Gráfica de tendencia (placeholder)
-                </div>
-                <div class="overflow-hidden rounded-xl border border-(--th-border)">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-(--th-border) bg-(--th-input-bg)">
-                                <th class="px-4 py-2.5 text-left font-semibold text-(--th-text-secondary)">Concepto</th>
-                                <th class="px-4 py-2.5 text-right font-semibold text-(--th-text-secondary)">Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-(--th-border) last:border-b-0">
-                                <td class="px-4 py-2.5 text-(--th-text-primary)">Total</td>
-                                <td class="px-4 py-2.5 text-right font-medium text-(--th-text-primary)">{{ selectedCard.value }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
-        </DetailDrawer>
     </AdminLayout>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DashboardHeader from '@/Components/Dashboards/DashboardHeader.vue'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
-import DetailDrawer from '@/Components/Dashboards/DetailDrawer.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
 import { Icon } from '@iconify/vue'
 import { autoAnimate } from '@formkit/auto-animate'
 import { useUsers } from './composables/useUsers'
+import type { DetailTableRow } from './composables/useUsers'
 
 const variantStyles: Record<string, { iconBg: string; iconColor: string }> = {
     blue: { iconBg: 'bg-blue-500/15 dark:bg-blue-400/20', iconColor: 'text-blue-600 dark:text-blue-400' },
@@ -150,7 +173,7 @@ const unit = computed(() => page.props.unit ?? null)
 const title = computed(() =>
     unit.value ? `Vista general · ${unit.value}` : 'Vista general'
 )
-const subtitle = 'Indicadores clave de usuarios por estatus. Clic en una tarjeta para ver detalle.'
+const subtitle = 'Indicadores clave de usuarios por estatus. Clic en una métrica para ver el detalle en la tabla.'
 
 const breadcrumbs = computed(() => [
     { name: 'Dashboard', href: '/dashboard' },
@@ -158,7 +181,7 @@ const breadcrumbs = computed(() => [
     { name: title.value },
 ])
 
-const { users, isLoading, getIndicadores } = useUsers()
+const { users, isLoading, getIndicadores, detailsByCard } = useUsers()
 
 function apiCardToItem(raw: { id: string; label: string; value: number; variant: string; iconKey: string }): CardItem {
     return {
@@ -192,6 +215,19 @@ function openDetail(card: CardItem) {
     selectedCard.value = card
 }
 
+const detailRows = computed<DetailTableRow[]>(() => {
+    if (!selectedCard.value) return []
+    return detailsByCard[selectedCard.value.id] ?? []
+})
+
+const hasPorcentaje = computed(() => detailRows.value.some((r) => r.porcentaje != null))
+const hasActualizado = computed(() => detailRows.value.some((r) => r.actualizado != null))
+
+function formatValor(v: number | string): string {
+    if (typeof v === 'number') return v.toLocaleString('es')
+    return String(v)
+}
+
 function loadData() {
     const date = new Date().toISOString().slice(0, 10)
     getIndicadores(date, unit.value ?? undefined)
@@ -201,6 +237,10 @@ onMounted(() => {
     loadData()
     if (gridRef.value) autoAnimate(gridRef.value)
 })
+
+watch(users, (u) => {
+    if (u?.hero && !selectedCard.value) selectedCard.value = apiCardToItem(u.hero)
+}, { immediate: true })
 
 watch(unit, () => { loadData() })
 </script>

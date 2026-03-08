@@ -86,6 +86,60 @@ const DUMMY_DETAILS = [
     { concepto: "LOCKED", valor: 120 },
 ]
 
+/** Detalle por métrica para la DataTable (tabla inline en VistaGeneral) */
+export type DetailTableRow = { concepto: string; valor: number | string; porcentaje?: string; unidad?: string; actualizado?: string }
+
+const DUMMY_DETAILS_BY_CARD: Record<string, DetailTableRow[]> = {
+    total: [
+        { concepto: "Total", valor: 142000, porcentaje: "100%", actualizado: "2025-01-31 08:00" },
+        { concepto: "PROVISIONED", valor: 131500, porcentaje: "92,6%", actualizado: "2025-01-31 08:00" },
+        { concepto: "PASSWORD_EXPIRED", valor: 85, porcentaje: "0,1%", actualizado: "2025-01-31 07:45" },
+        { concepto: "LOCKED", valor: 120, porcentaje: "0,1%", actualizado: "2025-01-31 07:50" },
+        { concepto: "Suspendidos", valor: 2700, porcentaje: "1,9%", actualizado: "2025-01-31 08:00" },
+        { concepto: "Desactivados", valor: 605, porcentaje: "0,4%", actualizado: "2025-01-30 23:00" },
+    ],
+    activos: [
+        { concepto: "EKT", valor: 45200, unidad: "usuarios", actualizado: "2025-01-31 08:00" },
+        { concepto: "TPE", valor: 38100, unidad: "usuarios", actualizado: "2025-01-31 08:00" },
+        { concepto: "TVA", valor: 28900, unidad: "usuarios", actualizado: "2025-01-31 08:00" },
+        { concepto: "BACK OFFICE", valor: 19800, unidad: "usuarios", actualizado: "2025-01-31 08:00" },
+    ],
+    inactivos: [
+        { concepto: "Por contraseña expirada", valor: 85, actualizado: "2025-01-31 07:45" },
+        { concepto: "Por bloqueo", valor: 120, actualizado: "2025-01-31 07:50" },
+        { concepto: "Provisionados (pendientes)", valor: 131500, actualizado: "2025-01-31 08:00" },
+        { concepto: "Suspendidos", valor: 2700, actualizado: "2025-01-31 08:00" },
+        { concepto: "Desactivados", valor: 605, actualizado: "2025-01-30 23:00" },
+    ],
+    locked: [
+        { concepto: "EKT", valor: 42, actualizado: "2025-01-31 08:00" },
+        { concepto: "TPE", valor: 28, actualizado: "2025-01-31 08:00" },
+        { concepto: "TVA", valor: 35, actualizado: "2025-01-31 08:00" },
+        { concepto: "BACK OFFICE", valor: 15, actualizado: "2025-01-31 08:00" },
+    ],
+    password: [
+        { concepto: "Últimas 24 h", valor: 12, actualizado: "2025-01-31 08:00" },
+        { concepto: "Últimos 7 días", valor: 45, actualizado: "2025-01-31 08:00" },
+        { concepto: "Últimos 30 días", valor: 85, actualizado: "2025-01-31 08:00" },
+    ],
+    provisioned: [
+        { concepto: "EKT", valor: 39800, actualizado: "2025-01-31 08:00" },
+        { concepto: "TPE", valor: 32500, actualizado: "2025-01-31 08:00" },
+        { concepto: "TVA", valor: 29200, actualizado: "2025-01-31 08:00" },
+        { concepto: "BACK OFFICE", valor: 30000, actualizado: "2025-01-31 08:00" },
+    ],
+    suspendidos: [
+        { concepto: "1-3 días", valor: 600, actualizado: "2025-01-31 08:00" },
+        { concepto: "4-6 días", valor: 900, actualizado: "2025-01-31 08:00" },
+        { concepto: "7+ días", valor: 1200, actualizado: "2025-01-31 08:00" },
+    ],
+    desactivados: [
+        { concepto: "Enero 2025", valor: 205, actualizado: "2025-01-31 08:00" },
+        { concepto: "Diciembre 2024", valor: 180, actualizado: "2024-12-31 23:59" },
+        { concepto: "Noviembre 2024", valor: 220, actualizado: "2024-11-30 23:59" },
+    ],
+}
+
 // Respuesta de /users-add-details
 const DUMMY_USERS_ADD_DETAILS = [
     { mes_referencia: "2025-01", total: 420 },
@@ -196,6 +250,7 @@ export const useUsers = () => {
         categories,
         suspended,
         details,
+        detailsByCard: DUMMY_DETAILS_BY_CARD,
         usersAdd,
         usersAddDetails,
         dashboardCards,
