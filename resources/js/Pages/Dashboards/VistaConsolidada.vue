@@ -6,14 +6,6 @@
             { name: 'Vista consolidada' },
         ]">
         <div class="space-y-14">
-            <section>
-                <p class="mb-5 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
-                    Explorar por tema
-                </p>
-                <DashboardBentoGrid :cards="dashboardCards" mode="navigate"
-                @scroll-to="scrollToSection" />
-            </section>
-
             <!-- ── Vista general ── -->
             <section :id="sectionIds.vistaGeneral" class="scroll-mt-6">
                 <div class="consolidated-section rounded-r-2xl border border-(--th-border) border-l-4 border-l-[#0b4261] bg-(--th-input-bg)/50 pl-6 pr-5 py-5 dark:border-l-[#5bb56a] space-y-6">
@@ -240,7 +232,6 @@ import HorizontalBarChart from '@/Components/Charts/HorizontalBarChart.vue'
 import SemaphoreBarChart from '@/Components/Charts/SemaphoreBarChart.vue'
 import { useUsers } from './composables/useUsers'
 import type { DetailTableRow } from './composables/useUsers'
-import DashboardBentoGrid from './components/DashboardBentoGrid.vue'
 
 const sectionIds = {
     vistaGeneral: 'vista-general',
@@ -250,19 +241,7 @@ const sectionIds = {
     unidades: 'unidades',
 }
 
-const { getIndicadores, getUsersAdd, detailsByCard, dashboardCards, byUnits, users, usersAdd } = useUsers()
-
-const dashboardCardsWithSection = computed(() =>
-    dashboardCards.map((card) => {
-        const href = card.href
-        let sectionId = 'vista-general'
-        if (href.includes('vista-general')) sectionId = sectionIds.vistaGeneral
-        else if (href.includes('usuarios-activos')) sectionId = sectionIds.activosInactivos
-        else if (href.includes('dias-suspendidos')) sectionId = sectionIds.diasSuspendidos
-        else if (href.includes('usuarios-nuevos')) sectionId = sectionIds.usuariosNuevos
-        return { ...card, sectionId }
-    })
-)
+const { getIndicadores, getUsersAdd, detailsByCard,  byUnits, users, usersAdd } = useUsers()
 
 const variantStyles: Record<string, { iconBg: string; iconColor: string }> = {
     blue: { iconBg: 'bg-blue-500/15 dark:bg-blue-400/20', iconColor: 'text-blue-600 dark:text-blue-400' },
