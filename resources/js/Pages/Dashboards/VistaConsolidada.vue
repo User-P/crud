@@ -61,24 +61,14 @@
                             <p class="text-sm text-(--th-text-muted)">Selecciona una métrica arriba para ver el detalle.
                             </p>
                         </div>
-                        <div v-else class="overflow-x-auto">
-                            <DataTable :value="detailRows" size="small" striped-rows :rows="5"
-                                :rows-per-page-options="[5, 10, 15]" paginator
-                                paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-                                current-page-report-template="{first} a {last} de {totalRecords}"
-                                responsive-layout="scroll" class="detail-datatable text-(--th-text-primary)">
-                                <Column field="concepto" header="Concepto" sortable class="font-medium" />
-                                <Column field="valor" header="Valor" sortable>
-                                    <template #body="{ data }">
-                                        <span class="tabular-nums font-semibold">{{ formatValor(data.valor) }}</span>
-                                        <span v-if="data.unidad" class="ml-1 text-xs text-(--th-text-muted)">{{
-                                            data.unidad }}</span>
-                                    </template>
-                                </Column>
-                                <Column v-if="hasPorcentaje" field="porcentaje" header="%" sortable />
-                                <Column v-if="hasActualizado" field="actualizado" header="Última actualización" sortable
-                                    class="text-(--th-text-secondary)" />
-                            </DataTable>
+                        <div v-else class="overflow-x-auto px-4 pb-4">
+                            <DetailMetricTable
+                                :rows="detailRows"
+                                :has-porcentaje="hasPorcentaje"
+                                :has-actualizado="hasActualizado"
+                                :format-valor="formatValor"
+                                :export-label="selectedCard?.label"
+                            />
                         </div>
                     </div>
                 </div>
@@ -222,9 +212,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import DetailMetricTable from '@/Components/Dashboards/DetailMetricTable.vue'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import PieChart from '@/Components/Charts/PieChart.vue'
