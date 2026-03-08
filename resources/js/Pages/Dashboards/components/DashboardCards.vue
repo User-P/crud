@@ -1,48 +1,73 @@
 <template>
     <a
         :href="href"
-        class="dashboard-card group relative flex flex-col overflow-hidden rounded-2xl border border-(--th-border) bg-(--th-input-bg) p-6 transition-all duration-300 hover:-translate-y-1 hover:border-(--th-input-focus-border) hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset) dark:focus:ring-offset-(--th-ring-offset)"
+        class="dashboard-tile group relative flex overflow-hidden rounded-3xl transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
+        :class="[
+            featured
+                ? 'dashboard-tile--featured col-span-1 row-span-2 flex-col justify-between p-8 min-h-[280px]'
+                : 'dashboard-tile--compact flex-col p-5 min-h-[140px]',
+        ]"
         @click.prevent="onNavigate(href)"
     >
-        <!-- Acento superior sutil (premium) -->
-        <div
-            class="absolute left-0 right-0 top-0 h-0.5 rounded-t-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        <!-- Glass base -->
+        <span
+            class="absolute inset-0 rounded-3xl border border-white/20 bg-white/70 shadow-lg backdrop-blur-xl transition-all duration-400 dark:border-white/10 dark:bg-white/5 dark:shadow-none group-hover:bg-white/80 dark:group-hover:bg-white/8 group-hover:shadow-xl"
+            aria-hidden="true"
+        />
+        <!-- Gradient blob (featured) or left accent (compact) -->
+        <span
+            v-if="featured"
+            class="absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-40 blur-2xl transition-opacity group-hover:opacity-60"
+            :class="blobClass"
+            aria-hidden="true"
+        />
+        <span
+            v-else
+            class="absolute left-0 top-4 bottom-4 w-1 rounded-full transition-all duration-300 group-hover:w-1.5"
             :class="accentBarClass"
             aria-hidden="true"
         />
 
-        <div class="flex items-center justify-between">
-            <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:shadow-md"
-                :class="iconBg"
-            >
-                <Icon :icon="icon" :class="iconColor" height="24px" aria-hidden="true" />
+        <div class="relative z-10 flex flex-1 flex-col">
+            <div class="flex items-start justify-between gap-3">
+                <div
+                    class="flex shrink-0 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105"
+                    :class="[
+                        featured ? 'h-14 w-14' : 'h-11 w-11 rounded-xl',
+                        iconBg,
+                    ]"
+                >
+                    <Icon :icon="icon" :class="[featured ? 'h-7 w-7' : 'h-5 w-5', iconColor]" aria-hidden="true" />
+                </div>
+                <span
+                    class="rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide text-(--th-text-secondary) ring-1 ring-(--th-border) transition-colors group-hover:text-(--th-text-primary) group-hover:ring-(--th-input-focus-border)"
+                >
+                    {{ badge }}
+                </span>
             </div>
-            <span
-                class="rounded-full border border-(--th-input-border) bg-(--th-input-bg) px-2.5 py-0.5 text-xs font-semibold tracking-wide text-(--th-text-secondary) backdrop-blur transition-colors duration-200 group-hover:border-(--th-input-focus-border) group-hover:text-(--th-text-primary)"
+
+            <h3
+                class="mt-4 font-semibold tracking-tight text-(--th-text-primary)"
+                :class="featured ? 'text-xl' : 'text-base'"
             >
-                {{ badge }}
-            </span>
+                {{ name }}
+            </h3>
+            <p
+                class="mt-1.5 flex-1 text-(--th-text-secondary)"
+                :class="featured ? 'text-sm leading-relaxed' : 'text-sm line-clamp-2'"
+            >
+                {{ description }}
+            </p>
         </div>
 
-        <h3 class="mt-4 text-lg font-semibold tracking-tight text-(--th-text-primary)">
-            {{ name }}
-        </h3>
-
-        <p class="mt-2 flex-1 text-sm leading-relaxed text-(--th-text-secondary)">
-            {{ description }}
-        </p>
-
-        <span
-            class="mt-4 inline-flex items-center text-sm font-medium text-(--th-item-active-color) transition-all duration-200 group-hover:gap-2 dark:text-(--th-item-active-color)"
-        >
-            Abrir dashboard
+        <div class="relative z-10 mt-4 flex items-center gap-2 text-(--th-item-active-color)">
+            <span class="text-sm font-semibold">{{ featured ? 'Abrir vista' : 'Abrir' }}</span>
             <Icon
                 icon="heroicons:arrow-right"
-                class="ml-1 h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
                 aria-hidden="true"
             />
-        </span>
+        </div>
     </a>
 </template>
 
@@ -56,18 +81,18 @@ interface Props {
     description: string
     badge: string | number
     icon: string
-    /** Clases para el contenedor del icono (incluir dark: para tema oscuro) */
     iconBg?: string
-    /** Clases para el color del icono (incluir dark: para que destaque en oscuro) */
     iconColor?: string
-    /** Clase para la barra de acento superior (opcional, por variante) */
     accentBar?: string
+    /** Card destacada (bento): más grande, con blob de gradiente */
+    featured?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    iconBg: 'bg-indigo-500/15 dark:bg-indigo-400/25',
+    iconBg: 'bg-indigo-500/20 dark:bg-indigo-400/25',
     iconColor: 'text-indigo-600 dark:text-indigo-400',
     accentBar: 'bg-indigo-500 dark:bg-indigo-400',
+    featured: false,
 })
 
 const emit = defineEmits<{
@@ -75,6 +100,14 @@ const emit = defineEmits<{
 }>()
 
 const accentBarClass = computed(() => props.accentBar || 'bg-indigo-500 dark:bg-indigo-400')
+
+const blobClass = computed(() => {
+    const a = (props.accentBar || '').toLowerCase()
+    if (a.includes('emerald')) return 'bg-emerald-400'
+    if (a.includes('amber')) return 'bg-amber-400'
+    if (a.includes('blue')) return 'bg-blue-400'
+    return 'bg-indigo-400'
+})
 
 function onNavigate(href: string) {
     emit('navigate', href)

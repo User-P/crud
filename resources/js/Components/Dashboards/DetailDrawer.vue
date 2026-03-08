@@ -15,12 +15,12 @@
                     @click.stop
                 >
                     <div class="drawer-header flex shrink-0 items-center justify-between border-b px-6 py-4">
-                        <h2 id="drawer-title" class="text-lg font-semibold text-primary">
+                        <h2 id="drawer-title" class="text-lg font-semibold text-(--th-text-primary)">
                             {{ title }}
                         </h2>
                         <button
                             type="button"
-                            class="rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+                            class="rounded-xl p-2 text-(--th-btn-color) transition-colors hover:bg-(--th-btn-hover-bg) hover:text-(--th-btn-hover-color) focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
                             aria-label="Cerrar"
                             @click="close"
                         >

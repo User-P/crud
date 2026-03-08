@@ -1,6 +1,6 @@
 <template>
     <AdminLayout :breadcrumbs="breadcrumbs">
-        <div class="space-y-8">
+        <div class="space-y-10">
             <DashboardHeader :title="title" :subtitle="subtitle" icon="heroicons:user-group">
                 <template #actions>
                     <CustomPicker :initial-range="{ start: '2025-01-01', end: '2025-01-31' }" initial-type="custom"
@@ -8,47 +8,82 @@
                 </template>
             </DashboardHeader>
 
-            <div v-if="isLoading" class="flex justify-center py-12">
-                <p class="text-sm text-muted">Cargando indicadores…</p>
+            <div v-if="isLoading" class="flex justify-center py-16">
+                <p class="text-sm text-(--th-text-muted)">Cargando indicadores…</p>
             </div>
 
             <template v-else>
-                <!-- Hero KPI -->
-                <div class="grid gap-6 lg:grid-cols-3">
-                    <button v-if="heroCard" type="button"
-                        class="group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
-                        @click="openDetail(heroCard)">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="icon-box flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl backdrop-blur">
-                                <Icon :icon="heroCard.icon" class="h-6 w-6" aria-hidden="true" />
+                <!-- Billboard hero: banda full-width, número gigante -->
+                <button
+                    v-if="heroCard"
+                    type="button"
+                    class="billboard-hero group relative w-full overflow-hidden rounded-3xl px-8 py-10 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset) sm:px-10 sm:py-12"
+                    @click="openDetail(heroCard)"
+                >
+                    <span class="billboard-hero__bg absolute inset-0 rounded-3xl" aria-hidden="true" />
+                    <span class="billboard-hero__blob absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-30 blur-3xl" aria-hidden="true" />
+                    <div class="relative z-10 flex flex-wrap items-end justify-between gap-6">
+                        <div class="flex items-center gap-4">
+                            <div class="icon-box flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl shadow-lg">
+                                <Icon :icon="heroCard.icon" class="h-8 w-8" aria-hidden="true" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-secondary">Métrica principal</p>
-                                <p class="text-3xl font-bold tabular-nums"> {{ heroCard.value }}</p>
-                                <p class="text-sm font-medium text-secondary">{{ heroCard.label }}</p>
+                                <p class="text-sm font-semibold uppercase tracking-wider text-(--th-text-secondary)">
+                                    Métrica principal
+                                </p>
+                                <p class="mt-1 text-4xl font-bold tabular-nums tracking-tight text-(--th-text-primary) sm:text-5xl">
+                                    {{ heroCard.value }}
+                                </p>
+                                <p class="mt-1 text-lg font-medium text-(--th-text-secondary)">{{ heroCard.label }}</p>
                             </div>
                         </div>
-                        <span class="absolute right-4 top-4 text-xs text-muted">Clic para detalle →</span>
-                    </button>
+                        <span class="text-sm font-medium text-(--th-text-muted) group-hover:text-(--th-item-active-color)">
+                            Clic para detalle →
+                        </span>
+                    </div>
+                </button>
 
-                    <MetricCard v-for="card in primaryCards" :key="card.id" :label="card.label" :value="card.value"
-                        :icon="card.icon" :variant="card.variant" @click="openDetail(card)" />
+                <!-- Dos KPIs principales: glass con barra lateral -->
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <MetricCard
+                        v-for="card in primaryCards"
+                        :key="card.id"
+                        :label="card.label"
+                        :value="card.value"
+                        :icon="card.icon"
+                        :variant="card.variant"
+                        @click="openDetail(card)"
+                    />
                 </div>
 
-                <!-- Otras métricas -->
+                <!-- Otras métricas: lista compacta clickeable -->
                 <section>
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider">
+                    <p class="mb-4 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
                         Otras métricas
-                    </h3>
-                    <div ref="gridRef" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <MetricCard v-for="card in secondaryCards" :key="card.id" :label="card.label"
-                            :value="card.value" :icon="card.icon" :variant="card.variant" @click="openDetail(card)" />
+                    </p>
+                    <div ref="gridRef" class="metric-strip flex flex-col overflow-hidden rounded-2xl border border-(--th-border) bg-(--th-input-bg) shadow-sm">
+                        <button
+                            v-for="card in secondaryCards"
+                            :key="card.id"
+                            type="button"
+                            class="metric-strip__row group flex w-full items-center gap-4 border-b border-(--th-border) px-5 py-4 text-left last:border-b-0 transition-colors hover:bg-(--th-item-hover-bg) focus:outline-none focus:ring-2 focus:ring-inset focus:ring-(--p-focus-ring-color)"
+                            @click="openDetail(card)"
+                        >
+                            <div
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+                                :class="variantStyles[card.variant].iconBg"
+                            >
+                                <Icon :icon="card.icon" class="h-5 w-5" :class="variantStyles[card.variant].iconColor" aria-hidden="true" />
+                            </div>
+                            <span class="min-w-0 flex-1 font-medium text-(--th-text-primary)">{{ card.label }}</span>
+                            <span class="tabular-nums font-semibold text-(--th-text-primary)">{{ card.value }}</span>
+                            <Icon icon="heroicons:chevron-right" class="h-5 w-5 shrink-0 text-(--th-text-muted) group-hover:text-(--th-item-active-color)" aria-hidden="true" />
+                        </button>
                     </div>
                 </section>
 
-                <p class="text-xs text-muted">
-                    Clic en cualquier tarjeta para ver detalle (gráficas + tabla)
+                <p class="text-xs text-(--th-text-muted)">
+                    Clic en cualquier elemento para ver detalle (gráficas + tabla)
                 </p>
             </template>
         </div>
@@ -56,25 +91,24 @@
         <DetailDrawer :visible="!!selectedCard" :title="selectedCard ? selectedCard.label : ''"
             @close="selectedCard = null">
             <template v-if="selectedCard">
-                <p class="mb-4 text-sm text-secondary">
-                    Detalle de <strong>{{ selectedCard.label }}</strong>. Aquí se mostrarían gráficas y tabla según el
-                    tipo de métrica.
+                <p class="mb-4 text-sm text-(--th-text-secondary)">
+                    Detalle de <strong class="text-(--th-text-primary)">{{ selectedCard.label }}</strong>. Aquí se mostrarían gráficas y tabla según el tipo de métrica.
                 </p>
-                <div class="mb-4 flex h-48 items-center justify-center rounded-xl text-sm text-muted">
+                <div class="mb-4 flex h-48 items-center justify-center rounded-xl border border-(--th-border) bg-(--th-input-bg) text-sm text-(--th-text-muted)">
                     Gráfica de tendencia (placeholder)
                 </div>
-                <div class="overflow-hidden rounded-xl">
+                <div class="overflow-hidden rounded-xl border border-(--th-border)">
                     <table class="w-full text-sm">
                         <thead>
-                            <tr>
-                                <th class="px-4 py-2.5 text-left font-medium">Concepto</th>
-                                <th class="px-4 py-2.5 text-right font-medium">Valor</th>
+                            <tr class="border-b border-(--th-border) bg-(--th-input-bg)">
+                                <th class="px-4 py-2.5 text-left font-semibold text-(--th-text-secondary)">Concepto</th>
+                                <th class="px-4 py-2.5 text-right font-semibold text-(--th-text-secondary)">Valor</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="px-4 py-2.5">Total</td>
-                                <td class="px-4 py-2.5 text-right font-medium">{{ selectedCard.value }}</td>
+                            <tr class="border-b border-(--th-border) last:border-b-0">
+                                <td class="px-4 py-2.5 text-(--th-text-primary)">Total</td>
+                                <td class="px-4 py-2.5 text-right font-medium text-(--th-text-primary)">{{ selectedCard.value }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -95,6 +129,12 @@ import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
 import { Icon } from '@iconify/vue'
 import { autoAnimate } from '@formkit/auto-animate'
 import { useUsers } from './composables/useUsers'
+
+const variantStyles: Record<string, { iconBg: string; iconColor: string }> = {
+    blue: { iconBg: 'bg-blue-500/15 dark:bg-blue-400/20', iconColor: 'text-blue-600 dark:text-blue-400' },
+    green: { iconBg: 'bg-emerald-500/15 dark:bg-emerald-400/20', iconColor: 'text-emerald-600 dark:text-emerald-400' },
+    red: { iconBg: 'bg-rose-500/15 dark:bg-rose-400/20', iconColor: 'text-rose-600 dark:text-rose-400' },
+}
 
 type CardItem = {
     id: string
