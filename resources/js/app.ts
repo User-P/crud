@@ -1,7 +1,7 @@
 import "./bootstrap";
 import "../css/app.css";
 
-import { createApp, h, DefineComponent } from "vue";
+import { createApp, h, DefineComponent, Fragment } from "vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import PrimeVue from "primevue/config";
 import CosmosPreset from "./primevue-preset";
@@ -9,6 +9,7 @@ import "primeicons/primeicons.css";
 import { createPinia } from "pinia";
 import * as echarts from "echarts/core";
 import { cosmosLight, cosmosDark } from "./echarts/cosmosThemes";
+import GlobalLoadingLayer from "./Components/GlobalLoadingLayer.vue";
 
 /* Aplicar tema al cargar para que PrimeVue y todos los componentes usen light/dark desde el primer paint */
 function initTheme() {
@@ -42,7 +43,14 @@ createInertiaApp({
     },
     setup({ el, App, props, plugin }) {
         const pinia = createPinia();
-        createApp({ render: () => h(App, props) })
+        createApp({
+            render() {
+                return h(Fragment, null, [
+                    h(App, props),
+                    h(GlobalLoadingLayer),
+                ]);
+            },
+        })
             .use(plugin)
             .use(pinia)
             .use(PrimeVue, {

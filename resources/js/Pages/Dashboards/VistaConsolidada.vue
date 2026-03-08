@@ -85,8 +85,9 @@
                             <p class="text-sm text-(--th-text-muted)">Generando 1.000.000 de filas con 10 columnas…</p>
                             <p class="text-xs text-(--th-text-muted)">Puede tardar unos segundos.</p>
                         </div>
-                        <div v-else class="overflow-x-auto px-4 pb-4">
+                        <div v-else class="relative min-h-[200px] overflow-x-auto px-4 pb-4">
                             <DetailMetricTable
+                                v-show="!detailLoading"
                                 :rows="detailRowsForTable"
                                 :columns="detailTableColumnsForTable"
                                 search-placeholder="Buscar en la tabla…"
@@ -233,12 +234,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DetailMetricTable from '@/Components/Dashboards/DetailMetricTable.vue'
 import type { DetailMetricColumn } from '@/Components/Dashboards/DetailMetricTable.vue'
+import { useGlobalLoading } from '@/composables/useGlobalLoading'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import PieChart from '@/Components/Charts/PieChart.vue'
@@ -289,6 +291,8 @@ const detailRows = computed<DetailTableRow[]>(() => {
 const useTestData1M = ref(false)
 const loadingTestData = ref(false)
 const testData1M = shallowRef<Record<string, unknown>[] | null>(null)
+const detailLoading = ref(false)
+const { show: showGlobalLoading, hide: hideGlobalLoading } = useGlobalLoading()
 
 async function loadTestData1M() {
     if (loadingTestData.value || testData1M.value) {
@@ -374,4 +378,17 @@ onMounted(() => {
 watch(users, (u) => {
     if (u?.primary?.length && !selectedCard.value) selectedCard.value = apiCardToItem(u.primary[0])
 }, { immediate: true })
+
+watch([selectedCard, useTestData1M], ([card, test]) => {
+    if (card || test) {
+        showGlobalLoading('Cargando detalle…')
+        detailLoading.value = true
+        nextTick(() => {
+            setTimeout(() => {
+                detailLoading.value = false
+                hideGlobalLoading()
+            }, 280)
+        })
+    }
+})
 </script>

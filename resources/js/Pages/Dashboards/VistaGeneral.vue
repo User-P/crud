@@ -68,8 +68,9 @@
                         <p class="text-sm text-(--th-text-muted)">Selecciona una métrica arriba para ver el detalle en
                             la tabla.</p>
                     </div>
-                    <div v-else class="overflow-x-auto px-4 pb-4">
-                        <DetailMetricTable
+                        <div v-else class="relative min-h-[200px] overflow-x-auto px-4 pb-4">
+                            <DetailMetricTable
+                                v-show="!detailLoading"
                             :rows="detailRows as Record<string, unknown>[]"
                             :columns="detailTableColumns"
                             search-placeholder="Buscar en concepto, valor, %..."
@@ -87,11 +88,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DetailMetricTable from '@/Components/Dashboards/DetailMetricTable.vue'
 import type { DetailMetricColumn } from '@/Components/Dashboards/DetailMetricTable.vue'
+import { useGlobalLoading } from '@/composables/useGlobalLoading'
 import DashboardHeader from '@/Components/Dashboards/DashboardHeader.vue'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
@@ -152,6 +154,8 @@ const secondaryCards = computed<CardItem[]>(() => {
 
 const gridRef = ref<HTMLElement | null>(null)
 const selectedCard = ref<CardItem | null>(null)
+const detailLoading = ref(false)
+const { show: showGlobalLoading, hide: hideGlobalLoading } = useGlobalLoading()
 
 function openDetail(card: CardItem) {
     selectedCard.value = card
@@ -198,8 +202,21 @@ onMounted(() => {
 })
 
 watch(users, (u) => {
-    if (u?.hero && !selectedCard.value) selectedCard.value = apiCardToItem(u.hero)
+    if (u?.primary?.length && !selectedCard.value) selectedCard.value = apiCardToItem(u.primary[0])
 }, { immediate: true })
+
+watch(selectedCard, (card) => {
+    if (card) {
+        showGlobalLoading('Cargando detalle…')
+        detailLoading.value = true
+        nextTick(() => {
+            setTimeout(() => {
+                detailLoading.value = false
+                hideGlobalLoading()
+            }, 280)
+        })
+    }
+})
 
 watch(unit, () => { loadData() })
 </script>
