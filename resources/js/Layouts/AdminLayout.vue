@@ -1,7 +1,7 @@
 <template>
-    <div class="min-h-screen bg-surface-subtle">
-        <div class="flex">
-            <!-- Sidebar desktop: visible solo si no está oculta -->
+    <div class="glass-app-bg min-h-screen">
+        <div class="relative z-10 flex">
+            <!-- Sidebar desktop -->
             <template v-if="!sidebarHidden">
                 <div
                     class="hidden shrink-0 transition-[width] duration-300 ease-in-out lg:flex lg:flex-col lg:z-30"
@@ -34,9 +34,9 @@
                 </div>
             </PrimeSidebar>
 
-            <!-- Área principal: sin margen si sidebar oculta -->
+            <!-- Área principal -->
             <div
-                class="min-w-0 flex-1 overflow-x-hidden transition-[margin] duration-200"
+                class="relative z-10 min-w-0 flex-1 overflow-x-hidden transition-[margin] duration-200"
                 :class="sidebarHidden ? 'lg:ml-0' : (sidebarCollapsed ? 'lg:ml-0' : 'lg:ml-0')"
             >
                 <Navbar
@@ -56,18 +56,18 @@
                                     <Icon
                                         v-if="index > 0"
                                         icon="heroicons:chevron-right"
-                                        class="h-4 w-4 shrink-0 text-slate-300"
+                                        class="h-4 w-4 shrink-0 text-slate-400/80"
                                         aria-hidden="true"
                                     />
                                     <a
                                         v-if="crumb.href"
                                         :href="crumb.href"
-                                        class="font-medium text-slate-500 transition hover:text-slate-700"
+                                        class="font-medium text-slate-600 transition hover:text-slate-800"
                                         @click.prevent="router.visit(crumb.href)"
                                     >
                                         {{ crumb.name }}
                                     </a>
-                                    <span v-else class="font-medium text-slate-900">
+                                    <span v-else class="font-medium text-slate-800">
                                         {{ crumb.name }}
                                     </span>
                                 </li>
@@ -76,10 +76,10 @@
 
                         <!-- Título de página -->
                         <div v-if="title" class="mb-8">
-                            <h1 class="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+                            <h1 class="text-2xl font-semibold tracking-tight text-slate-800 sm:text-3xl">
                                 {{ title }}
                             </h1>
-                            <p v-if="subtitle" class="mt-1.5 text-sm text-slate-500">
+                            <p v-if="subtitle" class="mt-1.5 text-sm text-slate-600">
                                 {{ subtitle }}
                             </p>
                         </div>

@@ -98,6 +98,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboards/dias-suspendidos', function () {
         return Inertia::render('Dashboards/DiasSuspendidos');
     })->name('dashboards.dias-suspendidos');
+    Route::get('/dashboards/usuarios-nuevos', function (\Illuminate\Http\Request $request) {
+        return Inertia::render('Dashboards/UsuariosNuevos', [
+            'unit' => $request->query('unit'),
+        ]);
+    })->name('dashboards.usuarios-nuevos');
 
     // API Cyaal: vista general y por unidad de negocio (?unit=EKT)
     Route::prefix('dashboard_cyaal')->group(function () {

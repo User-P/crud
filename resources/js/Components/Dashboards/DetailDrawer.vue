@@ -9,18 +9,18 @@
                 aria-labelledby="drawer-title"
                 @click.self="close"
             >
-                <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="close" />
+                <div class="absolute inset-0 bg-slate-900/30 backdrop-blur-md" @click="close" />
                 <div
-                    class="relative flex h-full w-full max-w-lg flex-col bg-white shadow-2xl sm:max-w-xl"
+                    class="glass-drawer relative flex h-full w-full max-w-lg flex-col sm:max-w-xl"
                     @click.stop
                 >
-                    <div class="flex shrink-0 items-center justify-between border-b border-slate-200 px-6 py-4">
-                        <h2 id="drawer-title" class="text-lg font-semibold text-slate-900">
+                    <div class="flex shrink-0 items-center justify-between border-b border-white/30 px-6 py-4">
+                        <h2 id="drawer-title" class="text-lg font-semibold text-slate-800">
                             {{ title }}
                         </h2>
                         <button
                             type="button"
-                            class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            class="rounded-xl p-2 text-slate-500 transition hover:bg-white/50 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
                             aria-label="Cerrar"
                             @click="close"
                         >

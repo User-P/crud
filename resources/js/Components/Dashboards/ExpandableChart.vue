@@ -1,18 +1,18 @@
 <template>
     <div :class="expanded ? 'fixed inset-0 z-[100]' : ''">
-        <!-- Overlay: clic cierra; detrás de la card -->
+        <!-- Overlay -->
         <div
             v-if="expanded"
-            class="fixed inset-0 z-0 bg-slate-900/50 backdrop-blur-sm"
+            class="fixed inset-0 z-0 bg-slate-900/40 backdrop-blur-md"
             aria-hidden="true"
             @click="expanded = false"
         />
-        <!-- Card: normal o flotante sobre el overlay -->
+        <!-- Card: normal o flotante -->
         <div
-            class="rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200"
+            class="glass-card rounded-2xl transition-all duration-200"
             :class="[
                 expanded
-                    ? 'fixed inset-4 z-10 flex flex-col rounded-2xl border-slate-200 bg-white p-6 shadow-2xl sm:inset-6 md:inset-8'
+                    ? 'fixed inset-4 z-10 flex flex-col p-6 sm:inset-6 md:inset-8'
                     : 'p-6',
             ]"
         >
@@ -28,7 +28,7 @@
             <div class="flex items-center gap-1">
                 <button
                     type="button"
-                    class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                    class="rounded-xl p-2 text-slate-500 transition hover:bg-white/50 hover:text-slate-700"
                     :title="expanded ? 'Reducir' : 'Expandir para ver mejor'"
                     :aria-label="expanded ? 'Reducir gráfica' : 'Expandir gráfica'"
                     @click="toggleExpand"
@@ -39,7 +39,7 @@
                 <button
                     v-if="expanded"
                     type="button"
-                    class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-600"
+                    class="rounded-xl p-2 text-slate-500 transition hover:bg-white/50 hover:text-slate-700"
                     title="Cerrar"
                     aria-label="Cerrar vista expandida"
                     @click="expanded = false"

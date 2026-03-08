@@ -1,24 +1,24 @@
 <template>
     <a :href="href"
-        class="group flex flex-col rounded-2xl border border-slate-200/80 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md focus-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2"
+        class="glass-card group flex flex-col rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
         @click.prevent="onNavigate(href)">
         <div class="flex items-center justify-between">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105 backdrop-blur"
                 :class="iconBg">
                 <Icon :icon="icon" :class="iconColor" height="24px" />
             </div>
 
             <span
-                class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 group-hover:bg-slate-200">
+                class="rounded-full bg-white/60 px-2.5 py-0.5 text-xs font-medium text-slate-600 backdrop-blur group-hover:bg-white/80">
                 {{ badge }}
             </span>
         </div>
 
-        <h3 class="mt-4 text-lg font-semibold text-slate-900">
+        <h3 class="mt-4 text-lg font-semibold text-slate-800">
             {{ name }}
         </h3>
 
-        <p class="mt-2 flex-1 text-sm leading-relaxed text-slate-500">
+        <p class="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
             {{ description }}
         </p>
 

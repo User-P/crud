@@ -1,12 +1,12 @@
 <template>
     <button
         type="button"
-        class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2"
+        class="glass-card group relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 focus:ring-offset-2 focus:ring-offset-transparent"
         @click="$emit('click')"
     >
         <div class="flex items-start justify-between gap-2">
             <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105 backdrop-blur"
                 :class="v.iconBg"
             >
                 <Icon :icon="icon" class="h-5 w-5" :class="v.iconColor" aria-hidden="true" />
@@ -40,10 +40,10 @@
             </div>
         </div>
 
-        <p class="mt-3 text-2xl font-bold tabular-nums tracking-tight text-slate-900">
+        <p class="mt-3 text-2xl font-bold tabular-nums tracking-tight text-slate-800">
             {{ value }}
         </p>
-        <p class="mt-0.5 text-sm font-medium text-slate-500">
+        <p class="mt-0.5 text-sm font-medium text-slate-600">
             {{ label }}
         </p>
 
@@ -53,7 +53,7 @@
         </div>
 
         <!-- Comparación (vs. período anterior) -->
-        <p v-if="comparison" class="mt-2 text-xs text-slate-400">
+        <p v-if="comparison" class="mt-2 text-xs text-slate-500">
             {{ comparison }}
         </p>
 

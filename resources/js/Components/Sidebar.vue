@@ -1,36 +1,36 @@
 <template>
     <aside
-        class="flex h-screen flex-col border-r border-slate-200/60 bg-white shadow-lg shadow-slate-200/50 transition-[width] duration-300 ease-in-out"
+        class="glass-sidebar flex h-screen flex-col transition-[width] duration-300 ease-in-out"
         :class="effectiveExpanded ? 'w-64' : 'w-[4.5rem]'"
         @mouseenter="onMouseEnter"
         @mouseleave="onMouseLeave"
     >
         <!-- Logo + contraer/cerrar -->
         <div
-            class="flex h-14 shrink-0 items-center border-b border-slate-100"
+            class="flex h-14 shrink-0 items-center border-b border-white/20"
             :class="effectiveExpanded ? 'justify-between px-4' : 'justify-center px-0'"
         >
             <a
                 v-if="effectiveExpanded"
                 href="/dashboard"
-                class="flex items-center gap-3 rounded-lg transition hover:opacity-90"
+                class="flex items-center gap-3 rounded-xl transition hover:opacity-90"
                 @click.prevent="navigate('/dashboard')"
             >
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/90 text-white shadow-lg shadow-indigo-500/30 backdrop-blur">
                     <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
                 </div>
                 <div class="min-w-0">
-                    <span class="block truncate text-sm font-semibold text-slate-900">Analytics</span>
+                    <span class="block truncate text-sm font-semibold text-slate-800">Analytics</span>
                     <span class="block truncate text-[10px] font-medium uppercase tracking-wider text-slate-500">Panel</span>
                 </div>
             </a>
-            <div v-else class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/30">
+            <div v-else class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/90 text-white shadow-lg shadow-indigo-500/30 backdrop-blur">
                 <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
             </div>
             <div v-if="effectiveExpanded" class="flex items-center gap-0.5">
                 <button
                     type="button"
-                    class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                    class="rounded-lg p-2 text-slate-500 transition hover:bg-white/50 hover:text-slate-700"
                     :title="collapsed ? 'Expandir menú' : 'Contraer menú'"
                     aria-label="Contraer menú"
                     @click="$emit('toggle-collapse')"
@@ -39,8 +39,8 @@
                 </button>
                 <button
                     type="button"
-                    class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                    title="Ocultar menú (usar toda la pantalla)"
+                    class="rounded-lg p-2 text-slate-500 transition hover:bg-white/50 hover:text-slate-700"
+                    title="Ocultar menú"
                     aria-label="Ocultar menú"
                     @click="$emit('close')"
                 >
@@ -67,9 +67,9 @@
                                     :title="!effectiveExpanded ? item.name : undefined"
                                     :class="[
                                         isGroupActive(item)
-                                            ? 'bg-indigo-50 text-indigo-700'
-                                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
-                                        'flex w-full items-center gap-3 rounded-lg py-2.5 text-left text-sm font-medium transition',
+                                            ? 'bg-indigo-400/20 text-indigo-700'
+                                            : 'text-slate-600 hover:bg-white/40 hover:text-slate-900',
+                                        'flex w-full items-center gap-3 rounded-xl py-2.5 text-left text-sm font-medium transition',
                                         effectiveExpanded ? 'px-3' : 'justify-center px-2',
                                     ]"
                                     @click="!effectiveExpanded ? goFirstChild(item) : toggleExpand(item)"
@@ -91,7 +91,7 @@
                                 </button>
                                 <ul
                                     v-if="effectiveExpanded && expandedItems.includes(item.name)"
-                                    class="mt-0.5 space-y-0.5 border-l-2 border-slate-200 pl-4 ml-5"
+                                    class="mt-0.5 space-y-0.5 border-l-2 border-white/30 pl-4 ml-5"
                                     role="list"
                                 >
                                     <li v-for="child in item.children" :key="child.href">
@@ -101,7 +101,7 @@
                                                 isCurrentRoute(child.href)
                                                     ? 'font-medium text-indigo-600'
                                                     : 'text-slate-600 hover:text-slate-900',
-                                                'block rounded-md py-2 px-2 text-sm transition',
+                                                'block rounded-lg py-2 px-2 text-sm transition',
                                             ]"
                                             @click.prevent="navigate(child.href)"
                                         >
@@ -119,9 +119,9 @@
                                 :title="!effectiveExpanded ? item.name : undefined"
                                 :class="[
                                     isCurrentRoute(item.href)
-                                        ? 'bg-indigo-50 text-indigo-700'
-                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
-                                    'flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition',
+                                        ? 'bg-indigo-400/20 text-indigo-700'
+                                        : 'text-slate-600 hover:bg-white/40 hover:text-slate-900',
+                                    'flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition',
                                     effectiveExpanded ? 'px-3' : 'justify-center px-2',
                                 ]"
                                 @click.prevent="item.href && navigate(item.href)"
@@ -140,12 +140,12 @@
             </ul>
         </nav>
 
-        <!-- Solo botón expandir cuando está contraído (cuenta y menú están en la barra superior) -->
-        <div class="border-t border-slate-100 p-2">
+        <!-- Botón expandir cuando está contraído -->
+        <div class="border-t border-white/20 p-2">
             <div v-if="!effectiveExpanded" class="flex justify-center">
                 <button
                     type="button"
-                    class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                    class="rounded-lg p-2 text-slate-500 transition hover:bg-white/50 hover:text-slate-700"
                     title="Expandir menú"
                     aria-label="Expandir menú"
                     @click="$emit('toggle-collapse')"

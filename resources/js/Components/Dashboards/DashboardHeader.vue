@@ -2,15 +2,15 @@
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-3">
             <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600"
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-400/20 text-indigo-600 backdrop-blur"
             >
                 <Icon :icon="icon" class="h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-                <h2 class="text-xl font-semibold tracking-tight text-slate-900">
+                <h2 class="text-xl font-semibold tracking-tight text-slate-800">
                     {{ title }}
                 </h2>
-                <p v-if="subtitle" class="mt-0.5 text-sm text-slate-500">
+                <p v-if="subtitle" class="mt-0.5 text-sm text-slate-600">
                     {{ subtitle }}
                 </p>
             </div>

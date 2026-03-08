@@ -13,7 +13,7 @@
                         :initial-range="{ start: '2025-01-01', end: '2025-01-31' }"
                         initial-type="custom"
                         select-disabled
-                        class="rounded-xl border border-slate-200 bg-white shadow-sm"
+                        class="glass-card rounded-xl"
                     />
                 </template>
             </DashboardHeader>
@@ -28,20 +28,20 @@
                     <button
                         v-if="heroCard"
                         type="button"
-                        class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-indigo-50 to-white p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        class="glass-card group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
                         @click="openDetail(heroCard)"
                     >
                         <div class="flex items-center gap-3">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-400/20 text-indigo-600 backdrop-blur">
                                 <Icon :icon="heroCard.icon" class="h-6 w-6" aria-hidden="true" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-slate-500">Métrica principal</p>
-                                <p class="text-3xl font-bold tabular-nums text-slate-900">{{ heroCard.value }}</p>
+                                <p class="text-sm font-medium text-slate-600">Métrica principal</p>
+                                <p class="text-3xl font-bold tabular-nums text-slate-800">{{ heroCard.value }}</p>
                                 <p class="text-sm font-medium text-slate-600">{{ heroCard.label }}</p>
                             </div>
                         </div>
-                        <span class="absolute right-4 top-4 text-xs text-slate-400">Clic para detalle →</span>
+                        <span class="absolute right-4 top-4 text-xs text-slate-500">Clic para detalle →</span>
                     </button>
 
                     <MetricCard
@@ -57,7 +57,7 @@
 
                 <!-- Otras métricas -->
                 <section>
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
                         Otras métricas
                     </h3>
                     <div ref="gridRef" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -73,7 +73,7 @@
                     </div>
                 </section>
 
-                <p class="text-xs text-slate-400">
+                <p class="text-xs text-slate-500">
                     Clic en cualquier tarjeta para ver detalle (gráficas + tabla)
                 </p>
             </template>
@@ -89,22 +89,19 @@
                 <p class="mb-4 text-sm text-slate-600">
                     Detalle de <strong>{{ selectedCard.label }}</strong>. Aquí se mostrarían gráficas y tabla según el tipo de métrica.
                 </p>
-                <div class="mb-4 h-48 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 text-sm">
+                <div class="mb-4 h-48 rounded-xl bg-white/50 flex items-center justify-center text-slate-500 text-sm backdrop-blur">
                     Gráfica de tendencia (placeholder)
                 </div>
-                <div class="rounded-xl border border-slate-200 overflow-hidden">
+                <div class="rounded-xl overflow-hidden border border-white/40 bg-white/40 backdrop-blur">
                     <table class="w-full text-sm">
-                        <thead class="bg-slate-50">
+                        <thead class="bg-white/50">
                             <tr>
                                 <th class="px-4 py-2 text-left font-medium text-slate-600">Concepto</th>
                                 <th class="px-4 py-2 text-right font-medium text-slate-600">Valor</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-t border-slate-100">
-                                <td class="px-4 py-2 text-slate-600">Total</td>
-                                <td class="px-4 py-2 text-right font-medium">{{ selectedCard.value }}</td>
-                            </tr>
+                            <tr class="border-t border-white/30"><td class="px-4 py-2 text-slate-600">Total</td><td class="px-4 py-2 text-right font-medium">{{ selectedCard.value }}</td></tr>
                         </tbody>
                     </table>
                 </div>

@@ -16,19 +16,19 @@
                     <CustomPicker
                         initial-preset="lastMonth"
                         select-disabled
-                        class="rounded-xl border border-slate-200 bg-white shadow-sm"
+                        class="glass-card rounded-xl shadow-sm"
                     />
                 </template>
             </DashboardHeader>
 
             <!-- Data storytelling: insight en una línea -->
-            <div class="rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-sm text-amber-900">
+            <div class="glass-card rounded-xl px-4 py-3 text-sm text-amber-900 shadow-sm ring-1 ring-amber-200/50">
                 <span class="font-medium">Insight:</span>
                 El 44% de los usuarios suspendidos llevan 7+ días (riesgo elevado). Priorizar revisión de ese grupo.
             </div>
 
             <!-- Leyenda de riesgo -->
-            <div class="flex flex-wrap gap-6 rounded-xl border border-slate-200/80 bg-white px-5 py-4 shadow-sm">
+            <div class="glass-card flex flex-wrap gap-6 rounded-xl px-5 py-4 shadow-sm">
                 <div class="flex items-center gap-2">
                     <span class="h-3 w-3 rounded-full bg-amber-400" aria-hidden="true" />
                     <span class="text-sm text-slate-600">1-3 días (riesgo menor)</span>

@@ -6,7 +6,7 @@
 
         <div class="space-y-8">
             <section>
-                <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
                     Explorar por tema
                 </h2>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -15,7 +15,7 @@
                 </div>
             </section>
             <section>
-                <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
                     Explorar por unidad de negocio
                 </h2>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
