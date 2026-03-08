@@ -63,10 +63,9 @@
                         </div>
                         <div v-else class="overflow-x-auto px-4 pb-4">
                             <DetailMetricTable
-                                :rows="detailRows"
-                                :has-porcentaje="hasPorcentaje"
-                                :has-actualizado="hasActualizado"
-                                :format-valor="formatValor"
+                                :rows="detailRows as Record<string, unknown>[]"
+                                :columns="detailTableColumns"
+                                search-placeholder="Buscar en concepto, valor, %..."
                                 :export-label="selectedCard?.label"
                             />
                         </div>
@@ -214,6 +213,7 @@ import { router } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DetailMetricTable from '@/Components/Dashboards/DetailMetricTable.vue'
+import type { DetailMetricColumn } from '@/Components/Dashboards/DetailMetricTable.vue'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import ExpandableChart from '@/Components/Dashboards/ExpandableChart.vue'
 import PieChart from '@/Components/Charts/PieChart.vue'
@@ -263,6 +263,23 @@ const detailRows = computed<DetailTableRow[]>(() => {
 
 const hasPorcentaje = computed(() => detailRows.value.some((r) => r.porcentaje != null))
 const hasActualizado = computed(() => detailRows.value.some((r) => r.actualizado != null))
+
+const detailTableColumns = computed<DetailMetricColumn[]>(() => {
+    const cols: DetailMetricColumn[] = [
+        { key: 'concepto', header: 'Concepto', sortable: true, class: 'font-medium' },
+        {
+            key: 'valor',
+            header: 'Valor',
+            sortable: true,
+            numeric: true,
+            format: (v, row) => formatValor(v as number | string) + (row.unidad ? ` ${row.unidad}` : ''),
+            exportFormat: (v, row) => formatValor(v as number | string) + (row.unidad ? ` ${row.unidad}` : ''),
+        },
+    ]
+    if (hasPorcentaje.value) cols.push({ key: 'porcentaje', header: '%', sortable: true })
+    if (hasActualizado.value) cols.push({ key: 'actualizado', header: 'Última actualización', sortable: true, class: 'text-(--th-text-secondary)' })
+    return cols
+})
 
 function formatValor(v: number | string): string {
     if (typeof v === 'number') return v.toLocaleString('es')
