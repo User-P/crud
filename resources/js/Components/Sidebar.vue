@@ -160,7 +160,7 @@
                     aria-label="Expandir menú"
                     @click="$emit('toggle-collapse')"
                 >
-                    <Icon icon="heroicons:chevron-right" class="h-5 w-5" aria-hidden="true" />
+                                    <Icon icon="heroicons:chevron-right" class="h-5 w-5" aria-hidden="true" />
                 </button>
             </div>
         </div>

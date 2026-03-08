@@ -10,7 +10,7 @@
             <div
                 v-if="!sidebarHidden"
                 class="sticky top-0 hidden h-screen shrink-0 self-start transition-[width] duration-300 ease-in-out lg:block lg:z-30"
-                :class="(sidebarCollapsed && !sidebarHoverExpanded) ? 'w-[4.5rem]' : 'w-64'"
+                :class="(sidebarCollapsed && !sidebarHoverExpanded) ? 'w-18' : 'w-64'"
             >
                 <Sidebar
                     :collapsed="sidebarCollapsed"
@@ -52,7 +52,7 @@
                     <div class="px-4 sm:px-6 lg:px-8">
                         <!-- Breadcrumbs -->
                         <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="mb-6" aria-label="Breadcrumb">
-                            <ol role="list" class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
+                            <ol role="list" class="flex flex-wrap gap-x-1.5 gap-y-1 text-sm">
                                 <li
                                     v-for="(crumb, index) in breadcrumbs"
                                     :key="crumb.name"

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Declara el orden de capas para que los overrides de PrimeVue
+   y las utilidades de Tailwind no colisionen */
+@layer tailwind-base, primevue, tailwind-utilities;
+
 /* ========== Glassmorphism legacy (otros componentes) ========== */
 @theme {
     --color-glass: rgba(255, 255, 255, 0.65);
@@ -64,19 +68,19 @@
 
 /* === Tema claro (predeterminado) === */
 :root {
-    /* Fondo */
-    --th-app-bg: linear-gradient(135deg, #ddd6fe 0%, #e0e7ff 50%, #cffafe 100%);
-    --th-dot: rgba(99, 102, 241, 0.055);
+    /* Fondo — gradiente suave y sofisticado */
+    --th-app-bg: linear-gradient(145deg, #f0eeff 0%, #f5f3ff 30%, #eef2ff 65%, #f0f9ff 100%);
+    --th-dot: rgba(99, 102, 241, 0.04);
 
     /* Sidebar */
-    --th-sidebar-bg: rgba(255, 255, 255, 0.68);
-    --th-sidebar-border: rgba(139, 92, 246, 0.14);
-    --th-sidebar-shadow: 4px 0 28px rgba(99, 102, 241, 0.1);
+    --th-sidebar-bg: rgba(255, 255, 255, 0.78);
+    --th-sidebar-border: rgba(139, 92, 246, 0.12);
+    --th-sidebar-shadow: 4px 0 32px rgba(99, 102, 241, 0.08), 1px 0 0 rgba(139, 92, 246, 0.06);
 
     /* Navbar */
-    --th-nav-bg: rgba(255, 255, 255, 0.6);
-    --th-nav-border: rgba(139, 92, 246, 0.1);
-    --th-nav-shadow: 0 1px 0 rgba(139, 92, 246, 0.06), 0 4px 24px rgba(99, 102, 241, 0.08);
+    --th-nav-bg: rgba(255, 255, 255, 0.72);
+    --th-nav-border: rgba(139, 92, 246, 0.08);
+    --th-nav-shadow: 0 1px 0 rgba(139, 92, 246, 0.08), 0 4px 32px rgba(99, 102, 241, 0.06);
 
     /* Items de navegación */
     --th-item-color: #475569;
@@ -439,3 +443,481 @@
 .cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-text { color: var(--th-menu-hover-text) !important; }
 .cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-icon { color: var(--th-menu-hover-icon) !important; }
 .cosmos-app .p-menu hr { border-color: var(--th-divider) !important; }
+
+/* =====================================================================
+   COSMOS — PrimeVue Component Overrides (v4)
+   Todos los componentes siguen la misma paleta violeta + glass del tema
+   ===================================================================== */
+
+/* ── Variables PrimeVue derivadas del tema ── */
+.cosmos-app {
+    --p-primary-color:          var(--th-item-active-color);
+    --p-primary-contrast-color: #ffffff;
+    --p-primary-hover-color:    #5b21b6;
+    --p-focus-ring-color:       rgba(139, 92, 246, 0.35);
+}
+[data-theme="dark"] .cosmos-app {
+    --p-primary-color:          #a78bfa;
+    --p-primary-contrast-color: #2e1065;
+    --p-primary-hover-color:    #c4b5fd;
+    --p-focus-ring-color:       rgba(167, 139, 250, 0.4);
+}
+
+/* ── Button ── */
+.cosmos-app .p-button {
+    border-radius: 0.625rem !important;
+    font-weight: 500 !important;
+    transition: background-color 150ms, border-color 150ms, box-shadow 150ms, transform 100ms !important;
+}
+.cosmos-app .p-button:active { transform: scale(0.97) !important; }
+.cosmos-app .p-button:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 3px var(--p-focus-ring-color) !important;
+}
+/* Outlined buttons — bordes más sutiles */
+.cosmos-app .p-button-outlined {
+    border-width: 1px !important;
+}
+/* Ghost / text buttons */
+.cosmos-app .p-button-text:not(:hover) { background: transparent !important; }
+/* Sizes */
+.cosmos-app .p-button-sm { font-size: 0.75rem !important; padding: 0.375rem 0.75rem !important; }
+.cosmos-app .p-button-lg { font-size: 1rem   !important; padding: 0.625rem 1.25rem !important; }
+
+/* ── InputText / Textarea / InputNumber ── */
+.cosmos-app .p-inputtext,
+.cosmos-app .p-textarea {
+    background: var(--th-input-bg) !important;
+    border: 1px solid var(--th-input-border) !important;
+    color: var(--th-input-text) !important;
+    border-radius: 0.625rem !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    transition: background-color 150ms, border-color 150ms, box-shadow 150ms !important;
+    box-shadow: none !important;
+}
+.cosmos-app .p-inputtext::placeholder,
+.cosmos-app .p-textarea::placeholder {
+    color: var(--th-input-placeholder) !important;
+    font-style: italic;
+}
+.cosmos-app .p-inputtext:hover,
+.cosmos-app .p-textarea:hover {
+    border-color: rgba(139, 92, 246, 0.3) !important;
+}
+.cosmos-app .p-inputtext:focus,
+.cosmos-app .p-inputtext.p-focused,
+.cosmos-app .p-textarea:focus {
+    background: var(--th-input-focus-bg) !important;
+    border-color: var(--th-input-focus-border) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important;
+    outline: none !important;
+}
+/* InputNumber inner input */
+.cosmos-app .p-inputnumber-input {
+    border-radius: 0.625rem !important;
+}
+
+/* ── Select (Dropdown) ── */
+.cosmos-app .p-select {
+    background: var(--th-input-bg) !important;
+    border: 1px solid var(--th-input-border) !important;
+    border-radius: 0.625rem !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    transition: border-color 150ms, box-shadow 150ms !important;
+    box-shadow: none !important;
+}
+.cosmos-app .p-select:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
+.cosmos-app .p-select.p-focused,
+.cosmos-app .p-select:focus-within {
+    border-color: var(--th-input-focus-border) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important;
+}
+.cosmos-app .p-select-label { color: var(--th-input-text) !important; }
+.cosmos-app .p-select-placeholder { color: var(--th-input-placeholder) !important; font-style: italic; }
+/* Dropdown panel */
+.cosmos-app .p-select-overlay {
+    background: var(--th-menu-bg) !important;
+    border: 1px solid var(--th-menu-border) !important;
+    border-radius: 0.875rem !important;
+    box-shadow: var(--th-menu-shadow) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    padding: 0.375rem !important;
+}
+.cosmos-app .p-select-option {
+    border-radius: 0.5rem !important;
+    color: var(--th-menu-text) !important;
+    transition: background-color 120ms !important;
+}
+.cosmos-app .p-select-option:hover,
+.cosmos-app .p-select-option.p-select-option-selected {
+    background: var(--th-menu-item-hover) !important;
+    color: var(--th-menu-hover-text) !important;
+}
+.cosmos-app .p-select-option.p-select-option-selected {
+    font-weight: 500 !important;
+}
+
+/* ── MultiSelect ── */
+.cosmos-app .p-multiselect {
+    background: var(--th-input-bg) !important;
+    border: 1px solid var(--th-input-border) !important;
+    border-radius: 0.625rem !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: none !important;
+}
+.cosmos-app .p-multiselect:hover { border-color: rgba(139, 92, 246, 0.3) !important; }
+.cosmos-app .p-multiselect.p-focused { border-color: var(--th-input-focus-border) !important; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12) !important; }
+.cosmos-app .p-multiselect-overlay {
+    background: var(--th-menu-bg) !important;
+    border: 1px solid var(--th-menu-border) !important;
+    border-radius: 0.875rem !important;
+    box-shadow: var(--th-menu-shadow) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    padding: 0.375rem !important;
+}
+
+/* ── DataTable ── */
+.cosmos-app .p-datatable {
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+}
+.cosmos-app .p-datatable-table-container {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(139, 92, 246, 0.1) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 32px rgba(99, 102, 241, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+[data-theme="dark"] .cosmos-app .p-datatable-table-container {
+    background: rgba(13, 13, 26, 0.7) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4) !important;
+}
+.cosmos-app .p-datatable-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--th-border) !important;
+    padding: 1rem 1.25rem !important;
+}
+.cosmos-app .p-datatable-thead > tr > th {
+    background: transparent !important;
+    border-bottom: 1px solid var(--th-border) !important;
+    border-top: none !important;
+    color: var(--th-text-secondary) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    padding: 0.875rem 1rem !important;
+}
+.cosmos-app .p-datatable-thead > tr > th:first-child { border-radius: 0 !important; }
+.cosmos-app .p-datatable-sort-icon { color: var(--th-text-muted) !important; }
+.cosmos-app .p-datatable-column-sorted .p-datatable-sort-icon { color: var(--th-item-active-color) !important; }
+.cosmos-app .p-datatable-tbody > tr {
+    background: transparent !important;
+    border-bottom: 1px solid var(--th-border) !important;
+    transition: background-color 120ms !important;
+}
+.cosmos-app .p-datatable-tbody > tr:last-child { border-bottom: none !important; }
+.cosmos-app .p-datatable-tbody > tr:hover {
+    background: var(--th-item-hover-bg) !important;
+}
+.cosmos-app .p-datatable-tbody > tr > td {
+    background: transparent !important;
+    border: none !important;
+    color: var(--th-text-primary) !important;
+    padding: 0.875rem 1rem !important;
+}
+.cosmos-app .p-datatable-footer {
+    background: transparent !important;
+    border-top: 1px solid var(--th-border) !important;
+    padding: 0.75rem 1.25rem !important;
+}
+/* Row selection */
+.cosmos-app .p-datatable-tbody > tr.p-highlight {
+    background: var(--th-item-active-bg) !important;
+    color: var(--th-item-active-color) !important;
+}
+/* Striped rows */
+.cosmos-app .p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+    background: rgba(139, 92, 246, 0.025) !important;
+}
+
+/* ── Paginator ── */
+.cosmos-app .p-paginator {
+    background: transparent !important;
+    border: none !important;
+    border-top: 1px solid var(--th-border) !important;
+    border-radius: 0 0 1rem 1rem !important;
+    padding: 0.75rem 1rem !important;
+    gap: 0.25rem !important;
+}
+.cosmos-app .p-paginator-page,
+.cosmos-app .p-paginator-prev,
+.cosmos-app .p-paginator-next,
+.cosmos-app .p-paginator-first,
+.cosmos-app .p-paginator-last {
+    border-radius: 0.5rem !important;
+    min-width: 2rem !important;
+    height: 2rem !important;
+    color: var(--th-text-secondary) !important;
+    transition: background-color 120ms, color 120ms !important;
+}
+.cosmos-app .p-paginator-page:hover,
+.cosmos-app .p-paginator-prev:hover,
+.cosmos-app .p-paginator-next:hover {
+    background: var(--th-item-hover-bg) !important;
+    color: var(--th-item-hover-color) !important;
+}
+.cosmos-app .p-paginator-page.p-highlight {
+    background: var(--th-item-active-bg) !important;
+    color: var(--th-item-active-color) !important;
+    font-weight: 600 !important;
+}
+.cosmos-app .p-paginator-rpp-dropdown .p-select,
+.cosmos-app .p-paginator-rpp-options {
+    border-radius: 0.5rem !important;
+}
+
+/* ── Dialog / Modal ── */
+.cosmos-app .p-dialog,
+.p-dialog.p-component {
+    border-radius: 1rem !important;
+    border: 1px solid var(--th-menu-border) !important;
+    box-shadow: 0 24px 60px rgba(99, 102, 241, 0.14), 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+}
+[data-theme="dark"] .cosmos-app .p-dialog,
+[data-theme="dark"] .p-dialog.p-component {
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
+}
+.cosmos-app .p-dialog-header,
+.p-dialog .p-dialog-header {
+    background: var(--th-nav-bg) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-bottom: 1px solid var(--th-border) !important;
+    padding: 1.25rem 1.5rem !important;
+}
+.cosmos-app .p-dialog-title,
+.p-dialog .p-dialog-title {
+    color: var(--th-text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+}
+.cosmos-app .p-dialog-content,
+.p-dialog .p-dialog-content {
+    background: var(--th-sidebar-bg) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    padding: 1.5rem !important;
+    color: var(--th-text-primary) !important;
+}
+.cosmos-app .p-dialog-footer,
+.p-dialog .p-dialog-footer {
+    background: var(--th-nav-bg) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-top: 1px solid var(--th-border) !important;
+    padding: 1rem 1.5rem !important;
+    gap: 0.5rem !important;
+}
+/* Overlay / mask */
+.p-dialog-mask.p-component-overlay,
+.p-overlay-modal {
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+}
+
+/* ── Toast ── */
+.cosmos-app .p-toast,
+.p-toast.p-component {
+    z-index: 9999 !important;
+}
+.cosmos-app .p-toast-message,
+.p-toast .p-toast-message {
+    background: var(--th-menu-bg) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid var(--th-menu-border) !important;
+    border-radius: 0.875rem !important;
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden !important;
+}
+[data-theme="dark"] .p-toast .p-toast-message {
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
+}
+.p-toast .p-toast-message-content {
+    padding: 1rem 1.25rem !important;
+    gap: 0.75rem !important;
+}
+.p-toast .p-toast-summary {
+    font-weight: 600 !important;
+    color: var(--th-text-primary) !important;
+}
+.p-toast .p-toast-detail {
+    color: var(--th-text-secondary) !important;
+    font-size: 0.875rem !important;
+}
+/* Toast accent bar */
+.p-toast .p-toast-message-success  { border-left: 3px solid #10b981 !important; }
+.p-toast .p-toast-message-info     { border-left: 3px solid #6d28d9 !important; }
+.p-toast .p-toast-message-warn     { border-left: 3px solid #f59e0b !important; }
+.p-toast .p-toast-message-error    { border-left: 3px solid #ef4444 !important; }
+
+/* ── Card ── */
+.cosmos-app .p-card {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(139, 92, 246, 0.1) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    transition: box-shadow 200ms, border-color 200ms !important;
+    color: var(--th-text-primary) !important;
+}
+.cosmos-app .p-card:hover {
+    border-color: rgba(139, 92, 246, 0.2) !important;
+    box-shadow: 0 8px 36px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+[data-theme="dark"] .cosmos-app .p-card {
+    background: rgba(13, 13, 26, 0.72) !important;
+    border-color: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4) !important;
+}
+[data-theme="dark"] .cosmos-app .p-card:hover {
+    border-color: rgba(139, 92, 246, 0.18) !important;
+    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
+}
+.cosmos-app .p-card-header { border-bottom: 1px solid var(--th-border) !important; padding: 1.25rem 1.5rem !important; }
+.cosmos-app .p-card-body { padding: 1.5rem !important; }
+.cosmos-app .p-card-title { color: var(--th-text-primary) !important; font-size: 1rem !important; font-weight: 600 !important; }
+.cosmos-app .p-card-subtitle { color: var(--th-text-secondary) !important; font-size: 0.875rem !important; }
+.cosmos-app .p-card-footer { border-top: 1px solid var(--th-border) !important; padding: 1rem 1.5rem !important; }
+
+/* ── Tabs ── */
+.cosmos-app .p-tabs { background: transparent !important; }
+.cosmos-app .p-tablist {
+    background: var(--th-input-bg) !important;
+    border: 1px solid var(--th-input-border) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.25rem !important;
+    gap: 0.125rem !important;
+    backdrop-filter: blur(8px) !important;
+}
+.cosmos-app .p-tab {
+    border-radius: 0.5rem !important;
+    color: var(--th-text-secondary) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    padding: 0.375rem 0.875rem !important;
+    transition: background-color 150ms, color 150ms !important;
+    border: none !important;
+}
+.cosmos-app .p-tab:hover { color: var(--th-text-primary) !important; background: var(--th-item-hover-bg) !important; }
+.cosmos-app .p-tab.p-tab-active {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: var(--th-item-active-color) !important;
+    box-shadow: 0 1px 4px rgba(99, 102, 241, 0.15) !important;
+}
+[data-theme="dark"] .cosmos-app .p-tab.p-tab-active {
+    background: rgba(139, 92, 246, 0.18) !important;
+    color: #c4b5fd !important;
+}
+.cosmos-app .p-tablist-active-bar { display: none !important; }
+.cosmos-app .p-tabpanels { background: transparent !important; padding: 1rem 0 0 !important; }
+
+/* ── Badge / Tag / Chip ── */
+.cosmos-app .p-badge {
+    border-radius: 0.5rem !important;
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    min-width: 1.25rem !important;
+    height: 1.25rem !important;
+    line-height: 1.25rem !important;
+    padding: 0 0.375rem !important;
+}
+.cosmos-app .p-tag {
+    border-radius: 0.5rem !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    padding: 0.2rem 0.5rem !important;
+}
+.cosmos-app .p-chip {
+    border-radius: 0.5rem !important;
+    border: 1px solid var(--th-border) !important;
+    background: var(--th-item-hover-bg) !important;
+    color: var(--th-text-primary) !important;
+}
+
+/* ── Popover / OverlayPanel ── */
+.cosmos-app .p-popover,
+.p-popover.p-component,
+.p-overlaypanel.p-component {
+    background: var(--th-menu-bg) !important;
+    border: 1px solid var(--th-menu-border) !important;
+    border-radius: 0.875rem !important;
+    box-shadow: var(--th-menu-shadow) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    padding: 0.5rem !important;
+}
+
+/* ── ProgressBar ── */
+.cosmos-app .p-progressbar {
+    background: var(--th-input-bg) !important;
+    border-radius: 999px !important;
+    height: 0.5rem !important;
+    border: 1px solid var(--th-input-border) !important;
+    overflow: hidden !important;
+}
+.cosmos-app .p-progressbar-value {
+    background: linear-gradient(90deg, #8b5cf6, #6d28d9) !important;
+    border-radius: 999px !important;
+}
+
+/* ── Checkbox ── */
+.cosmos-app .p-checkbox-box {
+    border-radius: 0.375rem !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
+    background: var(--th-input-bg) !important;
+    transition: border-color 150ms, background-color 150ms !important;
+}
+.cosmos-app .p-checkbox-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
+.cosmos-app .p-checkbox.p-highlight .p-checkbox-box {
+    background: #7c3aed !important;
+    border-color: #7c3aed !important;
+}
+
+/* ── RadioButton ── */
+.cosmos-app .p-radiobutton-box {
+    border: 1.5px solid rgba(139, 92, 246, 0.3) !important;
+    background: var(--th-input-bg) !important;
+    transition: border-color 150ms !important;
+}
+.cosmos-app .p-radiobutton-box:hover { border-color: rgba(139, 92, 246, 0.6) !important; }
+.cosmos-app .p-radiobutton.p-highlight .p-radiobutton-box { border-color: #7c3aed !important; }
+.cosmos-app .p-radiobutton.p-highlight .p-radiobutton-box .p-radiobutton-icon { background: #7c3aed !important; }
+
+/* ── ToggleSwitch / InputSwitch ── */
+.cosmos-app .p-toggleswitch-slider { background: var(--th-divider) !important; transition: background-color 200ms !important; }
+.cosmos-app .p-toggleswitch.p-highlight .p-toggleswitch-slider { background: #7c3aed !important; }
+
+/* ── Scrollbar personalizado ── */
+.cosmos-app ::-webkit-scrollbar { width: 5px; height: 5px; }
+.cosmos-app ::-webkit-scrollbar-track { background: transparent; }
+.cosmos-app ::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.25);
+    border-radius: 999px;
+}
+.cosmos-app ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.45); }
+[data-theme="dark"] .cosmos-app ::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.2); }
+[data-theme="dark"] .cosmos-app ::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.4); }

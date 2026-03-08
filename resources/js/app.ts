@@ -4,7 +4,7 @@ import "../css/app.css";
 import { createApp, h, DefineComponent } from "vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import PrimeVue from "primevue/config";
-import Aura from "@primeuix/themes/aura";
+import CosmosPreset from "./primevue-preset";
 import "primeicons/primeicons.css";
 import { createPinia } from "pinia";
 
@@ -26,7 +26,13 @@ createInertiaApp({
             .use(pinia)
             .use(PrimeVue, {
                 theme: {
-                    preset: Aura,
+                    preset: CosmosPreset,
+                    options: {
+                        cssLayer: {
+                            name: 'primevue',
+                            order: 'tailwind-base, primevue, tailwind-utilities',
+                        },
+                    },
                 },
             })
             .mount(el);
