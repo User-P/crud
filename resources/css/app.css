@@ -141,3 +141,198 @@
 .p-menu .p-menuitem-link:focus {
     box-shadow: none !important;
 }
+
+/* ========================================================
+   COSMOS DARK THEME
+   ======================================================== */
+:root {
+    --cosmos-bg: #060611;
+    --cosmos-border: rgba(255, 255, 255, 0.07);
+    --cosmos-border-strong: rgba(255, 255, 255, 0.11);
+    --cosmos-accent: #8b5cf6;
+    --cosmos-accent-subtle: rgba(139, 92, 246, 0.11);
+    --cosmos-blur: 22px;
+}
+
+/* Fondo base */
+.cosmos-app {
+    background-color: var(--cosmos-bg);
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Patrón de puntos sutil */
+.cosmos-app::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.07) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Blobs de gradiente animados */
+.cosmos-blob {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.cosmos-blob-1 {
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.18) 0%, transparent 65%);
+    top: -250px;
+    left: -200px;
+    animation: cosmos-pulse 10s ease-in-out infinite;
+}
+
+.cosmos-blob-2 {
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.14) 0%, transparent 65%);
+    bottom: -150px;
+    right: -100px;
+    animation: cosmos-pulse 13s ease-in-out infinite reverse;
+}
+
+.cosmos-blob-3 {
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 65%);
+    top: 40%;
+    left: 38%;
+    animation: cosmos-pulse 16s ease-in-out infinite;
+    animation-delay: -5s;
+}
+
+@keyframes cosmos-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.75; }
+}
+
+/* Sidebar oscuro */
+.cosmos-sidebar {
+    background: rgba(7, 7, 18, 0.82);
+    backdrop-filter: blur(var(--cosmos-blur));
+    -webkit-backdrop-filter: blur(var(--cosmos-blur));
+    border-right: 1px solid var(--cosmos-border-strong);
+    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Navbar oscuro con línea inferior de acento */
+.cosmos-nav {
+    background: rgba(6, 6, 16, 0.85);
+    backdrop-filter: blur(var(--cosmos-blur));
+    -webkit-backdrop-filter: blur(var(--cosmos-blur));
+    border-bottom: 1px solid var(--cosmos-border-strong);
+    box-shadow: 0 1px 0 rgba(139, 92, 246, 0.1), 0 4px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Item de nav activo: acento izquierdo con glow */
+.cosmos-item-active {
+    background: var(--cosmos-accent-subtle);
+    position: relative;
+    overflow: hidden;
+}
+
+.cosmos-item-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #c4b5fd 0%, #818cf8 100%);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
+}
+
+/* Input de búsqueda oscuro */
+.cosmos-input {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--cosmos-border-strong) !important;
+    color: #e2e8f0 !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.cosmos-input::placeholder {
+    color: rgba(100, 116, 139, 0.65) !important;
+}
+
+.cosmos-input:focus {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(139, 92, 246, 0.45) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.09) !important;
+}
+
+/* Texto con gradiente para títulos */
+.cosmos-gradient-text {
+    background: linear-gradient(135deg, #f1f5f9 0%, #c4b5fd 60%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ---- PrimeVue overrides para cosmos ---- */
+.cosmos-app .p-sidebar {
+    background: rgba(7, 7, 18, 0.92) !important;
+    backdrop-filter: blur(var(--cosmos-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--cosmos-blur)) !important;
+    border-right: 1px solid var(--cosmos-border-strong) !important;
+    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.cosmos-app .p-sidebar .p-sidebar-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--cosmos-border) !important;
+}
+
+.cosmos-app .p-sidebar .p-sidebar-content {
+    background: transparent !important;
+}
+
+.cosmos-app .p-menu {
+    background: rgba(10, 10, 24, 0.98) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid var(--cosmos-border-strong) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.07) !important;
+    padding: 6px !important;
+}
+
+.cosmos-app .p-menu .p-menuitem-link {
+    border-radius: 8px !important;
+}
+
+.cosmos-app .p-menu .p-menuitem-link:hover {
+    background: rgba(139, 92, 246, 0.12) !important;
+}
+
+.cosmos-app .p-menu .p-menuitem-link:focus {
+    box-shadow: none !important;
+}
+
+.cosmos-app .p-menu .p-menuitem-text {
+    color: #94a3b8 !important;
+}
+
+.cosmos-app .p-menu .p-menuitem-icon {
+    color: #64748b !important;
+}
+
+.cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-text {
+    color: #c4b5fd !important;
+}
+
+.cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-icon {
+    color: #a78bfa !important;
+}
+
+.cosmos-app .p-menu hr {
+    border-color: var(--cosmos-border) !important;
+}

@@ -1,5 +1,10 @@
 <template>
-    <div class="glass-app-bg min-h-screen">
+    <div class="cosmos-app min-h-screen">
+        <!-- Blobs de fondo animados -->
+        <div class="cosmos-blob cosmos-blob-1" aria-hidden="true" />
+        <div class="cosmos-blob cosmos-blob-2" aria-hidden="true" />
+        <div class="cosmos-blob cosmos-blob-3" aria-hidden="true" />
+
         <div class="relative z-10 flex">
             <!-- Sidebar desktop -->
             <template v-if="!sidebarHidden">
@@ -56,18 +61,18 @@
                                     <Icon
                                         v-if="index > 0"
                                         icon="heroicons:chevron-right"
-                                        class="h-4 w-4 shrink-0 text-slate-400/80"
+                                        class="h-3.5 w-3.5 shrink-0 text-slate-600"
                                         aria-hidden="true"
                                     />
                                     <a
                                         v-if="crumb.href"
                                         :href="crumb.href"
-                                        class="font-medium text-slate-600 transition hover:text-slate-800"
+                                        class="text-slate-500 transition hover:text-violet-400"
                                         @click.prevent="router.visit(crumb.href)"
                                     >
                                         {{ crumb.name }}
                                     </a>
-                                    <span v-else class="font-medium text-slate-800">
+                                    <span v-else class="font-medium text-slate-300">
                                         {{ crumb.name }}
                                     </span>
                                 </li>
@@ -76,10 +81,10 @@
 
                         <!-- Título de página -->
                         <div v-if="title" class="mb-8">
-                            <h1 class="text-2xl font-semibold tracking-tight text-slate-800 sm:text-3xl">
+                            <h1 class="cosmos-gradient-text text-2xl font-bold tracking-tight sm:text-3xl">
                                 {{ title }}
                             </h1>
-                            <p v-if="subtitle" class="mt-1.5 text-sm text-slate-600">
+                            <p v-if="subtitle" class="mt-1.5 text-sm text-slate-400">
                                 {{ subtitle }}
                             </p>
                         </div>
