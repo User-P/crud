@@ -16,16 +16,16 @@
                 class="flex items-center gap-3 rounded-xl transition hover:opacity-80"
                 @click.prevent="navigate('/dashboard')"
             >
-                <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
+                <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
                     <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
                     <span class="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#06060f] shadow shadow-emerald-400/60" />
                 </div>
                 <div class="min-w-0">
-                    <span class="block truncate text-sm font-semibold text-slate-100">Analytics</span>
-                    <span class="block truncate text-[10px] font-medium uppercase tracking-widest text-violet-400/70">Panel</span>
+                    <span class="cosmos-logo-text block truncate text-sm font-semibold">Analytics</span>
+                    <span class="cosmos-logo-sub block truncate text-[10px] font-medium uppercase tracking-widest">Panel</span>
                 </div>
             </a>
-            <div v-else class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
+            <div v-else class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
                 <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
                 <span class="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#06060f] shadow shadow-emerald-400/60" />
             </div>
@@ -57,14 +57,14 @@
                 <template v-for="group in navGroups" :key="group.label">
                     <!-- Separador de grupo -->
                     <li v-if="effectiveExpanded" class="px-3 pb-1 pt-5 first:pt-2">
-                        <p class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
-                            <span class="h-px flex-1 bg-gradient-to-r from-white/[0.07] to-transparent" />
+                        <p class="cosmos-group-label flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest">
+                            <span class="cosmos-group-line h-px flex-1" />
                             {{ group.label }}
-                            <span class="h-px flex-1 bg-gradient-to-l from-white/[0.07] to-transparent" />
+                            <span class="cosmos-group-line h-px flex-1" />
                         </p>
                     </li>
                     <li v-else class="py-1.5">
-                        <div class="mx-auto h-px w-8 bg-white/[0.07]" />
+                        <div class="cosmos-group-line mx-auto h-px w-8" />
                     </li>
 
                     <template v-for="item in group.items" :key="item.name">

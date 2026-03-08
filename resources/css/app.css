@@ -20,20 +20,17 @@
     --glass-border: rgba(255, 255, 255, 0.35);
     --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
     --glass-blur: 16px;
-    /* Gradiente más visible para que el glass se aprecie */
     --app-bg-start: #ddd6fe;
     --app-bg-mid: #e0e7ff;
     --app-bg-end: #cffafe;
 }
 
-/* Fondo global con gradiente visible para que el glass destaque */
 .glass-app-bg {
     background: linear-gradient(135deg, var(--app-bg-start) 0%, var(--app-bg-mid) 50%, var(--app-bg-end) 100%);
     min-height: 100vh;
     position: relative;
 }
 
-/* Patrón sutil de puntos para textura (opcional) */
 .glass-app-bg::before {
     content: "";
     position: fixed;
@@ -44,7 +41,6 @@
     z-index: 0;
 }
 
-/* Utilidades glass reutilizables */
 .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
@@ -102,7 +98,7 @@
     outline: none;
 }
 
-/* ========== Overrides PrimeVue para glassmorphism ========== */
+/* ========== Overrides PrimeVue para glassmorphism (legacy) ========== */
 .p-sidebar {
     background: rgba(255, 255, 255, 0.65) !important;
     backdrop-filter: blur(20px) !important;
@@ -143,41 +139,172 @@
 }
 
 /* ========================================================
-   COSMOS DARK THEME
+   UNIFIED THEME SYSTEM — light & dark
    ======================================================== */
+
+/* === Light theme (default) === */
 :root {
-    --cosmos-bg: #060611;
-    --cosmos-border: rgba(255, 255, 255, 0.07);
-    --cosmos-border-strong: rgba(255, 255, 255, 0.11);
-    --cosmos-accent: #8b5cf6;
-    --cosmos-accent-subtle: rgba(139, 92, 246, 0.11);
-    --cosmos-blur: 22px;
+    --th-app-bg: linear-gradient(135deg, #ddd6fe 0%, #e0e7ff 50%, #cffafe 100%);
+    --th-dot: rgba(99, 102, 241, 0.06);
+
+    --th-sidebar-bg: rgba(255, 255, 255, 0.48);
+    --th-sidebar-border: rgba(255, 255, 255, 0.55);
+    --th-sidebar-shadow: 4px 0 24px rgba(99, 102, 241, 0.12);
+
+    --th-nav-bg: rgba(255, 255, 255, 0.55);
+    --th-nav-border: rgba(255, 255, 255, 0.45);
+    --th-nav-shadow: 0 4px 24px rgba(99, 102, 241, 0.09);
+    --th-nav-accent: 0 1px 0 rgba(139, 92, 246, 0.06);
+
+    --th-item-active-bg: rgba(139, 92, 246, 0.1);
+    --th-item-hover-bg: rgba(255, 255, 255, 0.5);
+    --th-item-active-glow: rgba(109, 40, 217, 0.35);
+
+    --th-input-bg: rgba(255, 255, 255, 0.72);
+    --th-input-border: rgba(255, 255, 255, 0.55);
+    --th-input-text: #1e293b;
+    --th-input-placeholder: rgba(100, 116, 139, 0.7);
+    --th-input-focus-bg: rgba(255, 255, 255, 0.92);
+    --th-input-focus-border: rgba(139, 92, 246, 0.45);
+
+    --th-border: rgba(99, 102, 241, 0.12);
+    --th-divider: rgba(203, 213, 225, 0.5);
+
+    --th-menu-bg: rgba(255, 255, 255, 0.97);
+    --th-menu-border: rgba(255, 255, 255, 0.7);
+    --th-menu-shadow: 0 12px 40px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+    --th-menu-item-hover: rgba(99, 102, 241, 0.08);
+    --th-menu-text: #475569;
+    --th-menu-icon: #64748b;
+    --th-menu-hover-text: #7c3aed;
+    --th-menu-hover-icon: #7c3aed;
+
+    --th-title-gradient: linear-gradient(135deg, #1e293b 0%, #7c3aed 55%, #4f46e5 100%);
+
+    --th-nav-item-color: #475569;
+    --th-nav-item-hover-bg: rgba(255, 255, 255, 0.5);
+    --th-nav-item-hover-color: #0f172a;
+    --th-nav-item-active-color: #6d28d9;
+    --th-nav-btn-color: #64748b;
+    --th-nav-btn-hover-bg: rgba(255, 255, 255, 0.55);
+    --th-nav-btn-hover-color: #0f172a;
+
+    --th-group-label: #94a3b8;
+    --th-group-line: rgba(148, 163, 184, 0.25);
+
+    --th-text-primary: #0f172a;
+    --th-text-secondary: #64748b;
+    --th-text-muted: #94a3b8;
+
+    --th-ring-offset: #f8fafc;
+    --th-status-ring: white;
+    --th-notification-badge: #7c3aed;
+
+    --th-crumb-link: #64748b;
+    --th-crumb-hover: #7c3aed;
+    --th-crumb-current: #0f172a;
+    --th-crumb-separator: #94a3b8;
+    --th-subtitle: #64748b;
+    --th-logo-text: #0f172a;
+    --th-logo-sub: rgba(109, 40, 217, 0.7);
 }
 
-/* Fondo base */
+/* === Dark theme === */
+[data-theme="dark"] {
+    --th-app-bg: #060611;
+    --th-dot: rgba(139, 92, 246, 0.07);
+
+    --th-sidebar-bg: rgba(7, 7, 18, 0.82);
+    --th-sidebar-border: rgba(255, 255, 255, 0.11);
+    --th-sidebar-shadow: 4px 0 40px rgba(0, 0, 0, 0.5);
+
+    --th-nav-bg: rgba(6, 6, 16, 0.85);
+    --th-nav-border: rgba(255, 255, 255, 0.11);
+    --th-nav-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+    --th-nav-accent: 0 1px 0 rgba(139, 92, 246, 0.1);
+
+    --th-item-active-bg: rgba(139, 92, 246, 0.11);
+    --th-item-hover-bg: rgba(255, 255, 255, 0.05);
+    --th-item-active-glow: rgba(167, 139, 250, 0.8);
+
+    --th-input-bg: rgba(255, 255, 255, 0.04);
+    --th-input-border: rgba(255, 255, 255, 0.11);
+    --th-input-text: #e2e8f0;
+    --th-input-placeholder: rgba(100, 116, 139, 0.65);
+    --th-input-focus-bg: rgba(255, 255, 255, 0.06);
+    --th-input-focus-border: rgba(139, 92, 246, 0.45);
+
+    --th-border: rgba(255, 255, 255, 0.07);
+    --th-divider: rgba(255, 255, 255, 0.09);
+
+    --th-menu-bg: rgba(10, 10, 24, 0.98);
+    --th-menu-border: rgba(255, 255, 255, 0.11);
+    --th-menu-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.07);
+    --th-menu-item-hover: rgba(139, 92, 246, 0.12);
+    --th-menu-text: #94a3b8;
+    --th-menu-icon: #64748b;
+    --th-menu-hover-text: #c4b5fd;
+    --th-menu-hover-icon: #a78bfa;
+
+    --th-title-gradient: linear-gradient(135deg, #f1f5f9 0%, #c4b5fd 60%, #818cf8 100%);
+
+    --th-nav-item-color: #94a3b8;
+    --th-nav-item-hover-bg: rgba(255, 255, 255, 0.05);
+    --th-nav-item-hover-color: #e2e8f0;
+    --th-nav-item-active-color: #c4b5fd;
+    --th-nav-btn-color: #64748b;
+    --th-nav-btn-hover-bg: rgba(255, 255, 255, 0.07);
+    --th-nav-btn-hover-color: #e2e8f0;
+
+    --th-group-label: #475569;
+    --th-group-line: rgba(255, 255, 255, 0.07);
+
+    --th-text-primary: #e2e8f0;
+    --th-text-secondary: #94a3b8;
+    --th-text-muted: #64748b;
+
+    --th-ring-offset: #060611;
+    --th-status-ring: #060611;
+    --th-notification-badge: #8b5cf6;
+
+    --th-crumb-link: #64748b;
+    --th-crumb-hover: #a78bfa;
+    --th-crumb-current: #e2e8f0;
+    --th-crumb-separator: #475569;
+    --th-subtitle: #94a3b8;
+    --th-logo-text: #f1f5f9;
+    --th-logo-sub: rgba(167, 139, 250, 0.7);
+}
+
+/* App wrapper */
 .cosmos-app {
-    background-color: var(--cosmos-bg);
+    background: var(--th-app-bg);
     min-height: 100vh;
     position: relative;
 }
 
-/* Patrón de puntos sutil */
+/* Dot pattern overlay */
 .cosmos-app::before {
     content: "";
     position: fixed;
     inset: 0;
-    background-image: radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.07) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, var(--th-dot) 1px, transparent 0);
     background-size: 28px 28px;
     pointer-events: none;
     z-index: 0;
 }
 
-/* Blobs de gradiente animados */
+/* Blobs: solo en modo oscuro */
 .cosmos-blob {
     position: fixed;
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
+    display: none;
+}
+
+[data-theme="dark"] .cosmos-blob {
+    display: block;
 }
 
 .cosmos-blob-1 {
@@ -213,27 +340,65 @@
     50% { transform: scale(1.1); opacity: 0.75; }
 }
 
-/* Sidebar oscuro */
+/* Sidebar */
 .cosmos-sidebar {
-    background: rgba(7, 7, 18, 0.82);
-    backdrop-filter: blur(var(--cosmos-blur));
-    -webkit-backdrop-filter: blur(var(--cosmos-blur));
-    border-right: 1px solid var(--cosmos-border-strong);
-    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.5);
+    background: var(--th-sidebar-bg);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border-right: 1px solid var(--th-sidebar-border);
+    box-shadow: var(--th-sidebar-shadow);
 }
 
-/* Navbar oscuro con línea inferior de acento */
+/* Nav item text — sobrescribe Tailwind via mayor especificidad */
+.cosmos-sidebar nav a,
+.cosmos-sidebar nav button {
+    color: var(--th-nav-item-color);
+}
+
+.cosmos-sidebar nav a:not(.cosmos-item-active):hover,
+.cosmos-sidebar nav button:not(.cosmos-item-active):hover {
+    background-color: var(--th-nav-item-hover-bg);
+    color: var(--th-nav-item-hover-color);
+}
+
+.cosmos-sidebar nav a.cosmos-item-active,
+.cosmos-sidebar nav button.cosmos-item-active {
+    color: var(--th-nav-item-active-color);
+}
+
+/* Sidebar border lines */
+.cosmos-sidebar .border-b,
+.cosmos-sidebar .border-t {
+    border-color: var(--th-border) !important;
+}
+
+.cosmos-sidebar .border-l {
+    border-color: var(--th-group-line) !important;
+}
+
+/* Navbar */
 .cosmos-nav {
-    background: rgba(6, 6, 16, 0.85);
-    backdrop-filter: blur(var(--cosmos-blur));
-    -webkit-backdrop-filter: blur(var(--cosmos-blur));
-    border-bottom: 1px solid var(--cosmos-border-strong);
-    box-shadow: 0 1px 0 rgba(139, 92, 246, 0.1), 0 4px 32px rgba(0, 0, 0, 0.3);
+    background: var(--th-nav-bg);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border-bottom: 1px solid var(--th-nav-border);
+    box-shadow: var(--th-nav-accent), var(--th-nav-shadow);
 }
 
-/* Item de nav activo: acento izquierdo con glow */
+/* Navbar button colors */
+.cosmos-nav .cosmos-btn {
+    color: var(--th-nav-btn-color);
+    transition: background-color 150ms, color 150ms;
+}
+
+.cosmos-nav .cosmos-btn:hover {
+    background-color: var(--th-nav-btn-hover-bg);
+    color: var(--th-nav-btn-hover-color);
+}
+
+/* Active item */
 .cosmos-item-active {
-    background: var(--cosmos-accent-subtle);
+    background: var(--th-item-active-bg);
     position: relative;
     overflow: hidden;
 }
@@ -246,49 +411,71 @@
     bottom: 0;
     width: 3px;
     background: linear-gradient(180deg, #c4b5fd 0%, #818cf8 100%);
-    box-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
+    box-shadow: 0 0 10px var(--th-item-active-glow);
 }
 
-/* Input de búsqueda oscuro */
+/* Search input */
 .cosmos-input {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid var(--cosmos-border-strong) !important;
-    color: #e2e8f0 !important;
+    background: var(--th-input-bg) !important;
+    border: 1px solid var(--th-input-border) !important;
+    color: var(--th-input-text) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
 
 .cosmos-input::placeholder {
-    color: rgba(100, 116, 139, 0.65) !important;
+    color: var(--th-input-placeholder) !important;
 }
 
 .cosmos-input:focus {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(139, 92, 246, 0.45) !important;
+    background: var(--th-input-focus-bg) !important;
+    border-color: var(--th-input-focus-border) !important;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.09) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
 }
 
-/* Texto con gradiente para títulos */
+/* Gradient title */
 .cosmos-gradient-text {
-    background: linear-gradient(135deg, #f1f5f9 0%, #c4b5fd 60%, #818cf8 100%);
+    background: var(--th-title-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-/* ---- PrimeVue overrides para cosmos ---- */
+/* Semantic color utilities */
+.cosmos-logo-text { color: var(--th-logo-text); }
+.cosmos-logo-sub { color: var(--th-logo-sub); }
+.cosmos-group-label { color: var(--th-group-label); }
+.cosmos-group-line { background-color: var(--th-group-line); }
+.cosmos-separator { background-color: var(--th-divider); }
+.cosmos-user-name { color: var(--th-text-primary); }
+.cosmos-user-sub { color: var(--th-text-muted); }
+.cosmos-crumb-link { color: var(--th-crumb-link); }
+.cosmos-crumb-link:hover { color: var(--th-crumb-hover); }
+.cosmos-crumb-current { color: var(--th-crumb-current); }
+.cosmos-crumb-separator { color: var(--th-crumb-separator); }
+.cosmos-subtitle { color: var(--th-subtitle); }
+.cosmos-kbd {
+    background-color: var(--th-item-hover-bg);
+    border-color: var(--th-border);
+    color: var(--th-text-muted);
+}
+.cosmos-notification-dot {
+    background-color: var(--th-notification-badge);
+}
+
+/* PrimeVue overrides */
 .cosmos-app .p-sidebar {
-    background: rgba(7, 7, 18, 0.92) !important;
-    backdrop-filter: blur(var(--cosmos-blur)) !important;
-    -webkit-backdrop-filter: blur(var(--cosmos-blur)) !important;
-    border-right: 1px solid var(--cosmos-border-strong) !important;
-    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.6) !important;
+    background: var(--th-sidebar-bg) !important;
+    backdrop-filter: blur(22px) !important;
+    -webkit-backdrop-filter: blur(22px) !important;
+    border-right: 1px solid var(--th-sidebar-border) !important;
+    box-shadow: var(--th-sidebar-shadow) !important;
 }
 
 .cosmos-app .p-sidebar .p-sidebar-header {
     background: transparent !important;
-    border-bottom: 1px solid var(--cosmos-border) !important;
+    border-bottom: 1px solid var(--th-border) !important;
 }
 
 .cosmos-app .p-sidebar .p-sidebar-content {
@@ -296,12 +483,12 @@
 }
 
 .cosmos-app .p-menu {
-    background: rgba(10, 10, 24, 0.98) !important;
+    background: var(--th-menu-bg) !important;
     backdrop-filter: blur(24px) !important;
     -webkit-backdrop-filter: blur(24px) !important;
-    border: 1px solid var(--cosmos-border-strong) !important;
+    border: 1px solid var(--th-menu-border) !important;
     border-radius: 14px !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.07) !important;
+    box-shadow: var(--th-menu-shadow) !important;
     padding: 6px !important;
 }
 
@@ -310,7 +497,7 @@
 }
 
 .cosmos-app .p-menu .p-menuitem-link:hover {
-    background: rgba(139, 92, 246, 0.12) !important;
+    background: var(--th-menu-item-hover) !important;
 }
 
 .cosmos-app .p-menu .p-menuitem-link:focus {
@@ -318,21 +505,21 @@
 }
 
 .cosmos-app .p-menu .p-menuitem-text {
-    color: #94a3b8 !important;
+    color: var(--th-menu-text) !important;
 }
 
 .cosmos-app .p-menu .p-menuitem-icon {
-    color: #64748b !important;
+    color: var(--th-menu-icon) !important;
 }
 
 .cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-text {
-    color: #c4b5fd !important;
+    color: var(--th-menu-hover-text) !important;
 }
 
 .cosmos-app .p-menu .p-menuitem-link:hover .p-menuitem-icon {
-    color: #a78bfa !important;
+    color: var(--th-menu-hover-icon) !important;
 }
 
 .cosmos-app .p-menu hr {
-    border-color: var(--cosmos-border) !important;
+    border-color: var(--th-divider) !important;
 }

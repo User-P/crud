@@ -61,18 +61,18 @@
                                     <Icon
                                         v-if="index > 0"
                                         icon="heroicons:chevron-right"
-                                        class="h-3.5 w-3.5 shrink-0 text-slate-600"
+                                        class="cosmos-crumb-separator h-3.5 w-3.5 shrink-0"
                                         aria-hidden="true"
                                     />
                                     <a
                                         v-if="crumb.href"
                                         :href="crumb.href"
-                                        class="text-slate-500 transition hover:text-violet-400"
+                                        class="cosmos-crumb-link transition"
                                         @click.prevent="router.visit(crumb.href)"
                                     >
                                         {{ crumb.name }}
                                     </a>
-                                    <span v-else class="font-medium text-slate-300">
+                                    <span v-else class="cosmos-crumb-current font-medium">
                                         {{ crumb.name }}
                                     </span>
                                 </li>
@@ -84,7 +84,7 @@
                             <h1 class="cosmos-gradient-text text-2xl font-bold tracking-tight sm:text-3xl">
                                 {{ title }}
                             </h1>
-                            <p v-if="subtitle" class="mt-1.5 text-sm text-slate-400">
+                            <p v-if="subtitle" class="cosmos-subtitle mt-1.5 text-sm">
                                 {{ subtitle }}
                             </p>
                         </div>
@@ -99,12 +99,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import PrimeSidebar from 'primevue/sidebar'
 import { Icon } from '@iconify/vue'
 import Sidebar from '@/Components/Sidebar.vue'
 import Navbar from '@/Components/Navbar.vue'
+import { useTheme } from '@/composables/useTheme'
 
 interface Breadcrumb {
     name: string
@@ -118,6 +119,9 @@ interface Props {
 }
 
 defineProps<Props>()
+
+const { init } = useTheme()
+onMounted(() => init())
 
 const sidebarOpen = ref(false)
 const sidebarHidden = ref(false)
