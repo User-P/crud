@@ -1,49 +1,45 @@
 <template>
-    <div class="cosmos-app min-h-screen">
-        <!-- Blobs de fondo animados -->
+    <div class="cosmos-app">
+        <!-- Blobs de fondo (solo dark) -->
         <div class="cosmos-blob cosmos-blob-1" aria-hidden="true" />
         <div class="cosmos-blob cosmos-blob-2" aria-hidden="true" />
         <div class="cosmos-blob cosmos-blob-3" aria-hidden="true" />
 
-        <div class="relative z-10 flex">
-            <!-- Sidebar desktop -->
-            <template v-if="!sidebarHidden">
-                <div
-                    class="hidden shrink-0 transition-[width] duration-300 ease-in-out lg:flex lg:flex-col lg:z-30"
-                    :class="(sidebarCollapsed && !sidebarHoverExpanded) ? 'lg:w-[4.5rem]' : 'lg:w-64'"
-                >
-                    <Sidebar
-                        :collapsed="sidebarCollapsed"
-                        @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
-                        @close="sidebarHidden = true"
-                        @hover-expand="sidebarHoverExpanded = $event"
-                        @collapse="onSidebarCollapse"
-                    />
-                </div>
-            </template>
+        <div class="relative z-10 flex min-h-screen">
+            <!-- ── Sidebar desktop: sticky mientras scrollea el contenido ── -->
+            <div
+                v-if="!sidebarHidden"
+                class="sticky top-0 hidden h-screen shrink-0 self-start transition-[width] duration-300 ease-in-out lg:block lg:z-30"
+                :class="(sidebarCollapsed && !sidebarHoverExpanded) ? 'w-[4.5rem]' : 'w-64'"
+            >
+                <Sidebar
+                    :collapsed="sidebarCollapsed"
+                    @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
+                    @close="sidebarHidden = true"
+                    @hover-expand="sidebarHoverExpanded = $event"
+                    @collapse="onSidebarCollapse"
+                />
+            </div>
 
-            <!-- Sidebar móvil (drawer) -->
+            <!-- ── Sidebar móvil (drawer) ── -->
             <PrimeSidebar
                 v-model:visible="sidebarOpen"
                 position="left"
-                class="w-64 lg:hidden"
+                :style="{ width: '16rem' }"
+                class="lg:hidden"
+                :show-close-icon="false"
                 modal
                 blockScroll
             >
-                <div class="flex h-full flex-col">
-                    <Sidebar
-                        :collapsed="false"
-                        @toggle-collapse="() => {}"
-                        @close="sidebarOpen = false"
-                    />
-                </div>
+                <Sidebar
+                    :collapsed="false"
+                    @toggle-collapse="() => {}"
+                    @close="sidebarOpen = false"
+                />
             </PrimeSidebar>
 
-            <!-- Área principal -->
-            <div
-                class="relative z-10 min-w-0 flex-1 overflow-x-hidden transition-[margin] duration-200"
-                :class="sidebarHidden ? 'lg:ml-0' : (sidebarCollapsed ? 'lg:ml-0' : 'lg:ml-0')"
-            >
+            <!-- ── Área principal ── -->
+            <div class="flex min-w-0 flex-1 flex-col">
                 <Navbar
                     :sidebar-hidden="sidebarHidden"
                     :sidebar-collapsed="sidebarCollapsed"
@@ -52,12 +48,16 @@
                     @toggle-sidebar-collapse="sidebarCollapsed = !sidebarCollapsed"
                 />
 
-                <main class="min-w-0 py-8">
+                <main class="flex-1 py-8">
                     <div class="px-4 sm:px-6 lg:px-8">
                         <!-- Breadcrumbs -->
                         <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="mb-6" aria-label="Breadcrumb">
                             <ol role="list" class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
-                                <li v-for="(crumb, index) in breadcrumbs" :key="crumb.name" class="flex items-center gap-x-1.5">
+                                <li
+                                    v-for="(crumb, index) in breadcrumbs"
+                                    :key="crumb.name"
+                                    class="flex items-center gap-x-1.5"
+                                >
                                     <Icon
                                         v-if="index > 0"
                                         icon="heroicons:chevron-right"
@@ -79,7 +79,7 @@
                             </ol>
                         </nav>
 
-                        <!-- Título de página -->
+                        <!-- Título -->
                         <div v-if="title" class="mb-8">
                             <h1 class="cosmos-gradient-text text-2xl font-bold tracking-tight sm:text-3xl">
                                 {{ title }}
@@ -89,7 +89,6 @@
                             </p>
                         </div>
 
-                        <!-- Contenido -->
                         <slot />
                     </div>
                 </main>
