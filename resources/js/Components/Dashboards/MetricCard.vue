@@ -62,7 +62,7 @@ interface Props {
     label: string
     value: string | number
     icon: string
-    variant?: 'blue' | 'green' | 'red'
+    variant?: 'blue' | 'green' | 'red' | 'violet'
     trend?: 'up' | 'down' | 'neutral'
     trendPercent?: number | null
     sparklineData?: number[]
@@ -78,29 +78,34 @@ defineEmits<{
     (e: 'click'): void
 }>()
 
-const variants: Record<'blue' | 'green' | 'red', { iconBg: string; iconColor: string; bar: string }> = {
+const variants: Record<'blue' | 'green' | 'red' | 'violet', { iconBg: string; iconColor: string; bar: string }> = {
     blue: {
-        iconBg: 'bg-blue-500/15 dark:bg-blue-400/25',
-        iconColor: 'text-blue-600 dark:text-blue-400',
-        bar: 'bg-blue-500 dark:bg-blue-400',
+        iconBg: 'bg-[#0b4261]/15 dark:bg-[#0d5a7a]/25',
+        iconColor: 'text-[#0b4261] dark:text-[#5bb56a]',
+        bar: 'bg-[#0b4261] dark:bg-[#0d5a7a]',
     },
     green: {
-        iconBg: 'bg-emerald-500/15 dark:bg-emerald-400/25',
-        iconColor: 'text-emerald-600 dark:text-emerald-400',
-        bar: 'bg-emerald-500 dark:bg-emerald-400',
+        iconBg: 'bg-[#5bb56a]/15 dark:bg-[#5bb56a]/25',
+        iconColor: 'text-[#4a9d58] dark:text-[#6bc67a]',
+        bar: 'bg-[#5bb56a] dark:bg-[#5bb56a]',
     },
     red: {
         iconBg: 'bg-rose-500/15 dark:bg-rose-400/25',
         iconColor: 'text-rose-600 dark:text-rose-400',
         bar: 'bg-rose-500 dark:bg-rose-400',
     },
+    violet: {
+        iconBg: 'bg-[#0b4261]/15 dark:bg-[#5bb56a]/25',
+        iconColor: 'text-[#0b4261] dark:text-[#5bb56a]',
+        bar: 'bg-[#0b4261] dark:bg-[#5bb56a]',
+    },
 }
 
 const v = computed(() => variants[props.variant])
 
 const sparklineColor = computed(() => {
-    if (props.trend === 'up' && (props.variant === 'green' || props.variant === 'blue')) return 'green'
+    if (props.trend === 'up' && (props.variant === 'green' || props.variant === 'blue' || props.variant === 'violet')) return props.variant === 'violet' ? 'violet' : 'green'
     if (props.trend === 'down' && props.variant === 'red') return 'red'
-    return props.variant
+    return props.variant === 'violet' ? 'violet' : props.variant
 })
 </script>

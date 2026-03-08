@@ -23,8 +23,8 @@ import { computed } from 'vue'
 const props = withDefaults(defineProps<{
     /** Valores para la línea (ej. últimos 7 días) */
     data: number[]
-    /** Color de la línea */
-    color?: 'blue' | 'green' | 'red' | 'slate'
+    /** Color de la línea (violet = acento del tema Cosmos) */
+    color?: 'blue' | 'green' | 'red' | 'slate' | 'violet'
 }>(), {
     color: 'slate',
 })
@@ -33,8 +33,14 @@ const width = 80
 const height = 32
 
 const strokeColor = computed(() => {
-    const map = { blue: '#3b82f6', green: '#10b981', red: '#ef4444', slate: '#64748b' }
-    return map[props.color]
+    const map: Record<string, string> = {
+        blue: '#0b4261',
+        green: '#5bb56a',
+        red: '#ef4444',
+        slate: '#64666a',
+        violet: '#0b4261',
+    }
+    return map[props.color] ?? map.slate
 })
 
 const pathD = computed(() => {

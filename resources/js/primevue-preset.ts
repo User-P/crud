@@ -2,26 +2,23 @@ import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
 
 /**
- * CosmosPreset — PrimeVue theme aligned with the Cosmos design system.
- * Primary palette: violet (matches CSS variables --th-item-active-color, etc.)
- *
- * Component tokens must use the section shape expected by @primeuix/themes:
- * e.g. button: { root: { ... } }, inputtext: { root: { ... } }
+ * CosmosPreset — PrimeVue theme alineado con la paleta DSI.
+ * Verde #5bb56a, azul #0b4261, gris #64666a.
  */
 const CosmosPreset = definePreset(Aura, {
     primitive: {
-        violet: {
-            50:  '#f5f3ff',
-            100: '#ede9fe',
-            200: '#ddd6fe',
-            300: '#c4b5fd',
-            400: '#a78bfa',
-            500: '#8b5cf6',
-            600: '#7c3aed',
-            700: '#6d28d9',
-            800: '#5b21b6',
-            900: '#4c1d95',
-            950: '#2e1065',
+        primary: {
+            50:  '#e8f0f4',
+            100: '#c5dae6',
+            200: '#9ec0d6',
+            300: '#6fa3c2',
+            400: '#3d85ad',
+            500: '#156b8f',
+            600: '#0b4261',
+            700: '#093552',
+            800: '#072944',
+            900: '#051e35',
+            950: '#031220',
         },
         borderRadius: {
             none:  '0',
@@ -36,17 +33,17 @@ const CosmosPreset = definePreset(Aura, {
 
     semantic: {
         primary: {
-            50:  '{violet.50}',
-            100: '{violet.100}',
-            200: '{violet.200}',
-            300: '{violet.300}',
-            400: '{violet.400}',
-            500: '{violet.500}',
-            600: '{violet.600}',
-            700: '{violet.700}',
-            800: '{violet.800}',
-            900: '{violet.900}',
-            950: '{violet.950}',
+            50:  '{primary.50}',
+            100: '{primary.100}',
+            200: '{primary.200}',
+            300: '{primary.300}',
+            400: '{primary.400}',
+            500: '{primary.500}',
+            600: '{primary.600}',
+            700: '{primary.700}',
+            800: '{primary.800}',
+            900: '{primary.900}',
+            950: '{primary.950}',
         },
 
         colorScheme: {
@@ -67,16 +64,16 @@ const CosmosPreset = definePreset(Aura, {
             },
             dark: {
                 primary: {
-                    color:         '{primary.400}',
-                    contrastColor: '{primary.950}',
-                    hoverColor:    '{primary.300}',
-                    activeColor:   '{primary.200}',
+                    color:         '#5bb56a',
+                    contrastColor: '#0b4261',
+                    hoverColor:    '#6bc67a',
+                    activeColor:   '#4a9d58',
                 },
                 highlight: {
-                    background:      'rgba(139, 92, 246, 0.16)',
-                    focusBackground: 'rgba(139, 92, 246, 0.24)',
-                    color:           '{primary.300}',
-                    focusColor:      '{primary.200}',
+                    background:      'rgba(91, 181, 106, 0.16)',
+                    focusBackground: 'rgba(91, 181, 106, 0.24)',
+                    color:           '#6bc67a',
+                    focusColor:      '#5bb56a',
                 },
 
             },

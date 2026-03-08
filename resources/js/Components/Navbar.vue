@@ -30,7 +30,7 @@
                 class="flex min-w-0 items-center gap-2 rounded-xl py-1 pr-1 transition hover:opacity-80 sm:pr-2"
                 @click.prevent="navigate('/dashboard')">
                 <div
-                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/25 sm:h-8 sm:w-8">
+                    class="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#0b4261] to-[#5bb56a] text-white shadow-lg shadow-[#0b4261]/25 sm:h-8 sm:w-8">
                     <Icon icon="heroicons:chart-bar-square" class="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
                 </div>
                 <span class="logo-text hidden truncate text-sm font-semibold sm:block">Analytics</span>
@@ -82,7 +82,7 @@
                     class="btn flex items-center gap-1.5 rounded-xl py-1.5 pl-1 pr-2 sm:gap-2 sm:pl-1.5 sm:pr-2.5"
                     aria-label="Menú de cuenta" aria-haspopup="true" @click="toggleProfileMenu">
                     <div class="relative shrink-0">
-                        <img class="h-7 w-7 rounded-full object-cover ring-1 ring-violet-500/40 sm:h-8 sm:w-8"
+                        <img class="h-7 w-7 rounded-full object-cover ring-1 ring-[#0b4261]/40 sm:h-8 sm:w-8"
                             :src="userAvatar" :alt="user?.name || 'Usuario'" />
                         <span
                             class="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-1 sm:h-2.5 sm:w-2.5 sm:ring-2"

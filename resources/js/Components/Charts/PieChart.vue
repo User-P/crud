@@ -50,8 +50,17 @@ const chartOption = computed<Option>(() => ({
             data: props.data,
             avoidLabelOverlap: props.donut,
             label: props.donut ? { show: false, position: 'center' } : undefined,
-            emphasis: props.donut ? { label: { show: true, fontSize: 18, fontWeight: 'bold' } } : undefined,
+            emphasis: {
+                ...(props.donut ? { label: { show: true, fontSize: 18, fontWeight: 'bold' } } : {}),
+                itemStyle: { shadowBlur: 12, shadowColor: 'rgba(11, 66, 97, 0.35)' },
+            },
             labelLine: props.donut ? { show: false } : undefined,
+            itemStyle: {
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.4)',
+                shadowBlur: 8,
+                shadowColor: 'rgba(11, 66, 97, 0.2)',
+            },
         },
     ],
     ...props.extendOption,

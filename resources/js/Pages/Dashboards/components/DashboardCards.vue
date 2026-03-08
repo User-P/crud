@@ -89,9 +89,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    iconBg: 'bg-indigo-500/20 dark:bg-indigo-400/25',
-    iconColor: 'text-indigo-600 dark:text-indigo-400',
-    accentBar: 'bg-indigo-500 dark:bg-indigo-400',
+    iconBg: 'bg-[#0b4261]/20 dark:bg-[#5bb56a]/25',
+    iconColor: 'text-[#0b4261] dark:text-[#5bb56a]',
+    accentBar: 'bg-[#0b4261] dark:bg-[#5bb56a]',
     featured: false,
 })
 
@@ -99,14 +99,14 @@ const emit = defineEmits<{
     (e: 'navigate', href: string): void
 }>()
 
-const accentBarClass = computed(() => props.accentBar || 'bg-indigo-500 dark:bg-indigo-400')
+const accentBarClass = computed(() => props.accentBar || 'bg-[#0b4261] dark:bg-[#5bb56a]')
 
 const blobClass = computed(() => {
     const a = (props.accentBar || '').toLowerCase()
     if (a.includes('emerald')) return 'bg-emerald-400'
     if (a.includes('amber')) return 'bg-amber-400'
     if (a.includes('blue')) return 'bg-blue-400'
-    return 'bg-indigo-400'
+    return 'bg-[#0b4261]'
 })
 
 function onNavigate(href: string) {

@@ -165,9 +165,9 @@ export const useUsers = () => {
             description: "KPIs principales con tendencias, sparklines y drill-down al detalle.",
             href: "/dashboards/vista-general",
             icon: "heroicons:presentation-chart-bar",
-            iconBg: "bg-indigo-100 dark:bg-indigo-400/25",
-            iconColor: "text-indigo-600 dark:text-indigo-400",
-            accentBar: "bg-indigo-500 dark:bg-indigo-400",
+            iconBg: "bg-[#0b4261]/10 dark:bg-[#5bb56a]/25",
+            iconColor: "text-[#0b4261] dark:text-[#5bb56a]",
+            accentBar: "bg-[#0b4261] dark:bg-[#5bb56a]",
             badge: "KPIs",
         },
         {
@@ -203,7 +203,7 @@ export const useUsers = () => {
     ]
 
     const byUnits = [
-        { name: "Usuarios de EKT", description: "Vista general filtrada por unidad de negocio EKT", href: "/dashboards/vista-general?unit=EKT", icon: "streamline-plump:user-pin", iconBg: "bg-indigo-100 dark:bg-indigo-400/25", iconColor: "text-indigo-600 dark:text-indigo-400", accentBar: "bg-indigo-500 dark:bg-indigo-400", badge: "EKT" },
+        { name: "Usuarios de EKT", description: "Vista general filtrada por unidad de negocio EKT", href: "/dashboards/vista-general?unit=EKT", icon: "streamline-plump:user-pin", iconBg: "bg-[#0b4261]/10 dark:bg-[#5bb56a]/25", iconColor: "text-[#0b4261] dark:text-[#5bb56a]", accentBar: "bg-[#0b4261] dark:bg-[#5bb56a]", badge: "EKT" },
         { name: "Usuarios de TPE", description: "Vista general filtrada por unidad de negocio TPE", href: "/dashboards/vista-general?unit=TPE", icon: "stash:user-id", iconBg: "bg-emerald-100 dark:bg-emerald-400/25", iconColor: "text-emerald-600 dark:text-emerald-400", accentBar: "bg-emerald-500 dark:bg-emerald-400", badge: "TPE" },
         { name: "Usuarios de TVA", description: "Vista general filtrada por unidad de negocio TVA", href: "/dashboards/vista-general?unit=TVA", icon: "hugeicons:ai-user", iconBg: "bg-amber-100 dark:bg-amber-400/25", iconColor: "text-amber-600 dark:text-amber-400", accentBar: "bg-amber-500 dark:bg-amber-400", badge: "TVA" },
         { name: "Usuarios de BACK OFFICE", description: "Vista general filtrada por unidad de negocio BACK OFFICE", href: "/dashboards/vista-general?unit=BACK_OFFICE", icon: "line-md:account", iconBg: "bg-blue-100 dark:bg-blue-400/25", iconColor: "text-blue-600 dark:text-blue-400", accentBar: "bg-blue-500 dark:bg-blue-400", badge: "BACK OFFICE" },

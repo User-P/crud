@@ -11,14 +11,6 @@ import BaseEChart from './BaseEChart.vue';
 
 echarts.use([EBarChart, GridComponent, LegendComponent, TooltipComponent, TitleComponent]);
 
-const getContrastColor = (hexColor: string): string => {
-    const r = parseInt(hexColor.slice(1, 3), 16);
-    const g = parseInt(hexColor.slice(3, 5), 16);
-    const b = parseInt(hexColor.slice(5, 7), 16);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.5 ? '#000000' : '#ffffff';
-};
-
 type SeriesItem = {
     name: string;
     data: Array<number | null>;
@@ -70,6 +62,7 @@ const chartOption = computed(() => {
             name: s.name,
             type: 'bar',
             stack: 'total',
+            barBorderRadius: [0, 6, 6, 0],
             emphasis: { focus: 'series' },
             label: {
                 show: true,
@@ -79,10 +72,14 @@ const chartOption = computed(() => {
                 color: '#ffffff',
                 fontSize: 12,
                 fontWeight: 600,
-                backgroundColor: 'rgba(0, 0, 0, 0.35)',
-                borderRadius: 4,
-                padding: [2, 6],
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                borderRadius: 6,
+                padding: [4, 8],
                 overflow: 'truncate',
+            },
+            itemStyle: {
+                shadowBlur: 4,
+                shadowColor: 'rgba(0, 0, 0, 0.15)',
             },
             data: s.data,
         })),

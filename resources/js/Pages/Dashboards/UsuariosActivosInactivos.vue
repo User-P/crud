@@ -16,14 +16,14 @@
                     <CustomPicker
                         initial-preset="lastMonth"
                         select-disabled
-                        class="rounded-xl border border-slate-200 bg-white shadow-sm"
+                        class="rounded-xl border border-(--th-border) bg-(--th-input-bg) shadow-sm"
                     />
                 </template>
             </DashboardHeader>
 
             <!-- Insight en una línea (data storytelling) -->
-            <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3 text-sm text-indigo-800">
-                <span class="font-medium">Resumen:</span>
+            <div class="rounded-xl border border-(--th-border) bg-(--th-input-bg)/80 px-4 py-3 text-sm text-(--th-text-secondary) backdrop-blur-sm">
+                <span class="font-medium text-(--th-text-primary)">Resumen:</span>
                 El 94% de los usuarios están activos; 6% inactivos. La mayoría en estatus PROVISIONED.
             </div>
 
@@ -33,7 +33,7 @@
                     label="Usuarios totales"
                     value="140,000"
                     icon="heroicons:globe-alt"
-                    variant="blue"
+                    variant="violet"
                     trend="up"
                     :trend-percent="2.4"
                     :sparkline-data="[128, 131, 132, 130, 134, 138, 140]"

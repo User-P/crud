@@ -17,7 +17,7 @@
                 class="flex min-w-0 items-center gap-3 rounded-xl py-1 transition hover:opacity-80"
                 @click.prevent="navigate('/dashboard')"
             >
-                <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
+                <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#0b4261] to-[#5bb56a] text-white shadow-lg shadow-[#0b4261]/30">
                     <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
                     <span class="status-ring absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 shadow-sm shadow-emerald-400/50" aria-hidden="true" />
                 </div>
@@ -29,7 +29,7 @@
 
             <div
                 v-else
-                class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30"
+                class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#0b4261] to-[#5bb56a] text-white shadow-lg shadow-[#0b4261]/30"
             >
                 <Icon icon="heroicons:chart-bar-square" class="h-5 w-5" aria-hidden="true" />
                 <span class="status-ring absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 shadow-sm shadow-emerald-400/50" aria-hidden="true" />

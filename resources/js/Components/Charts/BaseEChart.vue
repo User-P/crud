@@ -11,7 +11,8 @@ echarts.use([CanvasRenderer]);
 
 interface Props {
     option: Record<string, any>;
-    theme?: string | object;
+    /** Si no se pasa, se usa cosmos-light / cosmos-dark según data-theme */
+    theme?: string;
 }
 
 const props = defineProps<Props>();
@@ -19,6 +20,12 @@ const props = defineProps<Props>();
 const chartRef = ref<HTMLDivElement | null>(null);
 let chart: EChartsType | null = null;
 let observer: ResizeObserver | null = null;
+let themeObserver: MutationObserver | null = null;
+
+function getThemeName(): string {
+    if (typeof document === 'undefined') return 'cosmos-light';
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'cosmos-dark' : 'cosmos-light';
+}
 
 function makeWheelPassiveForChart(option: Record<string, any>) {
     const safe = { ...option };
@@ -54,8 +61,16 @@ const renderChart = () => {
     const { clientWidth, clientHeight } = chartRef.value;
     if (clientWidth === 0 || clientHeight === 0) return;
 
+    const themeName = props.theme ?? getThemeName();
+
     if (!chart) {
-        chart = echarts.init(chartRef.value, props.theme);
+        chart = echarts.init(chartRef.value, themeName);
+    } else {
+        const currentTheme = getThemeName();
+        if (currentTheme !== themeName) {
+            chart.dispose();
+            chart = echarts.init(chartRef.value, currentTheme);
+        }
     }
 
     const safeOption = makeWheelPassiveForChart(props.option);
@@ -78,9 +93,22 @@ onMounted(async () => {
         });
         observer.observe(chartRef.value);
     }
+
+    themeObserver = new MutationObserver(() => {
+        if (props.theme) return;
+        const el = chartRef.value;
+        if (!el || !chart) return;
+        const next = getThemeName();
+        chart.dispose();
+        chart = echarts.init(el, next);
+        chart.setOption(makeWheelPassiveForChart(props.option), true);
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 });
 
 onBeforeUnmount(() => {
+    themeObserver?.disconnect();
+    themeObserver = null;
     observer?.disconnect();
     chart?.dispose();
     chart = null;
