@@ -29,6 +29,7 @@
     "@vue-flow/core": "^1.47.0",
     "ant-design-vue": "^4.2.6",
     "echarts": "^6.0.0",
+    "jszip": "^3.10.1",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
     "primevue": "^4.4.1",

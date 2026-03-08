@@ -30,6 +30,7 @@
                     :disabled="filteredRows.length === 0"
                     severity="secondary"
                     class="shrink-0"
+                    :loading="exportingCsv"
                     @click="exportCSV"
                 />
             </div>
@@ -138,15 +139,19 @@ const props = withDefaults(
         rowsPerPage?: number
         /** Opciones del selector de filas por página */
         rowsPerPageOptions?: number[]
+        /** Si > 0, export CSV se divide en varios archivos de hasta esta cantidad de filas cada uno (evita memoria/string gigante). */
+        maxRowsPerCsvFile?: number
     }>(),
     {
         searchPlaceholder: 'Buscar en la tabla…',
         rowsPerPage: 5,
         rowsPerPageOptions: () => [5, 10, 15, 25, 50],
+        maxRowsPerCsvFile: 0,
     }
 )
 
 const searchText = ref('')
+const exportingCsv = ref(false)
 
 function getCellValue(row: Record<string, unknown>, key: string): unknown {
     return row[key]
@@ -179,39 +184,83 @@ function escapeCsvCell(value: string): string {
 }
 
 /**
- * Export CSV: no hay límite de filas en el código.
- * Límites reales:
- * - Longitud máxima de string en JS (V8): ~268 millones de caracteres (2^28 - 1).
- *   Si cada fila tiene ~L caracteres, máximo teórico ≈ 268e6 / L (ej. L=150 → ~1,8M filas).
- * - Memoria: se construye el CSV como un string completo; el navegador puede fallar por RAM
- *   antes del límite de string (p. ej. 1–2M filas con columnas normales suele ser viable).
- * - Descarga: el archivo puede ser grande; depende de disco y del navegador.
+ * Export CSV: si maxRowsPerCsvFile > 0 y hay más filas, se empaquetan todas las partes
+ * en un único archivo ZIP (una sola descarga). Incluye LEEME.txt con la lista de partes.
  */
-/** Export propio: CSV sin formato (PrimeVue DataTable tiene exportCSV() en el ref, pero usamos columnas dinámicas). */
-function exportCSV() {
+async function exportCSV() {
     if (filteredRows.value.length === 0) return
+    const rows = filteredRows.value
     const cols = props.columns
-    const header = cols.map((c) => c.exportLabel ?? c.header).join(',')
-    const lines = filteredRows.value.map((row) =>
-        cols
-            .map((c) => {
-                const raw = getCellValue(row, c.key)
-                const str = c.exportFormat
-                    ? c.exportFormat(raw, row as Record<string, unknown>)
-                    : c.format
-                      ? c.format(raw, row as Record<string, unknown>)
-                      : raw == null ? '' : String(raw)
-                return escapeCsvCell(str)
-            })
-            .join(',')
-    )
-    const csv = [header, ...lines].join('\r\n')
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `detalle-${(props.exportLabel || 'datos').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+    const maxPerFile = props.maxRowsPerCsvFile ?? 0
+    const baseName = `detalle-${(props.exportLabel || 'datos').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}`
+
+    function buildCsvChunk(chunkRows: Record<string, unknown>[]): string {
+        const header = cols.map((c) => c.exportLabel ?? c.header).join(',')
+        const lines = chunkRows.map((row) =>
+            cols
+                .map((c) => {
+                    const raw = getCellValue(row, c.key)
+                    const str = c.exportFormat
+                        ? c.exportFormat(raw, row as Record<string, unknown>)
+                        : c.format
+                          ? c.format(raw, row as Record<string, unknown>)
+                          : raw == null ? '' : String(raw)
+                    return escapeCsvCell(str)
+                })
+                .join(',')
+        )
+        return [header, ...lines].join('\r\n')
+    }
+
+    function downloadBlob(blob: Blob, filename: string) {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        a.click()
+        URL.revokeObjectURL(url)
+    }
+
+    if (maxPerFile > 0 && rows.length > maxPerFile) {
+        exportingCsv.value = true
+        try {
+            const JSZip = (await import('jszip')).default
+            const zip = new JSZip()
+            const totalParts = Math.ceil(rows.length / maxPerFile)
+            const partNames: string[] = []
+
+            for (let part = 0; part < totalParts; part++) {
+                const start = part * maxPerFile
+                const end = Math.min(start + maxPerFile, rows.length)
+                const chunk = rows.slice(start, end)
+                const csv = buildCsvChunk(chunk)
+                const partName = `parte-${part + 1}-de-${totalParts}.csv`
+                partNames.push(partName)
+                zip.file(partName, '\ufeff' + csv, { createFolders: false })
+            }
+
+            const leeme = [
+                'Exportación en varias partes',
+                '────────────────────────────',
+                `Total de registros: ${rows.length.toLocaleString('es')}`,
+                `Partes: ${totalParts}`,
+                '',
+                'Archivos incluidos (en orden):',
+                ...partNames.map((name, i) => `  ${i + 1}. ${name}`),
+                '',
+                'Cada archivo tiene cabecera. Para unir en Excel/LibreOffice:',
+                'abrir el primero y luego insertar las filas de parte-2, parte-3, etc.',
+            ].join('\r\n')
+            zip.file('LEEME.txt', leeme, { createFolders: false })
+
+            const blob = await zip.generateAsync({ type: 'blob' })
+            downloadBlob(blob, `${baseName}.zip`)
+        } finally {
+            exportingCsv.value = false
+        }
+    } else {
+        const csv = buildCsvChunk(rows)
+        downloadBlob(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }), `${baseName}.csv`)
+    }
 }
 </script>

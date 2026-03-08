@@ -91,6 +91,7 @@
                                 :columns="detailTableColumnsForTable"
                                 search-placeholder="Buscar en la tabla…"
                                 :export-label="useTestData1M ? 'prueba-1m-registros' : selectedCard?.label"
+                                :max-rows-per-csv-file="500000"
                             />
                         </div>
                     </div>
