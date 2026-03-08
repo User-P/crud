@@ -157,6 +157,12 @@ Rutas bajo `/dashboards` (menú **Dashboards de métricas**):
 
 - Variables CSS (`@theme`) para colores de superficie y sidebar (paleta coherente).
 
+### Migrar los dashboards a otro proyecto
+
+Si quieres **reutilizar estos dashboards en otro proyecto** Laravel + Vue 3 + PrimeVue y que se vean igual (mismo tema, bento, gráficas), hay una guía paso a paso que lista todos los archivos y estilos a copiar o fusionar:
+
+- **[docs/MIGRACION-DASHBOARDS.md](docs/MIGRACION-DASHBOARDS.md)** — Qué estilos, componentes, temas PrimeVue/ECharts y rutas migrar para que los dashboards luzcan exactamente igual.
+
 ### Otras páginas del frontend
 
 - **Tablas**: `/tables` con TanStack Table, filtros y paginación.

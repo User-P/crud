@@ -285,11 +285,6 @@ function formatValue(value: unknown): string {
     return String(value ?? '–')
 }
 
-function scrollToSection(id: string) {
-    const el = document.getElementById(id)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
 function navigate(href: string) {
     router.visit(href)
 }
