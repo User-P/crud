@@ -954,3 +954,37 @@
     );
     background-size: 200% 200%;
 }
+
+/* =============================================================================
+   SORTABLE DRAG-AND-DROP — Secondary metric tiles
+   ============================================================================= */
+
+/* Ghost: the placeholder slot shown while dragging */
+.sortable-ghost > .secondary-metric-tile {
+    opacity: 0.35;
+    border: 2px dashed rgba(11, 66, 97, 0.3) !important;
+    background: rgba(11, 66, 97, 0.04) !important;
+}
+[data-theme="dark"] .sortable-ghost > .secondary-metric-tile {
+    border-color: rgba(91, 181, 106, 0.3) !important;
+    background: rgba(91, 181, 106, 0.04) !important;
+}
+
+/* Chosen: the element being picked up before drag starts */
+.sortable-chosen > .secondary-metric-tile {
+    box-shadow: 0 8px 32px rgba(11, 66, 97, 0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
+    transform: scale(1.02);
+}
+
+/* Drag handle icon visible styles */
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
+
+/* Rich tile popover: dark mode background override */
+[data-theme="dark"] .group\/tile .pointer-events-none > div {
+    background: rgba(10, 14, 18, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .group\/tile .pointer-events-none > div > div:last-child > div {
+    border-top-color: rgba(10, 14, 18, 0.95) !important;
+}

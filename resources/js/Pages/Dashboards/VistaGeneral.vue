@@ -1,6 +1,6 @@
 <template>
     <AdminLayout :breadcrumbs="breadcrumbs">
-        <div class="space-y-10">
+        <div class="space-y-10" :style="unitStyle">
             <DashboardHeader :title="title" :subtitle="subtitle" icon="heroicons:user-group">
                 <!-- Stats chips: datos de resumen rápido bajo el título -->
                 <template #stats>
@@ -40,18 +40,19 @@
                 <section>
                     <!-- Grid: hero card (2/3 width) + stacked cards (1/3 width) -->
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-[2fr_1fr]">
-                        <!-- Hero card: spans 2 rows -->
+                        <!-- Hero card: spans 2 rows, with mini donut + live tooltip -->
                         <MetricCard
                             v-if="primaryCards[0]"
                             :featured="true"
                             :live="true"
+                            last-sync="Hoy 08:00"
                             :label="primaryCards[0].label"
                             :value="primaryCards[0].value"
                             :icon="primaryCards[0].icon"
                             :variant="primaryCards[0].variant"
                             :trend="heroTrend"
                             :trend-percent="2.4"
-                            :sparkline-data="heroSparkline"
+                            :mini-chart="heroMiniChart"
                             comparison="vs. mes anterior"
                             class="sm:row-span-2 h-full"
                             :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === primaryCards[0]?.id }"
@@ -92,62 +93,122 @@
                     </div>
                 </section>
 
-                <!-- ── Otras métricas: bento de tiles compactos ── -->
+                <!-- ── Otras métricas: bento de tiles con popover rico + drag-and-drop ── -->
                 <section>
-                    <p class="mb-4 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
-                        Otras métricas
-                    </p>
+                    <div class="mb-4 flex items-center justify-between">
+                        <p class="text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
+                            Otras métricas
+                        </p>
+                        <span class="text-xs text-(--th-text-muted)">
+                            <Icon icon="heroicons:arrows-up-down" class="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
+                            Arrastra para reordenar
+                        </span>
+                    </div>
 
-                    <div ref="gridRef" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                        <button
-                            v-for="card in secondaryCards"
+                    <!-- Drag-and-drop grid; each item is a wrapper div so the popover isn't clipped -->
+                    <div ref="sortableGridRef" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                        <div
+                            v-for="card in orderedSecondaryCards"
                             :key="card.id"
-                            type="button"
-                            class="secondary-metric-tile group relative flex flex-col overflow-hidden rounded-2xl p-4 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
-                            :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === card.id }"
-                            @click="openDetail(card)"
+                            class="relative group/tile"
                         >
-                            <!-- Glass layer -->
-                            <span
-                                class="absolute inset-0 rounded-2xl border border-white/20 bg-white/65 shadow-md backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-none group-hover:bg-white/80 group-hover:shadow-lg dark:group-hover:bg-white/8"
+                            <!-- ── Rich hover popover (above the tile) ── -->
+                            <div
+                                class="pointer-events-none absolute bottom-full left-0 z-40 mb-2 w-48 min-w-full opacity-0 transition-all duration-200 group-hover/tile:opacity-100 group-hover/tile:-translate-y-0.5"
                                 aria-hidden="true"
-                            />
-                            <!-- Colored dot indicator (top-right) -->
-                            <span
-                                class="absolute right-3 top-3 h-2 w-2 rounded-full transition-transform duration-300 group-hover:scale-125"
-                                :class="variantDot[card.variant] ?? 'bg-rose-400'"
-                                aria-hidden="true"
-                            />
-
-                            <div class="relative z-10 flex flex-col gap-2.5">
-                                <!-- Icon -->
-                                <div
-                                    class="flex h-9 w-9 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
-                                    :class="variantStyles[card.variant]?.iconBg ?? 'bg-rose-500/15'"
+                            >
+                                <div class="relative overflow-hidden rounded-2xl border border-white/25 shadow-2xl backdrop-blur-2xl dark:border-white/10"
+                                    style="background: rgba(255,255,255,0.95)"
                                 >
-                                    <Icon
-                                        :icon="card.icon"
-                                        class="h-4 w-4"
-                                        :class="variantStyles[card.variant]?.iconColor ?? 'text-rose-600'"
+                                    <!-- Popover header -->
+                                    <div class="flex items-center gap-2 border-b border-(--th-border) px-3 py-2.5">
+                                        <span class="h-1.5 w-1.5 rounded-full" :class="variantDot[card.variant] ?? 'bg-rose-400'" />
+                                        <span class="text-xs font-semibold text-(--th-text-primary) leading-tight">{{ card.label }}</span>
+                                    </div>
+
+                                    <!-- Mini sparkline (derived from detail values) -->
+                                    <div v-if="tileSparkline(card.id).length >= 2" class="h-10 px-3 pt-2">
+                                        <Sparkline
+                                            :data="tileSparkline(card.id)"
+                                            :color="card.variant === 'red' ? 'red' : card.variant === 'green' ? 'green' : 'blue'"
+                                            :filled="true"
+                                        />
+                                    </div>
+
+                                    <!-- Top 3 preview rows -->
+                                    <ul class="divide-y divide-(--th-border) px-3 py-1.5">
+                                        <li
+                                            v-for="row in tilePreviewRows(card.id)"
+                                            :key="row.concepto"
+                                            class="flex items-center justify-between gap-2 py-1.5 text-xs"
+                                        >
+                                            <span class="truncate text-(--th-text-secondary)">{{ row.concepto }}</span>
+                                            <span class="tabular-nums font-semibold text-(--th-text-primary)">
+                                                {{ typeof row.valor === 'number' ? row.valor.toLocaleString('es') : row.valor }}
+                                            </span>
+                                        </li>
+                                        <li v-if="!tilePreviewRows(card.id).length" class="py-2 text-center text-xs text-(--th-text-muted)">
+                                            Sin datos disponibles
+                                        </li>
+                                    </ul>
+
+                                    <!-- Caret pointing down -->
+                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full">
+                                        <div class="border-4 border-transparent" style="border-top-color: rgba(255,255,255,0.95)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── Tile button ── -->
+                            <button
+                                type="button"
+                                class="secondary-metric-tile group relative flex w-full flex-col overflow-hidden rounded-2xl p-4 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
+                                :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === card.id }"
+                                @click="openDetail(card)"
+                            >
+                                <!-- Glass layer -->
+                                <span
+                                    class="absolute inset-0 rounded-2xl border border-white/20 bg-white/65 shadow-md backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-none group-hover:bg-white/80 group-hover:shadow-lg dark:group-hover:bg-white/8"
+                                    aria-hidden="true"
+                                />
+                                <!-- Colored dot + drag handle (top row) -->
+                                <div class="absolute right-2 top-2 flex items-center gap-1.5">
+                                    <!-- Drag handle (≡) -->
+                                    <span
+                                        class="drag-handle cursor-grab touch-none select-none text-(--th-text-muted) opacity-0 transition-opacity duration-200 group-hover:opacity-60 active:cursor-grabbing"
+                                        aria-label="Arrastrar para reordenar"
+                                    >
+                                        <Icon icon="heroicons:bars-3" class="h-3.5 w-3.5" aria-hidden="true" />
+                                    </span>
+                                    <span
+                                        class="h-2 w-2 rounded-full transition-transform duration-300 group-hover:scale-125"
+                                        :class="variantDot[card.variant] ?? 'bg-rose-400'"
                                         aria-hidden="true"
                                     />
                                 </div>
-                                <!-- Value -->
-                                <p class="text-xl font-bold tabular-nums tracking-tight text-(--th-text-primary)">
-                                    {{ card.value }}
-                                </p>
-                                <!-- Label -->
-                                <p class="line-clamp-2 text-xs font-medium leading-snug text-(--th-text-secondary)">
-                                    {{ card.label }}
-                                </p>
-                            </div>
 
-                            <!-- Hover arrow indicator -->
-                            <div class="relative z-10 mt-3 flex items-center gap-1 text-(--th-item-active-color) opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                                <span class="text-xs font-semibold">Ver detalle</span>
-                                <Icon icon="heroicons:arrow-right" class="h-3 w-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                            </div>
-                        </button>
+                                <div class="relative z-10 flex flex-col gap-2.5">
+                                    <div
+                                        class="flex h-9 w-9 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
+                                        :class="variantStyles[card.variant]?.iconBg ?? 'bg-rose-500/15'"
+                                    >
+                                        <Icon
+                                            :icon="card.icon"
+                                            class="h-4 w-4"
+                                            :class="variantStyles[card.variant]?.iconColor ?? 'text-rose-600'"
+                                            aria-hidden="true"
+                                        />
+                                    </div>
+                                    <p class="text-xl font-bold tabular-nums tracking-tight text-(--th-text-primary)">{{ card.value }}</p>
+                                    <p class="line-clamp-2 text-xs font-medium leading-snug text-(--th-text-secondary)">{{ card.label }}</p>
+                                </div>
+
+                                <div class="relative z-10 mt-3 flex items-center gap-1 text-(--th-item-active-color) opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                    <span class="text-xs font-semibold">Ver detalle</span>
+                                    <Icon icon="heroicons:arrow-right" class="h-3 w-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </section>
 
@@ -170,14 +231,54 @@
                             Limpiar selección
                         </button>
                     </div>
+                    <!-- ── Illustrated empty state ── -->
                     <div
                         v-if="!selectedCard"
-                        class="flex flex-col items-center justify-center gap-2 px-4 py-12 text-center"
+                        class="flex flex-col items-center justify-center gap-4 px-4 py-12 text-center"
                     >
-                        <Icon icon="heroicons:table-cells" class="h-10 w-10 text-(--th-text-muted)" aria-hidden="true" />
-                        <p class="text-sm text-(--th-text-muted)">
-                            Selecciona una métrica arriba para ver el detalle en la tabla.
-                        </p>
+                        <!-- Minimalist inline SVG illustration: data table + cursor -->
+                        <svg
+                            viewBox="0 0 160 100"
+                            class="h-24 w-36 text-(--th-text-muted)"
+                            aria-hidden="true"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <!-- Table card background -->
+                            <rect x="20" y="12" width="120" height="76" rx="8" fill="currentColor" opacity="0.06" />
+                            <!-- Header row -->
+                            <rect x="28" y="20" width="104" height="14" rx="4" fill="currentColor" opacity="0.12" />
+                            <!-- Header cell separators -->
+                            <rect x="28" y="20" width="48" height="14" rx="4" fill="currentColor" opacity="0.08" />
+                            <rect x="86" y="20" width="30" height="14" rx="4" fill="currentColor" opacity="0.08" />
+                            <!-- Data rows -->
+                            <rect x="28" y="40" width="60" height="6" rx="2" fill="currentColor" opacity="0.10" />
+                            <rect x="96" y="40" width="36" height="6" rx="2" fill="currentColor" opacity="0.14" />
+                            <rect x="28" y="52" width="50" height="6" rx="2" fill="currentColor" opacity="0.08" />
+                            <rect x="96" y="52" width="28" height="6" rx="2" fill="currentColor" opacity="0.10" />
+                            <rect x="28" y="64" width="55" height="6" rx="2" fill="currentColor" opacity="0.06" />
+                            <rect x="96" y="64" width="32" height="6" rx="2" fill="currentColor" opacity="0.08" />
+                            <!-- Row dividers -->
+                            <line x1="28" y1="37" x2="132" y2="37" stroke="currentColor" stroke-width="0.8" opacity="0.15" />
+                            <line x1="28" y1="49" x2="132" y2="49" stroke="currentColor" stroke-width="0.8" opacity="0.10" />
+                            <line x1="28" y1="61" x2="132" y2="61" stroke="currentColor" stroke-width="0.8" opacity="0.08" />
+                            <!-- Animated cursor pointer -->
+                            <g opacity="0.35">
+                                <path d="M108 56 L108 74 L113 69 L116 76 L119 74.5 L116 68 L122 68 Z" fill="currentColor" />
+                                <path d="M108 56 L108 74 L113 69 L116 76 L119 74.5 L116 68 L122 68 Z" fill="currentColor" opacity="0.3" stroke="white" stroke-width="1.5" stroke-linejoin="round" />
+                            </g>
+                            <!-- Dotted selection ring -->
+                            <circle cx="80" cy="50" r="38" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity="0.12" />
+                        </svg>
+
+                        <div class="space-y-1">
+                            <p class="text-sm font-medium text-(--th-text-secondary)">
+                                Ninguna métrica seleccionada
+                            </p>
+                            <p class="text-xs text-(--th-text-muted)">
+                                Haz clic en cualquier tarjeta o tile para ver el desglose en la tabla.
+                            </p>
+                        </div>
                     </div>
                     <div v-else class="relative min-h-[200px] overflow-x-auto px-4 pb-4">
                         <DetailMetricTable
@@ -201,6 +302,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
+import { useSortable } from '@vueuse/integrations/useSortable'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DetailMetricTable from '@/Components/Dashboards/DetailMetricTable.vue'
 import type { DetailMetricColumn } from '@/Components/Dashboards/DetailMetricTable.vue'
@@ -208,9 +310,9 @@ import { useGlobalLoading } from '@/composables/useGlobalLoading'
 import AppSkeleton from '@/Components/AppSkeleton.vue'
 import DashboardHeader from '@/Components/Dashboards/DashboardHeader.vue'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
+import Sparkline from '@/Components/Dashboards/Sparkline.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
 import { Icon } from '@iconify/vue'
-import { autoAnimate } from '@formkit/auto-animate'
 import { useUsers } from './composables/useUsers'
 import type { DetailTableRow } from './composables/useUsers'
 
@@ -273,13 +375,59 @@ const secondaryCards = computed<CardItem[]>(() => {
     return Array.isArray(arr) ? arr.map(apiCardToItem) : []
 })
 
+// ── Draggable secondary grid ────────────────────────────────────────────────
+// orderedSecondaryCards is a local ref so drag reorders persist in this session
+const orderedSecondaryCards = ref<CardItem[]>([])
+watch(secondaryCards, (cards) => { orderedSecondaryCards.value = [...cards] }, { immediate: true })
+
+const sortableGridRef = ref<HTMLElement | null>(null)
+useSortable(sortableGridRef, orderedSecondaryCards, {
+    animation: 180,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    handle: '.drag-handle',
+})
+
+// ── Unit-level colour theming ────────────────────────────────────────────────
+// Changes --th-item-active-color and related vars per business unit
+const UNIT_THEMES: Record<string, Record<string, string>> = {
+    EKT:         { '--th-item-active-color': '#0b4261', '--th-item-active-glow': 'rgba(11,66,97,0.25)',   '--p-primary-color': '#0b4261' },
+    TPE:         { '--th-item-active-color': '#5bb56a', '--th-item-active-glow': 'rgba(91,181,106,0.25)', '--p-primary-color': '#5bb56a' },
+    TVA:         { '--th-item-active-color': '#d97706', '--th-item-active-glow': 'rgba(217,119,6,0.25)',  '--p-primary-color': '#d97706' },
+    BACK_OFFICE: { '--th-item-active-color': '#7c3aed', '--th-item-active-glow': 'rgba(124,58,237,0.25)','--p-primary-color': '#7c3aed' },
+}
+const unitStyle = computed<Record<string, string>>(() =>
+    unit.value ? (UNIT_THEMES[unit.value.toUpperCase()] ?? {}) : {}
+)
+
+// Helper: sparkline from detail rows for tile popovers (uses valor field)
+function tileSparkline(cardId: string): number[] {
+    const rows = detailsByCard[cardId] ?? []
+    return rows.map((r) => (typeof r.valor === 'number' ? r.valor : 0)).filter(Boolean)
+}
+// Top 3 preview rows for tile popover
+function tilePreviewRows(cardId: string): DetailTableRow[] {
+    return (detailsByCard[cardId] ?? []).slice(0, 3)
+}
+
 // Hero card trend direction
 const heroTrend = computed<'up' | 'down' | 'neutral'>(() =>
     primaryCards.value[0]?.variant === 'red' ? 'down' : 'up'
 )
 
-// Decorative sparkline for hero card (last 7 days trend)
-const heroSparkline = [128000, 131000, 132000, 130000, 134000, 138000, 142000]
+// Mini donut chart for hero card: shows activos vs inactivos breakdown
+const heroMiniChart = computed(() => {
+    const activos = Number(String(primaryCards.value[1]?.value ?? '132000').replace(/[,.\s]/g, '')) || 132000
+    const inactivos = Number(String(primaryCards.value[2]?.value ?? '10000').replace(/[,.\s]/g, '')) || 10000
+    return {
+        type: 'donut' as const,
+        data: [
+            { name: 'Activos', value: activos },
+            { name: 'Inactivos', value: inactivos },
+        ],
+        colors: ['#5bb56a', '#ef4444'],
+    }
+})
 
 // Header stat chips — resumen rápido bajo el título
 const headerChips = computed(() => {
@@ -292,7 +440,6 @@ const headerChips = computed(() => {
     ]
 })
 
-const gridRef = ref<HTMLElement | null>(null)
 const selectedCard = ref<CardItem | null>(null)
 const detailLoading = ref(false)
 const { show: showGlobalLoading, hide: hideGlobalLoading } = useGlobalLoading()
@@ -336,10 +483,7 @@ function loadData() {
     getIndicadores(date, unit.value ?? undefined)
 }
 
-onMounted(() => {
-    loadData()
-    if (gridRef.value) autoAnimate(gridRef.value)
-})
+onMounted(() => { loadData() })
 
 watch(users, (u) => {
     if (u?.primary?.length && !selectedCard.value) selectedCard.value = apiCardToItem(u.primary[0])
