@@ -2,6 +2,19 @@
     <AdminLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-10">
             <DashboardHeader :title="title" :subtitle="subtitle" icon="heroicons:user-group">
+                <!-- Stats chips: datos de resumen rápido bajo el título -->
+                <template #stats>
+                    <span
+                        v-for="chip in headerChips"
+                        :key="chip.label"
+                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-(--th-border)"
+                        style="background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);"
+                    >
+                        <span class="h-1.5 w-1.5 rounded-full" :class="chip.dot" aria-hidden="true" />
+                        <span class="text-(--th-text-secondary)">{{ chip.label }}:</span>
+                        <span class="font-semibold text-(--th-text-primary)">{{ chip.value }}</span>
+                    </span>
+                </template>
                 <template #actions>
                     <CustomPicker :initial-range="{ start: '2025-01-01', end: '2025-01-31' }" initial-type="custom"
                         select-disabled class="rounded-xl" />
@@ -31,6 +44,7 @@
                         <MetricCard
                             v-if="primaryCards[0]"
                             :featured="true"
+                            :live="true"
                             :label="primaryCards[0].label"
                             :value="primaryCards[0].value"
                             :icon="primaryCards[0].icon"
@@ -259,13 +273,24 @@ const secondaryCards = computed<CardItem[]>(() => {
     return Array.isArray(arr) ? arr.map(apiCardToItem) : []
 })
 
-// Hero card uses the first primary card's variant to determine trend direction
+// Hero card trend direction
 const heroTrend = computed<'up' | 'down' | 'neutral'>(() =>
     primaryCards.value[0]?.variant === 'red' ? 'down' : 'up'
 )
 
-// Static sparkline data for the hero card (decorative, shows trend over 7 days)
+// Decorative sparkline for hero card (last 7 days trend)
 const heroSparkline = [128000, 131000, 132000, 130000, 134000, 138000, 142000]
+
+// Header stat chips — resumen rápido bajo el título
+const headerChips = computed(() => {
+    const total = primaryCards.value[0]?.value ?? '–'
+    const activos = primaryCards.value[1]?.value ?? '–'
+    return [
+        { label: 'Total', value: total, dot: 'bg-[#0b4261] dark:bg-[#5bb56a]' },
+        { label: 'Activos', value: activos, dot: 'bg-emerald-500 dark:bg-emerald-400' },
+        { label: 'Sync', value: 'Hoy 08:00', dot: 'bg-amber-500 dark:bg-amber-400' },
+    ]
+})
 
 const gridRef = ref<HTMLElement | null>(null)
 const selectedCard = ref<CardItem | null>(null)

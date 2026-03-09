@@ -5,7 +5,7 @@
         :class="[featured ? 'metric-card--featured rounded-3xl' : 'rounded-3xl']"
         @click="$emit('click')"
     >
-        <!-- Gradient border glow (featured only, animates on hover) -->
+        <!-- Gradient border glow (featured only, appears on hover) -->
         <span
             v-if="featured"
             class="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -20,14 +20,14 @@
             aria-hidden="true"
         />
 
-        <!-- Corner ambient glow orb (featured) -->
+        <!-- Corner ambient glow orb top-right (featured only) -->
         <span
             v-if="featured"
-            class="absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-25 blur-3xl transition-all duration-500 group-hover:opacity-40 group-hover:scale-110"
+            class="metric-blob absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-25 blur-3xl transition-all duration-500 group-hover:opacity-40 group-hover:scale-110"
             :class="v.blob"
             aria-hidden="true"
         />
-        <!-- Secondary corner orb bottom-left (featured) -->
+        <!-- Secondary orb bottom-left (featured only) -->
         <span
             v-if="featured"
             class="absolute -bottom-8 -left-8 h-28 w-28 rounded-full opacity-15 blur-2xl transition-opacity duration-500 group-hover:opacity-25"
@@ -35,7 +35,7 @@
             aria-hidden="true"
         />
 
-        <!-- Side accent bar (compact only) -->
+        <!-- Side accent bar (compact cards only) -->
         <span
             v-if="!featured"
             class="absolute left-0 top-5 bottom-5 w-1.5 rounded-full transition-all duration-300 group-hover:w-2"
@@ -43,10 +43,20 @@
             aria-hidden="true"
         />
 
+        <!-- Live indicator dot -->
+        <span
+            v-if="live"
+            class="absolute right-3.5 top-3.5 flex h-2.5 w-2.5 items-center justify-center"
+            aria-label="Datos en tiempo real"
+        >
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" aria-hidden="true" />
+            <span class="relative h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" aria-hidden="true" />
+        </span>
+
         <!-- Content -->
         <div class="relative z-10 flex flex-1 flex-col" :class="featured ? 'p-7' : 'p-5'">
 
-            <!-- Header row: icon + trend badge -->
+            <!-- Header: icon + trend pill -->
             <div class="flex items-start justify-between gap-2">
                 <div
                     class="flex shrink-0 items-center justify-center transition-transform duration-300 group-hover:scale-105"
@@ -62,8 +72,9 @@
                     />
                 </div>
 
-                <!-- Trend pill (featured = pill badge, compact = plain) -->
+                <!-- Trend indicator -->
                 <div v-if="trend !== undefined">
+                    <!-- Featured: pill badge -->
                     <span
                         v-if="featured"
                         class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 transition-colors duration-300"
@@ -82,7 +93,7 @@
                             {{ trendPercent > 0 ? '+' : '' }}{{ trendPercent }}%
                         </span>
                     </span>
-                    <!-- compact inline trend -->
+                    <!-- Compact: inline icon + text -->
                     <div v-else class="flex shrink-0 items-center gap-0.5">
                         <Icon
                             v-if="trend === 'up'" icon="heroicons:arrow-trending-up"
@@ -99,7 +110,11 @@
                         <span
                             v-if="trendPercent != null"
                             class="text-xs font-medium"
-                            :class="trend === 'up' ? 'text-emerald-600 dark:text-emerald-400' : trend === 'down' ? 'text-rose-600 dark:text-rose-400' : 'text-(--th-text-muted)'"
+                            :class="trend === 'up'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : trend === 'down'
+                                    ? 'text-rose-600 dark:text-rose-400'
+                                    : 'text-(--th-text-muted)'"
                         >
                             {{ trendPercent > 0 ? '+' : '' }}{{ trendPercent }}%
                         </span>
@@ -107,12 +122,12 @@
                 </div>
             </div>
 
-            <!-- Value -->
+            <!-- Value (animated count-up for featured numeric values) -->
             <p
                 class="tabular-nums font-bold tracking-tight text-(--th-text-primary)"
                 :class="featured ? 'mt-6 text-5xl leading-none' : 'mt-4 text-2xl'"
             >
-                {{ value }}
+                {{ displayedValue }}
             </p>
 
             <!-- Label -->
@@ -123,16 +138,20 @@
                 {{ label }}
             </p>
 
-            <!-- Sparkline -->
+            <!-- Sparkline (filled area for featured, plain line for compact) -->
             <div
                 v-if="sparklineData?.length"
                 class="w-full"
                 :class="featured ? 'mt-6 h-14' : 'mt-4 h-9'"
             >
-                <Sparkline :data="sparklineData" :color="sparklineColor" />
+                <Sparkline
+                    :data="sparklineData"
+                    :color="sparklineColor"
+                    :filled="featured"
+                />
             </div>
 
-            <!-- Comparison text -->
+            <!-- Comparison label -->
             <p v-if="comparison" class="mt-2 text-xs text-(--th-text-muted)">
                 {{ comparison }}
             </p>
@@ -144,6 +163,7 @@
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import Sparkline from './Sparkline.vue'
+import { useCountUp } from '@/composables/useCountUp'
 
 interface Props {
     label: string
@@ -154,19 +174,22 @@ interface Props {
     trendPercent?: number | null
     sparklineData?: number[]
     comparison?: string
+    /** Hero-size card with ambient glows, pill badge, count-up and filled sparkline */
     featured?: boolean
+    /** Show a pulsing "live data" indicator dot */
+    live?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'blue',
     trendPercent: null,
     featured: false,
+    live: false,
 })
 
-defineEmits<{
-    (e: 'click'): void
-}>()
+defineEmits<{ (e: 'click'): void }>()
 
+// ── Variant styles ───────────────────────────────────────────────────────────
 const variants: Record<
     'blue' | 'green' | 'red' | 'violet',
     { iconBg: string; iconColor: string; bar: string; blob: string; gradientRing: string }
@@ -181,7 +204,7 @@ const variants: Record<
     green: {
         iconBg: 'bg-[#5bb56a]/15 dark:bg-[#5bb56a]/25',
         iconColor: 'text-[#4a9d58] dark:text-[#6bc67a]',
-        bar: 'bg-[#5bb56a] dark:bg-[#5bb56a]',
+        bar: 'bg-[#5bb56a]',
         blob: 'bg-emerald-400',
         gradientRing: 'bg-gradient-to-br from-emerald-400/40 via-emerald-300/20 to-transparent',
     },
@@ -203,6 +226,7 @@ const variants: Record<
 
 const v = computed(() => variants[props.variant])
 
+// ── Trend pill style ─────────────────────────────────────────────────────────
 const trendPillClass = computed(() => {
     if (props.trend === 'up')
         return 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:bg-emerald-400/15 dark:text-emerald-400 dark:ring-emerald-400/20'
@@ -211,10 +235,28 @@ const trendPillClass = computed(() => {
     return 'bg-white/40 text-(--th-text-muted) ring-(--th-border) dark:bg-white/5'
 })
 
+// ── Sparkline colour ─────────────────────────────────────────────────────────
 const sparklineColor = computed(() => {
-    if (props.trend === 'up' && (props.variant === 'green' || props.variant === 'blue' || props.variant === 'violet'))
-        return props.variant === 'violet' ? 'violet' : 'green'
+    if (props.trend === 'up' && props.variant !== 'red') return 'green'
     if (props.trend === 'down' && props.variant === 'red') return 'red'
     return props.variant === 'violet' ? 'violet' : props.variant
+})
+
+// ── Count-up animation for featured numeric values ───────────────────────────
+const numericValue = computed<number | null>(() => {
+    if (typeof props.value === 'number') return props.value
+    // Strip common separators to get a raw integer
+    const n = Number(String(props.value).replace(/[,.\s]/g, ''))
+    return isNaN(n) ? null : n
+})
+
+const { displayed: countedRaw } = useCountUp(
+    () => (props.featured && numericValue.value !== null ? numericValue.value : 0),
+)
+
+const displayedValue = computed(() => {
+    if (!props.featured || numericValue.value === null) return props.value
+    // Format with locale thousands separator (matches Spanish convention)
+    return countedRaw.value.toLocaleString('es')
 })
 </script>
