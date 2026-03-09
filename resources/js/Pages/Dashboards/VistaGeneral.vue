@@ -105,28 +105,46 @@
                         </span>
                     </div>
 
-                    <!-- Drag-and-drop grid; each item is a wrapper div so the popover isn't clipped -->
-                    <div ref="sortableGridRef" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                    <!--
+                        VueDraggable renders the grid container itself.
+                        handle=".drag-handle" targets a div OUTSIDE the <button>
+                        so pointer events reach SortableJS without interference.
+                    -->
+                    <VueDraggable
+                        v-model="orderedSecondaryCards"
+                        handle=".drag-handle"
+                        :animation="200"
+                        ghost-class="sortable-ghost"
+                        chosen-class="sortable-chosen"
+                        class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+                    >
                         <div
                             v-for="card in orderedSecondaryCards"
                             :key="card.id"
                             class="relative group/tile"
                         >
+                            <!-- ── Drag handle (OUTSIDE the button so mouse events aren't blocked) ── -->
+                            <div
+                                class="drag-handle absolute right-2 top-2 z-50 flex h-6 w-6 cursor-grab select-none items-center justify-center rounded-md opacity-25 transition-opacity duration-200 group-hover/tile:opacity-80 active:cursor-grabbing"
+                                aria-label="Arrastrar para reordenar"
+                                title="Arrastrar para reordenar"
+                            >
+                                <Icon icon="heroicons:bars-3" class="h-3.5 w-3.5 text-(--th-text-secondary)" aria-hidden="true" />
+                            </div>
+
                             <!-- ── Rich hover popover (above the tile) ── -->
                             <div
                                 class="pointer-events-none absolute bottom-full left-0 z-40 mb-2 w-48 min-w-full opacity-0 transition-all duration-200 group-hover/tile:opacity-100 group-hover/tile:-translate-y-0.5"
                                 aria-hidden="true"
                             >
-                                <div class="relative overflow-hidden rounded-2xl border border-white/25 shadow-2xl backdrop-blur-2xl dark:border-white/10"
+                                <div
+                                    class="relative overflow-hidden rounded-2xl border border-white/25 shadow-2xl backdrop-blur-2xl dark:border-white/10"
                                     style="background: rgba(255,255,255,0.95)"
                                 >
-                                    <!-- Popover header -->
                                     <div class="flex items-center gap-2 border-b border-(--th-border) px-3 py-2.5">
                                         <span class="h-1.5 w-1.5 rounded-full" :class="variantDot[card.variant] ?? 'bg-rose-400'" />
-                                        <span class="text-xs font-semibold text-(--th-text-primary) leading-tight">{{ card.label }}</span>
+                                        <span class="text-xs font-semibold leading-tight text-(--th-text-primary)">{{ card.label }}</span>
                                     </div>
-
-                                    <!-- Mini sparkline (derived from detail values) -->
                                     <div v-if="tileSparkline(card.id).length >= 2" class="h-10 px-3 pt-2">
                                         <Sparkline
                                             :data="tileSparkline(card.id)"
@@ -134,8 +152,6 @@
                                             :filled="true"
                                         />
                                     </div>
-
-                                    <!-- Top 3 preview rows -->
                                     <ul class="divide-y divide-(--th-border) px-3 py-1.5">
                                         <li
                                             v-for="row in tilePreviewRows(card.id)"
@@ -151,7 +167,6 @@
                                             Sin datos disponibles
                                         </li>
                                     </ul>
-
                                     <!-- Caret pointing down -->
                                     <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full">
                                         <div class="border-4 border-transparent" style="border-top-color: rgba(255,255,255,0.95)" />
@@ -171,21 +186,12 @@
                                     class="absolute inset-0 rounded-2xl border border-white/20 bg-white/65 shadow-md backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-none group-hover:bg-white/80 group-hover:shadow-lg dark:group-hover:bg-white/8"
                                     aria-hidden="true"
                                 />
-                                <!-- Colored dot + drag handle (top row) -->
-                                <div class="absolute right-2 top-2 flex items-center gap-1.5">
-                                    <!-- Drag handle (≡) -->
-                                    <span
-                                        class="drag-handle cursor-grab touch-none select-none text-(--th-text-muted) opacity-0 transition-opacity duration-200 group-hover:opacity-60 active:cursor-grabbing"
-                                        aria-label="Arrastrar para reordenar"
-                                    >
-                                        <Icon icon="heroicons:bars-3" class="h-3.5 w-3.5" aria-hidden="true" />
-                                    </span>
-                                    <span
-                                        class="h-2 w-2 rounded-full transition-transform duration-300 group-hover:scale-125"
-                                        :class="variantDot[card.variant] ?? 'bg-rose-400'"
-                                        aria-hidden="true"
-                                    />
-                                </div>
+                                <!-- Colored dot (top-right, keeps space from handle) -->
+                                <span
+                                    class="absolute right-2 top-10 h-2 w-2 rounded-full transition-transform duration-300 group-hover:scale-125"
+                                    :class="variantDot[card.variant] ?? 'bg-rose-400'"
+                                    aria-hidden="true"
+                                />
 
                                 <div class="relative z-10 flex flex-col gap-2.5">
                                     <div
@@ -209,7 +215,7 @@
                                 </div>
                             </button>
                         </div>
-                    </div>
+                    </VueDraggable>
                 </section>
 
                 <!-- ── Tabla de detalle (inline) ── -->
@@ -302,7 +308,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
-import { useSortable } from '@vueuse/integrations/useSortable'
+import { VueDraggable } from 'vue-draggable-plus'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DetailMetricTable from '@/Components/Dashboards/DetailMetricTable.vue'
 import type { DetailMetricColumn } from '@/Components/Dashboards/DetailMetricTable.vue'
@@ -379,14 +385,6 @@ const secondaryCards = computed<CardItem[]>(() => {
 // orderedSecondaryCards is a local ref so drag reorders persist in this session
 const orderedSecondaryCards = ref<CardItem[]>([])
 watch(secondaryCards, (cards) => { orderedSecondaryCards.value = [...cards] }, { immediate: true })
-
-const sortableGridRef = ref<HTMLElement | null>(null)
-useSortable(sortableGridRef, orderedSecondaryCards, {
-    animation: 180,
-    ghostClass: 'sortable-ghost',
-    chosenClass: 'sortable-chosen',
-    handle: '.drag-handle',
-})
 
 // ── Unit-level colour theming ────────────────────────────────────────────────
 // Changes --th-item-active-color and related vars per business unit
