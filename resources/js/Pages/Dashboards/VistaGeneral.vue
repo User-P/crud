@@ -8,8 +8,8 @@
                 </template>
             </DashboardHeader>
 
-            <div v-if="isLoading" class="flex justify-center py-16">
-                <p class="text-sm text-(--th-text-muted)">Cargando indicadores…</p>
+            <div v-if="isLoading" class="grid gap-5 sm:grid-cols-3">
+                <AppSkeleton v-for="n in 6" :key="n" variant="card" :show-badge="n > 3" />
             </div>
 
             <template v-else>
@@ -94,6 +94,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DetailMetricTable from '@/Components/Dashboards/DetailMetricTable.vue'
 import type { DetailMetricColumn } from '@/Components/Dashboards/DetailMetricTable.vue'
 import { useGlobalLoading } from '@/composables/useGlobalLoading'
+import AppSkeleton from '@/Components/AppSkeleton.vue'
 import DashboardHeader from '@/Components/Dashboards/DashboardHeader.vue'
 import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'

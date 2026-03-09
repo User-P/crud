@@ -1,7 +1,7 @@
 <template>
     <button
         type="button"
-        class="metric-card group relative flex overflow-hidden rounded-3xl text-left transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
+        class="metric-card cosmos-lift group relative flex overflow-hidden rounded-3xl text-left transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
         @click="$emit('click')"
     >
         <!-- Glass -->

@@ -64,19 +64,11 @@
             </Column>
 
             <template #empty>
-                <div class="py-12 text-center">
-                    <div
-                        class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-(--th-input-bg) text-(--th-text-muted)"
-                    >
-                        <Icon icon="heroicons:magnifying-glass" class="h-6 w-6" aria-hidden="true" />
-                    </div>
-                    <p class="text-sm font-medium text-(--th-text-primary)">
-                        {{ searchText ? 'Ningún registro coincide con la búsqueda' : 'No hay datos para mostrar' }}
-                    </p>
-                    <p class="mt-1 text-xs text-(--th-text-muted)">
-                        {{ searchText ? 'Prueba con otros términos.' : 'Selecciona una métrica o filtra los datos.' }}
-                    </p>
-                </div>
+                <EmptyState
+                    :title="searchText ? 'Ningún registro coincide con la búsqueda' : 'No hay datos para mostrar'"
+                    :description="searchText ? 'Prueba con otros términos.' : 'Selecciona una métrica o filtra los datos.'"
+                    icon="heroicons:magnifying-glass"
+                />
             </template>
 
             <template #footer>
@@ -100,6 +92,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import EmptyState from '@/Components/EmptyState.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import InputText from 'primevue/inputtext'

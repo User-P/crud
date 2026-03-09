@@ -1,7 +1,12 @@
 <template>
     <div
         class="dashboard-bento-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-[1fr_1fr] lg:gap-5">
-        <div v-for="(card, i) in cards" :key="card.name" :class="i === 0 ? 'lg:row-span-2 lg:min-h-0 lg:h-full' : ''">
+        <div v-for="(card, i) in cards" :key="card.name"
+            :class="[
+                'cosmos-reveal',
+                `cosmos-reveal--stagger-${Math.min(i + 1, 8)}`,
+                i === 0 ? 'lg:row-span-2 lg:min-h-0 lg:h-full' : ''
+            ]">
             <component :is="getTag(card)" :href="getHref(card)"
                 class="dashboard-tile group relative flex overflow-hidden rounded-3xl transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
                 :class="[

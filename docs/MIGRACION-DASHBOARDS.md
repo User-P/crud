@@ -146,6 +146,13 @@ Copiar toda la carpeta o los archivos listados:
 | `resources/js/Components/Charts/HorizontalBarChart.vue` | Barras horizontales |
 | `resources/js/Components/Charts/SemaphoreBarChart.vue` | Barras tipo semáforo (Días suspendidos) |
 
+Además, para **tendencias de UX y carga** (skeleton loaders, empty states, micro-interacciones):
+
+| Origen | Uso |
+|--------|-----|
+| `resources/js/Components/AppSkeleton.vue` | Placeholder de carga (variantes: card, row, text) en lugar de solo spinner |
+| `resources/js/Components/EmptyState.vue` | Estado vacío reutilizable (icono, título, descripción, CTA opcional) |
+
 Si en el proyecto destino ya tienes componentes de gráficas propios, puedes mantenerlos pero tendrás que adaptar las páginas para usar tus componentes o reemplazar las referencias para que usen `BaseEChart` + temas `cosmos-light` / `cosmos-dark` si quieres el mismo aspecto.
 
 ---
@@ -233,6 +240,19 @@ Si no lo copias, quita o sustituye el uso de `CustomPicker` en `VistaGeneral`, `
 
 ---
 
+### 1.11 Tendencias de diseño (glass, bento, grain, stagger, lift)
+
+El sistema aplica varias tendencias actuales de UI:
+
+- **Glassmorphism**: Sidebar, navbar, tiles y cards usan `backdrop-blur` y fondos semitransparentes (variables `--th-*` en `app.css`).
+- **Bento grid**: `DashboardBentoGrid.vue` con una card destacada (row-span) y el resto compactas.
+- **Textura grain**: Overlay sutil de ruido (`.cosmos-app::after`) para dar profundidad; se desactiva con `prefers-reduced-motion`.
+- **Stagger reveal**: Clases `.cosmos-reveal` y `.cosmos-reveal--stagger-1` … `--stagger-8` para animación de entrada escalonada (keyframes `cosmos-fade-in-up`).
+- **Hover lift**: Clases `.cosmos-lift` y `.dashboard-tile` con `translateY(-4px)` y sombra en hover; respetan `prefers-reduced-motion: reduce`.
+- **Barra de progreso en navegación**: En `app.ts` se puede configurar `progress: { delay: 200, color: '#0b4261', includeCSS: true, showSpinner: false }` en `createInertiaApp` para mostrar una barra al cambiar de página (depende de la implementación por defecto de Inertia; si se desactiva con `progress: false`, se puede usar NProgress y eventos del router).
+
+---
+
 ## 2. Rutas (Laravel)
 
 En `routes/web.php` (o donde definas rutas Inertia) añade rutas equivalentes. Ejemplo:
@@ -299,6 +319,8 @@ Las vistas esperan estructuras como `users.value.primary`, `users.value.secondar
 - [ ] **Páginas**: Todas las vistas bajo `Pages/Dashboards/` y el componente `DashboardBentoGrid` + composable `useUsers`.
 - [ ] **Componentes**: MetricCard, ExpandableChart, DashboardHeader, Sparkline, DetailMetricTable; BaseEChart, PieChart, HorizontalBarChart, SemaphoreBarChart; DetailDrawer si lo usas.
 - [ ] **Loading global**: AppLoading, GlobalLoadingLayer, useGlobalLoading; integración en app.ts (Fragment + GlobalLoadingLayer) si quieres loading a pantalla completa en peticiones / clic en cards.
+- [ ] **Skeleton y empty state**: AppSkeleton (variant card/row/text) y EmptyState para cargas y tablas vacías.
+- [ ] **Accesibilidad**: Si usas animaciones, mantener `prefers-reduced-motion` (ya aplicado en app.css).
 - [ ] **Rutas**: Rutas web que hagan `Inertia::render('Dashboards/...')`.
 - [ ] **Alias**: `@` apuntando a la raíz del frontend para Layouts y Components.
 - [ ] **Datos**: Mantener dummy o conectar `useUsers` a tu API.

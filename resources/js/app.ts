@@ -35,6 +35,12 @@ interface PageModule {
 }
 
 createInertiaApp({
+    progress: {
+        delay: 200,
+        color: '#0b4261',
+        includeCSS: true,
+        showSpinner: false,
+    },
     resolve: (name) => {
         const pages = import.meta.glob<PageModule>("./Pages/**/*.vue", {
             eager: true
