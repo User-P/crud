@@ -124,60 +124,113 @@
                 </div>
             </div>
 
-            <!-- Value (count-up for featured numeric values) -->
+            <!-- Value: oculto en featured con miniChart (cada bloque lo muestra) -->
             <p
+                v-if="!featured || !miniChart"
                 class="tabular-nums font-bold tracking-tight text-(--th-text-primary)"
                 :class="featured ? 'mt-6 text-5xl leading-none' : 'mt-4 text-2xl'"
             >
                 {{ displayedValue }}
             </p>
 
-            <!-- Label -->
-            <p class="font-medium text-(--th-text-secondary)" :class="featured ? 'mt-2 text-base' : 'mt-1 text-sm'">
+            <!-- Label: oculto en featured con miniChart -->
+            <p
+                v-if="!featured || !miniChart"
+                class="font-medium text-(--th-text-secondary)"
+                :class="featured ? 'mt-2 text-base' : 'mt-1 text-sm'"
+            >
                 {{ label }}
             </p>
 
             <!--
                 Data visualisation (featured only):
-                Priority: miniChart > sparkline
-                The mini chart is always non-interactive (pointer-events-none in MiniChart).
+                Priority: miniChart (donut) con layout en 2 columnas + barras % + sparkline opcional
             -->
-            <template v-if="featured">
-                <!-- Mini ECharts with auto-legend for donut -->
-                <div v-if="miniChart" class="mt-5 flex gap-4" :class="miniChart.type === 'donut' ? 'items-center' : 'flex-col'">
-                    <div class="shrink-0" :class="miniChart.type === 'donut' ? 'h-24 w-24' : 'h-20 w-full'">
-                        <MiniChart :type="miniChart.type" :data="miniChart.data" :colors="miniChart.colors" />
+            <template v-if="featured && miniChart?.type === 'donut'">
+                <div class="mt-5 grid grid-cols-1 gap-5 min-[380px]:grid-cols-[1fr_auto]">
+                    <!-- Columna izquierda: valor, label, comparación, barras de % y tendencia -->
+                    <div class="flex min-w-0 flex-col justify-center">
+                        <p class="tabular-nums font-bold leading-none tracking-tight text-(--th-text-primary) text-5xl">
+                            {{ displayedValue }}
+                        </p>
+                        <p class="mt-2 font-medium text-(--th-text-secondary) text-base">
+                            {{ label }}
+                        </p>
+                        <p v-if="comparison" class="mt-1 text-xs text-(--th-text-muted)">{{ comparison }}</p>
+                        <!-- Barras de % (Activos / Inactivos) -->
+                        <div v-if="donutPercentages.length" class="mt-4 space-y-2">
+                            <div
+                                v-for="(p, i) in donutPercentages"
+                                :key="p.name"
+                                class="flex items-center gap-2"
+                            >
+                                <span
+                                    class="h-2 w-2 shrink-0 rounded-full"
+                                    :style="{ background: (miniChart.colors ?? DONUT_DEFAULTS)[i % (miniChart.colors ?? DONUT_DEFAULTS).length] }"
+                                    aria-hidden="true"
+                                />
+                                <span class="min-w-18 text-xs font-medium text-(--th-text-secondary)">{{ p.name }}</span>
+                                <div class="h-2 flex-1 min-w-0 overflow-hidden rounded-full bg-(--th-input-bg)">
+                                    <div
+                                        class="h-full rounded-full transition-all duration-500"
+                                        :style="{ width: `${p.percent}%`, background: (miniChart.colors ?? DONUT_DEFAULTS)[i % (miniChart.colors ?? DONUT_DEFAULTS).length] }"
+                                    />
+                                </div>
+                                <span class="w-11 shrink-0 text-right text-xs font-bold tabular-nums text-(--th-text-primary)">{{ p.percent }}%</span>
+                            </div>
+                        </div>
+                        <!-- Tendencia 7 días (sparkline) si se pasa -->
+                        <div v-if="sparklineData?.length" class="mt-4">
+                            <p class="mb-1.5 text-xs font-medium text-(--th-text-muted)">Tendencia (7 días)</p>
+                            <div class="h-10 w-full">
+                                <Sparkline :data="sparklineData" :color="sparklineColor" :filled="true" />
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Legend (donut only) -->
-                    <ul v-if="miniChart.type === 'donut'" class="flex flex-col justify-center gap-2.5" aria-label="Leyenda">
-                        <li v-for="(item, i) in miniChart.data" :key="item.name" class="flex items-center gap-2 text-xs">
-                            <span
-                                class="h-2 w-2 shrink-0 rounded-full"
-                                :style="{ background: (miniChart.colors ?? DONUT_DEFAULTS)[i % (miniChart.colors ?? DONUT_DEFAULTS).length] }"
-                                aria-hidden="true"
-                            />
-                            <span class="font-medium text-(--th-text-secondary)">{{ item.name }}</span>
-                            <span class="ml-auto tabular-nums font-bold text-(--th-text-primary)">
-                                {{ item.value.toLocaleString('es') }}
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Fallback: filled sparkline -->
-                <div v-else-if="sparklineData?.length" class="mt-6 h-14 w-full">
-                    <Sparkline :data="sparklineData" :color="sparklineColor" :filled="true" />
+                    <!-- Columna derecha: donut más grande + leyenda -->
+                    <div class="flex flex-col items-center justify-center gap-3">
+                        <div class="h-32 w-32 shrink-0 sm:h-36 sm:w-36">
+                            <MiniChart :type="miniChart.type" :data="miniChart.data" :colors="miniChart.colors" />
+                        </div>
+                        <ul class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs" aria-label="Leyenda">
+                            <li v-for="(item, i) in miniChart.data" :key="item.name" class="flex items-center gap-1.5">
+                                <span
+                                    class="h-2 w-2 shrink-0 rounded-full"
+                                    :style="{ background: (miniChart.colors ?? DONUT_DEFAULTS)[i % (miniChart.colors ?? DONUT_DEFAULTS).length] }"
+                                    aria-hidden="true"
+                                />
+                                <span class="font-medium text-(--th-text-secondary)">{{ item.name }}</span>
+                                <span class="tabular-nums font-bold text-(--th-text-primary)">{{ item.value.toLocaleString('es') }}</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </template>
+
+            <!-- Featured con miniChart tipo bar u otro -->
+            <template v-else-if="featured && miniChart">
+                <p class="mt-6 text-5xl font-bold tabular-nums leading-none tracking-tight text-(--th-text-primary)">{{ displayedValue }}</p>
+                <p class="mt-2 font-medium text-(--th-text-secondary) text-base">{{ label }}</p>
+                <p v-if="comparison" class="mt-1 text-xs text-(--th-text-muted)">{{ comparison }}</p>
+                <div class="mt-5 flex flex-col gap-4">
+                    <div class="h-20 w-full shrink-0">
+                        <MiniChart :type="miniChart.type" :data="miniChart.data" :colors="miniChart.colors" />
+                    </div>
+                </div>
+            </template>
+
+            <!-- Featured sin miniChart: solo sparkline si hay -->
+            <div v-else-if="featured && sparklineData?.length" class="mt-6 h-14 w-full">
+                <Sparkline :data="sparklineData" :color="sparklineColor" :filled="true" />
+            </div>
 
             <!-- Compact sparkline (non-featured) -->
             <div v-else-if="sparklineData?.length" class="mt-4 h-9 w-full">
                 <Sparkline :data="sparklineData" :color="sparklineColor" />
             </div>
 
-            <!-- Comparison text -->
-            <p v-if="comparison" class="mt-2 text-xs text-(--th-text-muted)">{{ comparison }}</p>
+            <!-- Comparison text (oculto cuando featured+donut o featured+miniChart, ya va dentro del bloque) -->
+            <p v-if="comparison && (!featured || !miniChart)" class="mt-2 text-xs text-(--th-text-muted)">{{ comparison }}</p>
         </div>
     </button>
 </template>
@@ -294,5 +347,16 @@ const { displayed: countedRaw } = useCountUp(
 const displayedValue = computed(() => {
     if (!props.featured || numericValue.value === null) return props.value
     return countedRaw.value.toLocaleString('es')
+})
+
+/** Porcentajes del donut para las barras de desglose (solo featured + donut) */
+const donutPercentages = computed(() => {
+    if (!props.featured || !props.miniChart?.data?.length) return []
+    const total = props.miniChart.data.reduce((s, d) => s + d.value, 0)
+    if (total === 0) return []
+    return props.miniChart.data.map((d) => ({
+        name: d.name,
+        percent: Math.round((d.value / total) * 100),
+    }))
 })
 </script>
