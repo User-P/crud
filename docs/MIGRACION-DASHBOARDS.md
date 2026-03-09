@@ -139,6 +139,7 @@ Copiar toda la carpeta o los archivos listados:
 | `resources/js/Components/Dashboards/ExpandableChart.vue` | Wrapper de gráficas con botón “Expandir” |
 | `resources/js/Components/Dashboards/DashboardHeader.vue` | Cabecera con título, subtítulo, slot para acciones (p. ej. fecha) |
 | `resources/js/Components/Dashboards/Sparkline.vue` | Minigráfico en MetricCard |
+| `resources/js/Components/Dashboards/DetailMetricTable.vue` | Tabla de detalle con búsqueda, ordenación y exportación CSV (y ZIP por partes si hay muchas filas) |
 | `resources/js/Components/Dashboards/DetailDrawer.vue` | Panel lateral de detalle (opcional si no usas drill-down) |
 | `resources/js/Components/Charts/BaseEChart.vue` | Base ECharts con tema cosmos-light/dark y ResizeObserver |
 | `resources/js/Components/Charts/PieChart.vue` | Gráfico circular |
@@ -149,7 +150,59 @@ Si en el proyecto destino ya tienes componentes de gráficas propios, puedes man
 
 ---
 
-### 1.7 Dependencias del layout (si usas AdminLayout tal cual)
+### 1.7 Loading global (pantalla completa)
+
+Sistema de loading reutilizable que se muestra sobre toda la pantalla durante peticiones o acciones asíncronas (p. ej. al hacer clic en una MetricCard mientras se “pinta” el detalle).
+
+| Origen | Destino | Descripción |
+|--------|---------|-------------|
+| `resources/js/Components/AppLoading.vue` | `resources/js/Components/AppLoading.vue` | Spinner (PrimeVue ProgressSpinner) con mensaje opcional; modos **overlay** (cubre contenedor o pantalla) e **inline**. Prop `fullScreen` para overlay a pantalla completa. |
+| `resources/js/Components/GlobalLoadingLayer.vue` | `resources/js/Components/GlobalLoadingLayer.vue` | Capa que lee el estado de `useGlobalLoading()` y muestra `AppLoading` en modo full-screen cuando está activo. |
+| `resources/js/composables/useGlobalLoading.ts` | `resources/js/composables/useGlobalLoading.ts` | Composable con estado global: `isLoading`, `message`, `show(msg?)`, `hide()`. Cualquier componente puede llamar `useGlobalLoading().show('Cargando…')` y `hide()` al terminar. |
+
+**Integración en el entrypoint:** en `app.ts` (o donde montes la app con `createInertiaApp`), el árbol de la app debe incluir la capa de loading global para que el overlay se vea por encima de todo. Ejemplo:
+
+```ts
+import { createApp, h, Fragment } from 'vue'
+import GlobalLoadingLayer from './Components/GlobalLoadingLayer.vue'
+
+createInertiaApp({
+  setup({ el, App, props, plugin }) {
+    createApp({
+      render() {
+        return h(Fragment, null, [
+          h(App, props),
+          h(GlobalLoadingLayer),
+        ])
+      },
+    })
+      .use(plugin)
+      // ... resto (Pinia, PrimeVue, etc.)
+      .mount(el)
+  },
+})
+```
+
+**Uso en cualquier página o componente:**
+
+```ts
+import { useGlobalLoading } from '@/composables/useGlobalLoading'
+
+const { show, hide } = useGlobalLoading()
+
+// Al iniciar una petición
+show('Guardando…')   // o show() para "Cargando…"
+await api.post('/algo', data)
+hide()
+```
+
+En las vistas de dashboards (VistaGeneral, VistaConsolidada) el clic en una MetricCard llama a `showGlobalLoading('Cargando detalle…')` y tras un breve delay a `hideGlobalLoading()`, de modo que el usuario ve el loading a pantalla completa mientras se actualiza la tabla de detalle.
+
+**Dependencia:** `AppLoading.vue` usa `ProgressSpinner` de PrimeVue; no requiere dependencias adicionales si ya usas PrimeVue.
+
+---
+
+### 1.8 Dependencias del layout (si usas AdminLayout tal cual)
 
 Para que `AdminLayout.vue` funcione sin cambios necesitas:
 
@@ -162,7 +215,13 @@ Y en el layout: `PrimeSidebar` de PrimeVue (ya lo tienes si usas PrimeVue). Las 
 
 ---
 
-### 1.8 Opcional: selector de fechas
+### 1.9 DetailMetricTable: exportación CSV y ZIP por partes
+
+`DetailMetricTable.vue` admite exportación a CSV. Si hay muchas filas, puedes limitar el tamaño por archivo con la prop **`maxRowsPerCsvFile`** (p. ej. `500000`): la exportación se divide en varios CSV y se entrega un único **ZIP** con `parte-1-de-N.csv`, …, y un `LEEME.txt` con instrucciones. Dependencia: **JSZip** (`npm i jszip`). Si no usas exportación por partes, no hace falta instalar JSZip.
+
+---
+
+### 1.10 Opcional: selector de fechas
 
 Algunas vistas usan un selector de fecha en el header:
 
@@ -212,6 +271,7 @@ Los componentes usan alias `@/` para:
 - `@/Components/Dashboards/...`
 - `@/Components/Charts/...`
 - `@/composables/useTheme`
+- `@/composables/useGlobalLoading`
 - `@/composables/useUsers` (no existe en raíz; está en `Pages/Dashboards/composables/useUsers.ts`)
 
 En este repo los imports desde las páginas de Dashboards son relativos a `Pages/Dashboards/` para el composable (`./composables/useUsers`) y `@/` para Layout y Components. En el proyecto destino, configura en `vite.config` (o `tsconfig`) el alias `@` apuntando a `resources/js` (o la raíz de tu frontend) para que `@/Components/...` y `@/Layouts/...` resuelvan bien.
@@ -237,7 +297,8 @@ Las vistas esperan estructuras como `users.value.primary`, `users.value.secondar
 - [ ] **Tema**: `data-theme` en `<html>` inicializado al arrancar (p. ej. desde `app.ts` + `useTheme`).
 - [ ] **Layout**: `AdminLayout.vue` (y Sidebar/Navbar si usas el mismo layout).
 - [ ] **Páginas**: Todas las vistas bajo `Pages/Dashboards/` y el componente `DashboardBentoGrid` + composable `useUsers`.
-- [ ] **Componentes**: MetricCard, ExpandableChart, DashboardHeader, Sparkline; BaseEChart, PieChart, HorizontalBarChart, SemaphoreBarChart; DetailDrawer si lo usas.
+- [ ] **Componentes**: MetricCard, ExpandableChart, DashboardHeader, Sparkline, DetailMetricTable; BaseEChart, PieChart, HorizontalBarChart, SemaphoreBarChart; DetailDrawer si lo usas.
+- [ ] **Loading global**: AppLoading, GlobalLoadingLayer, useGlobalLoading; integración en app.ts (Fragment + GlobalLoadingLayer) si quieres loading a pantalla completa en peticiones / clic en cards.
 - [ ] **Rutas**: Rutas web que hagan `Inertia::render('Dashboards/...')`.
 - [ ] **Alias**: `@` apuntando a la raíz del frontend para Layouts y Components.
 - [ ] **Datos**: Mantener dummy o conectar `useUsers` a tu API.
