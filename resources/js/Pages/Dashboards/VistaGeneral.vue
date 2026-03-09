@@ -7,12 +7,12 @@
                     <span
                         v-for="chip in headerChips"
                         :key="chip.label"
-                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-(--th-border)"
+                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-[var(--th-border)]"
                         style="background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);"
                     >
                         <span class="h-1.5 w-1.5 rounded-full" :class="chip.dot" aria-hidden="true" />
-                        <span class="text-(--th-text-secondary)">{{ chip.label }}:</span>
-                        <span class="font-semibold text-(--th-text-primary)">{{ chip.value }}</span>
+                        <span class="text-[color:var(--th-text-secondary)]">{{ chip.label }}:</span>
+                        <span class="font-semibold text-[color:var(--th-text-primary)]">{{ chip.value }}</span>
                     </span>
                 </template>
                 <template #actions>
@@ -55,7 +55,7 @@
                             :mini-chart="heroMiniChart"
                             comparison="vs. mes anterior"
                             class="sm:row-span-2 h-full"
-                            :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === primaryCards[0]?.id }"
+                            :class="{ 'ring-2 ring-[var(--th-input-focus-border)] ring-offset-2 ring-offset-[var(--th-ring-offset)]': selectedCard?.id === primaryCards[0]?.id }"
                             @click="primaryCards[0] && openDetail(primaryCards[0])"
                         />
 
@@ -72,7 +72,7 @@
                                 :sparkline-data="[126, 128, 129, 130, 131, 132, 132]"
                                 comparison="vs. mes anterior"
                                 class="flex-1"
-                                :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === primaryCards[1]?.id }"
+                                :class="{ 'ring-2 ring-[var(--th-input-focus-border)] ring-offset-2 ring-offset-[var(--th-ring-offset)]': selectedCard?.id === primaryCards[1]?.id }"
                                 @click="primaryCards[1] && openDetail(primaryCards[1])"
                             />
                             <MetricCard
@@ -86,7 +86,7 @@
                                 :sparkline-data="[10.5, 10.2, 10, 10.1, 9.8, 9.5, 10]"
                                 comparison="vs. mes anterior"
                                 class="flex-1"
-                                :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === primaryCards[2]?.id }"
+                                :class="{ 'ring-2 ring-[var(--th-input-focus-border)] ring-offset-2 ring-offset-[var(--th-ring-offset)]': selectedCard?.id === primaryCards[2]?.id }"
                                 @click="primaryCards[2] && openDetail(primaryCards[2])"
                             />
                         </div>
@@ -96,10 +96,10 @@
                 <!-- ── Otras métricas: bento de tiles con popover rico + drag-and-drop ── -->
                 <section>
                     <div class="mb-4 flex items-center justify-between">
-                        <p class="text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
+                        <p class="text-xs font-semibold uppercase tracking-widest text-[color:var(--th-group-label)]">
                             Otras métricas
                         </p>
-                        <span class="text-xs text-(--th-text-muted)">
+                        <span class="text-xs text-[color:var(--th-text-muted)]">
                             <Icon icon="heroicons:arrows-up-down" class="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
                             Arrastra para reordenar
                         </span>
@@ -129,7 +129,7 @@
                                 aria-label="Arrastrar para reordenar"
                                 title="Arrastrar para reordenar"
                             >
-                                <Icon icon="heroicons:bars-3" class="h-3.5 w-3.5 text-(--th-text-secondary)" aria-hidden="true" />
+                                <Icon icon="heroicons:bars-3" class="h-3.5 w-3.5 text-[color:var(--th-text-secondary)]" aria-hidden="true" />
                             </div>
 
                             <!-- ── Rich hover popover (above the tile) ── -->
@@ -141,9 +141,9 @@
                                     class="relative overflow-hidden rounded-2xl border border-white/25 shadow-2xl backdrop-blur-2xl dark:border-white/10"
                                     style="background: rgba(255,255,255,0.95)"
                                 >
-                                    <div class="flex items-center gap-2 border-b border-(--th-border) px-3 py-2.5">
+                                    <div class="flex items-center gap-2 border-b border-[var(--th-border)] px-3 py-2.5">
                                         <span class="h-1.5 w-1.5 rounded-full" :class="variantDot[card.variant] ?? 'bg-rose-400'" />
-                                        <span class="text-xs font-semibold leading-tight text-(--th-text-primary)">{{ card.label }}</span>
+                                        <span class="text-xs font-semibold leading-tight text-[color:var(--th-text-primary)]">{{ card.label }}</span>
                                     </div>
                                     <div v-if="tileSparkline(card.id).length >= 2" class="h-10 px-3 pt-2">
                                         <Sparkline
@@ -152,18 +152,18 @@
                                             :filled="true"
                                         />
                                     </div>
-                                    <ul class="divide-y divide-(--th-border) px-3 py-1.5">
+                                    <ul class="divide-y divide-[var(--th-border)] px-3 py-1.5">
                                         <li
                                             v-for="row in tilePreviewRows(card.id)"
                                             :key="row.concepto"
                                             class="flex items-center justify-between gap-2 py-1.5 text-xs"
                                         >
-                                            <span class="truncate text-(--th-text-secondary)">{{ row.concepto }}</span>
-                                            <span class="tabular-nums font-semibold text-(--th-text-primary)">
+                                            <span class="truncate text-[color:var(--th-text-secondary)]">{{ row.concepto }}</span>
+                                            <span class="tabular-nums font-semibold text-[color:var(--th-text-primary)]">
                                                 {{ typeof row.valor === 'number' ? row.valor.toLocaleString('es') : row.valor }}
                                             </span>
                                         </li>
-                                        <li v-if="!tilePreviewRows(card.id).length" class="py-2 text-center text-xs text-(--th-text-muted)">
+                                        <li v-if="!tilePreviewRows(card.id).length" class="py-2 text-center text-xs text-[color:var(--th-text-muted)]">
                                             Sin datos disponibles
                                         </li>
                                     </ul>
@@ -177,8 +177,8 @@
                             <!-- ── Tile button ── -->
                             <button
                                 type="button"
-                                class="secondary-metric-tile group relative flex w-full flex-col overflow-hidden rounded-2xl p-4 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
-                                :class="{ 'ring-2 ring-(--th-input-focus-border) ring-offset-2 ring-offset-(--th-ring-offset)': selectedCard?.id === card.id }"
+                                class="secondary-metric-tile group relative flex w-full flex-col overflow-hidden rounded-2xl p-4 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
+                                :class="{ 'ring-2 ring-[var(--th-input-focus-border)] ring-offset-2 ring-offset-[var(--th-ring-offset)]': selectedCard?.id === card.id }"
                                 @click="openDetail(card)"
                             >
                                 <!-- Glass layer -->
@@ -205,11 +205,11 @@
                                             aria-hidden="true"
                                         />
                                     </div>
-                                    <p class="text-xl font-bold tabular-nums tracking-tight text-(--th-text-primary)">{{ card.value }}</p>
-                                    <p class="line-clamp-2 text-xs font-medium leading-snug text-(--th-text-secondary)">{{ card.label }}</p>
+                                    <p class="text-xl font-bold tabular-nums tracking-tight text-[color:var(--th-text-primary)]">{{ card.value }}</p>
+                                    <p class="line-clamp-2 text-xs font-medium leading-snug text-[color:var(--th-text-secondary)]">{{ card.label }}</p>
                                 </div>
 
-                                <div class="relative z-10 mt-3 flex items-center gap-1 text-(--th-item-active-color) opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                <div class="relative z-10 mt-3 flex items-center gap-1 text-[color:var(--th-item-active-color)] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                                     <span class="text-xs font-semibold">Ver detalle</span>
                                     <Icon icon="heroicons:arrow-right" class="h-3 w-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                                 </div>
@@ -220,18 +220,18 @@
 
                 <!-- ── Tabla de detalle (inline) ── -->
                 <section
-                    class="detail-table-section overflow-hidden rounded-2xl border border-(--th-border) bg-(--th-input-bg) shadow-sm"
+                    class="detail-table-section overflow-hidden rounded-2xl border border-[var(--th-border)] bg-[var(--th-input-bg)] shadow-sm"
                 >
                     <div
-                        class="flex flex-wrap items-center justify-between gap-3 border-b border-(--th-border) bg-(--th-input-bg) px-4 py-3"
+                        class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--th-border)] bg-[var(--th-input-bg)] px-4 py-3"
                     >
-                        <h3 class="text-sm font-semibold text-(--th-text-primary)">
+                        <h3 class="text-sm font-semibold text-[color:var(--th-text-primary)]">
                             {{ selectedCard ? `Detalle: ${selectedCard.label}` : 'Detalle de la métrica' }}
                         </h3>
                         <button
                             v-if="selectedCard"
                             type="button"
-                            class="text-xs font-medium text-(--th-text-muted) transition-colors hover:text-(--th-item-active-color)"
+                            class="text-xs font-medium text-[color:var(--th-text-muted)] transition-colors hover:text-[color:var(--th-item-active-color)]"
                             @click="selectedCard = null"
                         >
                             Limpiar selección
@@ -245,7 +245,7 @@
                         <!-- Minimalist inline SVG illustration: data table + cursor -->
                         <svg
                             viewBox="0 0 160 100"
-                            class="h-24 w-36 text-(--th-text-muted)"
+                            class="h-24 w-36 text-[color:var(--th-text-muted)]"
                             aria-hidden="true"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
@@ -278,10 +278,10 @@
                         </svg>
 
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-(--th-text-secondary)">
+                            <p class="text-sm font-medium text-[color:var(--th-text-secondary)]">
                                 Ninguna métrica seleccionada
                             </p>
-                            <p class="text-xs text-(--th-text-muted)">
+                            <p class="text-xs text-[color:var(--th-text-muted)]">
                                 Haz clic en cualquier tarjeta o tile para ver el desglose en la tabla.
                             </p>
                         </div>
@@ -297,7 +297,7 @@
                     </div>
                 </section>
 
-                <p class="text-xs text-(--th-text-muted)">
+                <p class="text-xs text-[color:var(--th-text-muted)]">
                     Clic en cualquier métrica para ver el detalle en la tabla debajo.
                 </p>
             </template>
@@ -467,7 +467,7 @@ const detailTableColumns = computed<DetailMetricColumn[]>(() => {
         },
     ]
     if (hasPorcentaje.value) cols.push({ key: 'porcentaje', header: '%', sortable: true })
-    if (hasActualizado.value) cols.push({ key: 'actualizado', header: 'Última actualización', sortable: true, class: 'text-(--th-text-secondary)' })
+    if (hasActualizado.value) cols.push({ key: 'actualizado', header: 'Última actualización', sortable: true, class: 'text-[color:var(--th-text-secondary)]' })
     return cols
 })
 

@@ -1,7 +1,7 @@
 <template>
     <button
         type="button"
-        class="metric-card cosmos-lift group relative flex overflow-hidden text-left transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
+        class="metric-card cosmos-lift group relative flex overflow-hidden text-left transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
         :class="[featured ? 'metric-card--featured rounded-3xl' : 'rounded-3xl']"
         @click="$emit('click')"
     >
@@ -55,7 +55,7 @@
         >
             <!-- Glass tooltip (shows on dot hover, not card hover) -->
             <span
-                class="pointer-events-none absolute right-full top-1/2 mr-2.5 -translate-y-1/2 whitespace-nowrap rounded-xl border border-(--th-border) px-2.5 py-1.5 text-xs font-medium text-(--th-text-primary) opacity-0 shadow-xl backdrop-blur-xl transition-opacity duration-200 group-hover/dot:opacity-100 dark:border-white/10"
+                class="pointer-events-none absolute right-full top-1/2 mr-2.5 -translate-y-1/2 whitespace-nowrap rounded-xl border border-[var(--th-border)] px-2.5 py-1.5 text-xs font-medium text-[color:var(--th-text-primary)] opacity-0 shadow-xl backdrop-blur-xl transition-opacity duration-200 group-hover/dot:opacity-100 dark:border-white/10"
                 style="background: rgba(255,255,255,0.96)"
                 aria-hidden="true"
             >
@@ -114,11 +114,11 @@
                     <div v-else class="flex shrink-0 items-center gap-0.5">
                         <Icon v-if="trend === 'up'" icon="heroicons:arrow-trending-up" class="h-4 w-4 text-emerald-500 dark:text-emerald-400" aria-hidden="true" />
                         <Icon v-else-if="trend === 'down'" icon="heroicons:arrow-trending-down" class="h-4 w-4 text-rose-500 dark:text-rose-400" aria-hidden="true" />
-                        <Icon v-else icon="heroicons:minus" class="h-4 w-4 text-(--th-text-muted)" aria-hidden="true" />
+                        <Icon v-else icon="heroicons:minus" class="h-4 w-4 text-[color:var(--th-text-muted)]" aria-hidden="true" />
                         <span
                             v-if="trendPercent != null"
                             class="text-xs font-medium"
-                            :class="trend === 'up' ? 'text-emerald-600 dark:text-emerald-400' : trend === 'down' ? 'text-rose-600 dark:text-rose-400' : 'text-(--th-text-muted)'"
+                            :class="trend === 'up' ? 'text-emerald-600 dark:text-emerald-400' : trend === 'down' ? 'text-rose-600 dark:text-rose-400' : 'text-[color:var(--th-text-muted)]'"
                         >{{ trendPercent > 0 ? '+' : '' }}{{ trendPercent }}%</span>
                     </div>
                 </div>
@@ -126,14 +126,14 @@
 
             <!-- Value (count-up for featured numeric values) -->
             <p
-                class="tabular-nums font-bold tracking-tight text-(--th-text-primary)"
+                class="tabular-nums font-bold tracking-tight text-[color:var(--th-text-primary)]"
                 :class="featured ? 'mt-6 text-5xl leading-none' : 'mt-4 text-2xl'"
             >
                 {{ displayedValue }}
             </p>
 
             <!-- Label -->
-            <p class="font-medium text-(--th-text-secondary)" :class="featured ? 'mt-2 text-base' : 'mt-1 text-sm'">
+            <p class="font-medium text-[color:var(--th-text-secondary)]" :class="featured ? 'mt-2 text-base' : 'mt-1 text-sm'">
                 {{ label }}
             </p>
 
@@ -157,8 +157,8 @@
                                 :style="{ background: (miniChart.colors ?? DONUT_DEFAULTS)[i % (miniChart.colors ?? DONUT_DEFAULTS).length] }"
                                 aria-hidden="true"
                             />
-                            <span class="font-medium text-(--th-text-secondary)">{{ item.name }}</span>
-                            <span class="ml-auto tabular-nums font-bold text-(--th-text-primary)">
+                            <span class="font-medium text-[color:var(--th-text-secondary)]">{{ item.name }}</span>
+                            <span class="ml-auto tabular-nums font-bold text-[color:var(--th-text-primary)]">
                                 {{ item.value.toLocaleString('es') }}
                             </span>
                         </li>
@@ -177,7 +177,7 @@
             </div>
 
             <!-- Comparison text -->
-            <p v-if="comparison" class="mt-2 text-xs text-(--th-text-muted)">{{ comparison }}</p>
+            <p v-if="comparison" class="mt-2 text-xs text-[color:var(--th-text-muted)]">{{ comparison }}</p>
         </div>
     </button>
 </template>
@@ -272,7 +272,7 @@ const trendPillClass = computed(() => {
         return 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:bg-emerald-400/15 dark:text-emerald-400 dark:ring-emerald-400/20'
     if (props.trend === 'down')
         return 'bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:bg-rose-400/15 dark:text-rose-400 dark:ring-rose-400/20'
-    return 'bg-white/40 text-(--th-text-muted) ring-(--th-border) dark:bg-white/5'
+    return 'bg-white/40 text-[color:var(--th-text-muted)] ring-[var(--th-border)] dark:bg-white/5'
 })
 
 const sparklineColor = computed(() => {

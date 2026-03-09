@@ -1,6 +1,6 @@
-import { defineConfig } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
-export default defineConfig({
+export default {
     content: [
         "./resources/views/**/*.blade.php",
         "./resources/js/**/*.vue",
@@ -9,8 +9,13 @@ export default defineConfig({
         "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
         "./storage/framework/views/*.php",
     ],
+    darkMode: ["selector", '[data-theme="dark"]'],
     theme: {
-        extend: {},
+        extend: {
+            transitionDuration: {
+                "400": "400ms",
+            },
+        },
     },
     plugins: [],
-});
+} satisfies Config;

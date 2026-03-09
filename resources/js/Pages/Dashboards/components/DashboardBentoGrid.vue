@@ -14,7 +14,7 @@
             <component
                 :is="getTag(card)"
                 :href="getHref(card)"
-                class="dashboard-tile group relative flex overflow-hidden rounded-3xl transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
+                class="dashboard-tile group relative flex overflow-hidden rounded-3xl transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
                 :class="[
                     i === 0
                         ? 'dashboard-tile--featured col-span-1 row-span-2 flex-col justify-between p-8 min-h-[280px] h-full'
@@ -81,21 +81,21 @@
                         <span
                             class="rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide ring-1 transition-colors"
                             :class="i === 0
-                                ? 'bg-white/30 text-(--th-text-primary) ring-white/40 group-hover:bg-white/50 dark:bg-white/10 dark:ring-white/20'
-                                : 'text-(--th-text-secondary) ring-(--th-border) group-hover:text-(--th-text-primary) group-hover:ring-(--th-input-focus-border)'"
+                                ? 'bg-white/30 text-[color:var(--th-text-primary)] ring-white/40 group-hover:bg-white/50 dark:bg-white/10 dark:ring-white/20'
+                                : 'text-[color:var(--th-text-secondary)] ring-[var(--th-border)] group-hover:text-[color:var(--th-text-primary)] group-hover:ring-[var(--th-input-focus-border)]'"
                         >
                             {{ card.badge }}
                         </span>
                     </div>
 
                     <h3
-                        class="mt-4 font-semibold tracking-tight text-(--th-text-primary)"
+                        class="mt-4 font-semibold tracking-tight text-[color:var(--th-text-primary)]"
                         :class="i === 0 ? 'text-xl' : 'text-base'"
                     >
                         {{ card.name }}
                     </h3>
                     <p
-                        class="mt-1.5 flex-1 text-(--th-text-secondary)"
+                        class="mt-1.5 flex-1 text-[color:var(--th-text-secondary)]"
                         :class="i === 0 ? 'text-sm leading-relaxed' : 'text-sm line-clamp-2'"
                     >
                         {{ card.description }}
@@ -103,7 +103,7 @@
                 </div>
 
                 <!-- CTA row -->
-                <div class="relative z-10 mt-4 flex items-center gap-2 text-(--th-item-active-color)">
+                <div class="relative z-10 mt-4 flex items-center gap-2 text-[color:var(--th-item-active-color)]">
                     <span class="text-sm font-semibold">{{ ctaLabel(card) }}</span>
                     <Icon
                         :icon="isScrollMode(card) ? 'heroicons:arrow-down' : 'heroicons:arrow-right'"

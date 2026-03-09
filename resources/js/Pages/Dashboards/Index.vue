@@ -25,10 +25,10 @@
                             aria-hidden="true"
                         />
                         <div class="relative z-10">
-                            <p class="text-2xl font-bold tabular-nums tracking-tight text-(--th-text-primary)">
+                            <p class="text-2xl font-bold tabular-nums tracking-tight text-[color:var(--th-text-primary)]">
                                 {{ stat.value }}
                             </p>
-                            <p class="mt-0.5 text-xs font-medium text-(--th-text-muted)">{{ stat.label }}</p>
+                            <p class="mt-0.5 text-xs font-medium text-[color:var(--th-text-muted)]">{{ stat.label }}</p>
                         </div>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
             <section>
                 <a
                     href="/dashboards/vista-consolidada"
-                    class="group relative flex items-center justify-between overflow-hidden rounded-2xl px-6 py-5 transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset)"
+                    class="group relative flex items-center justify-between overflow-hidden rounded-2xl px-6 py-5 transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
                     @click.prevent="navigate('/dashboards/vista-consolidada')"
                 >
                     <!-- Glass -->
@@ -67,12 +67,12 @@
                             />
                         </div>
                         <div>
-                            <p class="font-semibold text-(--th-text-primary)">Vista consolidada</p>
-                            <p class="text-sm text-(--th-text-secondary)">Todos los indicadores en una sola pantalla</p>
+                            <p class="font-semibold text-[color:var(--th-text-primary)]">Vista consolidada</p>
+                            <p class="text-sm text-[color:var(--th-text-secondary)]">Todos los indicadores en una sola pantalla</p>
                         </div>
                     </div>
 
-                    <div class="relative z-10 flex items-center gap-1.5 text-(--th-item-active-color)">
+                    <div class="relative z-10 flex items-center gap-1.5 text-[color:var(--th-item-active-color)]">
                         <span class="text-sm font-semibold">Abrir</span>
                         <Icon
                             icon="heroicons:arrow-right"
@@ -85,7 +85,7 @@
 
             <!-- ── Bento: por tema ── -->
             <section>
-                <p class="mb-5 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
+                <p class="mb-5 text-xs font-semibold uppercase tracking-widest text-[color:var(--th-group-label)]">
                     Explorar por tema
                 </p>
                 <DashboardBentoGrid :cards="dashboardCards" mode="navigate" @navigate="navigate" />
@@ -93,7 +93,7 @@
 
             <!-- ── Unidades: strip horizontal ── -->
             <section>
-                <p class="mb-5 text-xs font-semibold uppercase tracking-widest text-(--th-group-label)">
+                <p class="mb-5 text-xs font-semibold uppercase tracking-widest text-[color:var(--th-group-label)]">
                     Por unidad de negocio
                 </p>
                 <div class="flex flex-wrap gap-3">
@@ -101,7 +101,7 @@
                         v-for="card in byUnits"
                         :key="card.name"
                         :href="card.href"
-                        class="unit-pill group flex items-center gap-3 rounded-2xl border border-white/20 bg-white/70 px-5 py-3.5 shadow-md backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/90 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-(--p-focus-ring-color) focus:ring-offset-2 focus:ring-offset-(--th-ring-offset) dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                        class="unit-pill group flex items-center gap-3 rounded-2xl border border-white/20 bg-white/70 px-5 py-3.5 shadow-md backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/90 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
                         @click.prevent="navigate(card.href)"
                     >
                         <div
@@ -111,12 +111,12 @@
                             <Icon :icon="card.icon" :class="card.iconColor" class="h-5 w-5" aria-hidden="true" />
                         </div>
                         <div class="min-w-0">
-                            <span class="block truncate font-semibold text-(--th-text-primary)">{{ card.name }}</span>
-                            <span class="text-xs text-(--th-text-muted)">{{ card.badge }}</span>
+                            <span class="block truncate font-semibold text-[color:var(--th-text-primary)]">{{ card.name }}</span>
+                            <span class="text-xs text-[color:var(--th-text-muted)]">{{ card.badge }}</span>
                         </div>
                         <Icon
                             icon="heroicons:arrow-right"
-                            class="h-4 w-4 shrink-0 text-(--th-item-active-color) transition-transform group-hover:translate-x-0.5"
+                            class="h-4 w-4 shrink-0 text-[color:var(--th-item-active-color)] transition-transform group-hover:translate-x-0.5"
                             aria-hidden="true"
                         />
                     </a>

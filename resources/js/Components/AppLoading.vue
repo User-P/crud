@@ -2,7 +2,7 @@
     <div
         v-if="overlay"
         :class="[
-            'app-loading-overlay flex flex-col items-center justify-center gap-3 bg-(--th-input-bg)/80 backdrop-blur-sm',
+            'app-loading-overlay flex flex-col items-center justify-center gap-3 bg-[var(--th-input-bg)] backdrop-blur-sm',
             fullScreen ? 'fixed inset-0 z-9999' : 'absolute inset-0 z-10 rounded-2xl'
         ]"
         role="status"
@@ -12,10 +12,10 @@
         <ProgressSpinner
             style="width: 40px; height: 40px"
             stroke-width="3"
-            class="text-(--th-item-active-color)"
+            class="text-[color:var(--th-item-active-color)]"
             aria-hidden="true"
         />
-        <p v-if="message" class="text-sm font-medium text-(--th-text-secondary)">
+        <p v-if="message" class="text-sm font-medium text-[color:var(--th-text-secondary)]">
             {{ message }}
         </p>
     </div>
@@ -23,10 +23,10 @@
         <ProgressSpinner
             style="width: 32px; height: 32px"
             stroke-width="3"
-            class="text-(--th-item-active-color)"
+            class="text-[color:var(--th-item-active-color)]"
             aria-hidden="true"
         />
-        <p v-if="message" class="text-xs text-(--th-text-muted)">
+        <p v-if="message" class="text-xs text-[color:var(--th-text-muted)]">
             {{ message }}
         </p>
     </div>

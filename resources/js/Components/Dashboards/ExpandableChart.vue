@@ -4,14 +4,14 @@
         <div v-if="expanded" class="fixed inset-0 z-0 bg-black/40 backdrop-blur-md" aria-hidden="true"
             @click="expanded = false" />
         <!-- Card: normal o flotante -->
-        <div class="rounded-2xl border border-(--th-border) bg-(--th-input-bg)/80 backdrop-blur-xl transition-all duration-200 shadow-sm" :class="[
+        <div class="rounded-2xl border border-[var(--th-border)] bg-[var(--th-input-bg)] backdrop-blur-xl transition-all duration-200 shadow-sm" :class="[
             expanded
                 ? 'fixed inset-4 z-10 flex flex-col p-6 sm:inset-6 md:inset-8'
                 : 'p-6',
         ]">
 
             <div class="mb-4 flex items-center justify-between gap-2">
-                <h3 class="text-sm font-semibold uppercase tracking-wider text-(--th-group-label)"
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-[color:var(--th-group-label)]"
                     :id="expanded ? 'expandable-chart-title' : undefined" :role="expanded ? 'heading' : undefined">
                     {{ title }}
                 </h3>

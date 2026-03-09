@@ -1,10 +1,6 @@
-@import "tailwindcss";
-
-/* Capas: PrimeVue y Tailwind sin colisionar */
-@layer tailwind-base, primevue, tailwind-utilities;
-
-/* Variante dark según data-theme en html (toggle manual) */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* =============================================================================
    TEMA — Variables CSS (--th-* = theme, --p-* = PrimeVue)

@@ -65,7 +65,7 @@ createInertiaApp({
                     options: {
                         cssLayer: {
                             name: 'primevue',
-                            order: 'tailwind-base, primevue, tailwind-utilities',
+                            order: 'base, primevue, utilities',
                         },
                         darkModeSelector: '[data-theme="dark"]',
                     },

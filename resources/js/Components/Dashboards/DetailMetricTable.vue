@@ -1,24 +1,24 @@
 <template>
-    <div class="detail-metric-table rounded-xl border border-(--th-border) bg-(--th-input-bg)/60 backdrop-blur-sm overflow-hidden">
+    <div class="detail-metric-table rounded-xl border border-[var(--th-border)] bg-[var(--th-input-bg)] backdrop-blur-sm overflow-hidden">
         <!-- Barra: búsqueda + exportar -->
-        <div class="flex flex-wrap items-center gap-3 border-b border-(--th-border) bg-(--th-input-bg)/40 px-4 py-3">
+        <div class="flex flex-wrap items-center gap-3 border-b border-[var(--th-border)] bg-[var(--th-input-bg)] px-4 py-3">
             <span class="relative flex-1 min-w-[200px] max-w-sm">
                 <Icon
                     icon="heroicons:magnifying-glass"
-                    class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--th-text-muted)"
+                    class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--th-text-muted)]"
                     aria-hidden="true"
                 />
                 <InputText
                     v-model="searchText"
                     :placeholder="searchPlaceholder"
-                    class="w-full rounded-lg border-(--th-input-border) bg-(--th-input-bg) pl-9 text-sm placeholder:italic"
+                    class="w-full rounded-lg border-[var(--th-input-border)] bg-[var(--th-input-bg)] pl-9 text-sm placeholder:italic"
                     aria-label="Buscar en la tabla"
                 />
             </span>
             <div class="flex items-center gap-3">
                 <span
                     v-if="searchText"
-                    class="rounded-full bg-(--th-item-active-bg) px-2.5 py-1 text-xs font-medium text-(--th-item-active-color)"
+                    class="rounded-full bg-[var(--th-item-active-bg)] px-2.5 py-1 text-xs font-medium text-[color:var(--th-item-active-color)]"
                 >
                     {{ filteredRows.length }} de {{ rows.length }} coincidencias
                 </span>
@@ -46,7 +46,7 @@
             paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             current-page-report-template="{first} – {last} de {totalRecords}"
             responsive-layout="scroll"
-            class="detail-datatable text-(--th-text-primary) border-0"
+            class="detail-datatable text-[color:var(--th-text-primary)] border-0"
         >
             <Column
                 v-for="col in columns"
@@ -73,14 +73,14 @@
 
             <template #footer>
                 <div
-                    class="flex flex-wrap items-center justify-between gap-3 border-t border-(--th-border) bg-(--th-input-bg)/30 px-4 py-3"
+                    class="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--th-border)] bg-[var(--th-input-bg)] px-4 py-3"
                 >
-                    <p class="text-sm text-(--th-text-secondary)">
-                        <span class="font-semibold tabular-nums text-(--th-text-primary)">{{ totalRecords }}</span>
+                    <p class="text-sm text-[color:var(--th-text-secondary)]">
+                        <span class="font-semibold tabular-nums text-[color:var(--th-text-primary)]">{{ totalRecords }}</span>
                         {{ totalRecords === 1 ? 'registro' : 'registros' }}
-                        <span v-if="searchText" class="ml-1 text-(--th-text-muted)">(filtrados)</span>
+                        <span v-if="searchText" class="ml-1 text-[color:var(--th-text-muted)]">(filtrados)</span>
                     </p>
-                    <p class="text-xs text-(--th-text-muted)">
+                    <p class="text-xs text-[color:var(--th-text-muted)]">
                         Usa el paginador para ver más resultados.
                     </p>
                 </div>

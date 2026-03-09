@@ -8,7 +8,7 @@
         />
         <!-- Left gradient accent strip -->
         <span
-            class="absolute inset-y-0 left-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-(--th-item-active-color) to-(--th-item-active-color)/0"
+            class="absolute inset-y-0 left-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-[color:var(--th-item-active-color)] to-transparent"
             aria-hidden="true"
         />
         <!-- Top-right corner ambient orb -->
@@ -27,10 +27,10 @@
                 </div>
 
                 <div class="min-w-0 flex-1">
-                    <h2 class="text-xl font-bold tracking-tight text-(--th-text-primary)">
+                    <h2 class="text-xl font-bold tracking-tight text-[color:var(--th-text-primary)]">
                         {{ title }}
                     </h2>
-                    <p v-if="subtitle" class="mt-0.5 text-sm text-(--th-text-secondary)">
+                    <p v-if="subtitle" class="mt-0.5 text-sm text-[color:var(--th-text-secondary)]">
                         {{ subtitle }}
                     </p>
 
