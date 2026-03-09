@@ -53,6 +53,7 @@
                             :trend="heroTrend"
                             :trend-percent="2.4"
                             :mini-chart="heroMiniChart"
+                            :sparkline-data="heroSparklineData"
                             comparison="vs. mes anterior"
                             class="sm:row-span-2 h-full"
                             :class="{ 'ring-2 ring-[var(--th-input-focus-border)] ring-offset-2 ring-offset-[var(--th-ring-offset)]': selectedCard?.id === primaryCards[0]?.id }"
@@ -123,13 +124,22 @@
                             :key="card.id"
                             class="relative group/tile"
                         >
-                            <!-- ── Drag handle (OUTSIDE the button so mouse events aren't blocked) ── -->
+                            <!-- ── Top-right: handle de arrastre + gota (variante), en una sola fila ── -->
                             <div
-                                class="drag-handle absolute right-2 top-2 z-50 flex h-6 w-6 cursor-grab select-none items-center justify-center rounded-md opacity-25 transition-opacity duration-200 group-hover/tile:opacity-80 active:cursor-grabbing"
-                                aria-label="Arrastrar para reordenar"
-                                title="Arrastrar para reordenar"
+                                class="absolute right-2 top-2 z-50 flex items-center gap-2"
                             >
-                                <Icon icon="heroicons:bars-3" class="h-3.5 w-3.5 text-[color:var(--th-text-secondary)]" aria-hidden="true" />
+                                <div
+                                    class="drag-handle flex h-6 w-6 cursor-grab select-none items-center justify-center rounded-md text-[color:var(--th-text-muted)] opacity-50 transition-opacity duration-200 hover:opacity-90 group-hover/tile:opacity-70 active:cursor-grabbing"
+                                    aria-label="Arrastrar para reordenar"
+                                    title="Arrastrar para reordenar"
+                                >
+                                    <Icon icon="heroicons:bars-3" class="h-3.5 w-3.5" aria-hidden="true" />
+                                </div>
+                                <span
+                                    class="h-2 w-2 rounded-full transition-transform duration-300 group-hover/tile:scale-125"
+                                    :class="variantDot[card.variant] ?? 'bg-rose-400'"
+                                    aria-hidden="true"
+                                />
                             </div>
 
                             <!-- ── Rich hover popover (above the tile) ── -->
@@ -177,7 +187,7 @@
                             <!-- ── Tile button ── -->
                             <button
                                 type="button"
-                                class="secondary-metric-tile group relative flex w-full flex-col overflow-hidden rounded-2xl p-4 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
+                                class="secondary-metric-tile group relative flex w-full flex-col overflow-hidden rounded-2xl p-4 pl-5 text-left transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
                                 :class="{ 'ring-2 ring-[var(--th-input-focus-border)] ring-offset-2 ring-offset-[var(--th-ring-offset)]': selectedCard?.id === card.id }"
                                 @click="openDetail(card)"
                             >
@@ -186,14 +196,14 @@
                                     class="absolute inset-0 rounded-2xl border border-white/20 bg-white/65 shadow-md backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-none group-hover:bg-white/80 group-hover:shadow-lg dark:group-hover:bg-white/8"
                                     aria-hidden="true"
                                 />
-                                <!-- Colored dot (top-right, keeps space from handle) -->
+                                <!-- Barra lateral de variante (como MetricCard) -->
                                 <span
-                                    class="absolute right-2 top-10 h-2 w-2 rounded-full transition-transform duration-300 group-hover:scale-125"
+                                    class="absolute left-0 top-4 bottom-4 w-1 rounded-full transition-all duration-300 group-hover:w-1.5"
                                     :class="variantDot[card.variant] ?? 'bg-rose-400'"
                                     aria-hidden="true"
                                 />
 
-                                <div class="relative z-10 flex flex-col gap-2.5">
+                                <div class="relative z-10 flex flex-col gap-2.5 pt-1">
                                     <div
                                         class="flex h-9 w-9 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
                                         :class="variantStyles[card.variant]?.iconBg ?? 'bg-rose-500/15'"
@@ -426,6 +436,9 @@ const heroMiniChart = computed(() => {
         colors: ['#5bb56a', '#ef4444'],
     }
 })
+
+/** Tendencia últimos 7 días para la card principal (rellena más la card) */
+const heroSparklineData = [138, 139, 140, 139, 141, 142, 142]
 
 // Header stat chips — resumen rápido bajo el título
 const headerChips = computed(() => {
