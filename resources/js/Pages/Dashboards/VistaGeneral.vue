@@ -147,8 +147,7 @@
                                 aria-hidden="true"
                             >
                                 <div
-                                    class="relative overflow-hidden rounded-2xl border border-white/25 shadow-2xl backdrop-blur-2xl dark:border-white/10"
-                                    style="background: rgba(255,255,255,0.95)"
+                                    class="glass-panel relative overflow-hidden rounded-2xl transition-all duration-200 dark:border-white/10"
                                 >
                                     <div class="flex items-center gap-2 border-b border-[var(--th-border)] px-3 py-2.5">
                                         <span class="h-1.5 w-1.5 rounded-full" :class="variantDot[card.variant] ?? 'bg-rose-400'" />
@@ -178,7 +177,7 @@
                                     </ul>
                                     <!-- Caret pointing down -->
                                     <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full">
-                                        <div class="border-4 border-transparent" style="border-top-color: rgba(255,255,255,0.95)" />
+                                        <div class="border-4 border-transparent" style="border-top-color: var(--glass-bg)" />
                                     </div>
                                 </div>
                             </div>
@@ -192,7 +191,7 @@
                             >
                                 <!-- Glass layer -->
                                 <span
-                                    class="absolute inset-0 rounded-2xl border border-white/20 bg-white/65 shadow-md backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-none group-hover:bg-white/80 group-hover:shadow-lg dark:group-hover:bg-white/8"
+                                    class="glass-panel absolute inset-0 rounded-2xl transition-all duration-300"
                                     aria-hidden="true"
                                 />
                                 <!-- Barra lateral de variante (como MetricCard) -->

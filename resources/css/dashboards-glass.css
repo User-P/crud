@@ -1,8 +1,34 @@
 /**
  * Estilos glassmorphic para dashboards
  * Tarjetas con backdrop-blur, bordes translúcidos y sombras suaves.
- * Sin dependencia de "cosmostheme".
+ * Variables --glass-* en app.css (visibles en modo claro y oscuro).
  */
+
+/* =============================================================================
+   PANEL GLASS — Clase reutilizable para capas tipo cristal
+   ============================================================================= */
+
+.glass-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.group:hover .glass-panel,
+.unit-pill:hover .glass-panel,
+.unit-pill.glass-panel:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow-hover);
+}
+.dashboard-tile.group:hover .glass-panel,
+.metric-card.group:hover .glass-panel {
+    box-shadow: var(--glass-shadow-hover);
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+}
 
 /* =============================================================================
    CONTENEDOR PRINCIPAL — Fondo, grain, puntos
@@ -18,11 +44,11 @@
     content: "";
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
 }
-[data-theme="dark"] .dashboard-app::after { opacity: 0.06; }
+[data-theme="dark"] .dashboard-app::after { opacity: 0.08; }
 @media (prefers-reduced-motion: reduce) {
     .dashboard-app::after { display: none; }
 }
@@ -120,12 +146,14 @@
    ============================================================================= */
 
 .glass-chip {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 [data-theme="dark"] .glass-chip {
     background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .glass-lift {

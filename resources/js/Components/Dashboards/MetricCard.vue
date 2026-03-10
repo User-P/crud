@@ -15,7 +15,7 @@
 
         <!-- Glass base -->
         <span
-            class="absolute inset-0 rounded-3xl border border-white/20 bg-white/70 shadow-lg backdrop-blur-xl transition-all duration-400 dark:border-white/10 dark:bg-white/5 dark:shadow-none group-hover:bg-white/80 dark:group-hover:bg-white/8"
+            class="glass-panel absolute inset-0 rounded-3xl transition-all duration-400"
             :class="featured ? 'group-hover:shadow-2xl' : 'group-hover:shadow-xl'"
             aria-hidden="true"
         />

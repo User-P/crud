@@ -212,7 +212,7 @@
                     </h2>
                 <div class="flex flex-wrap gap-3">
                     <a v-for="card in byUnits" :key="card.name" :href="card.href"
-                        class="unit-pill group flex items-center gap-3 rounded-2xl border border-white/20 bg-white/70 px-5 py-3.5 shadow-md backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/90 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                        class="unit-pill glass-panel group flex items-center gap-3 rounded-2xl px-5 py-3.5 transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
                         @click.prevent="navigate(card.href)">
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
                             :class="card.iconBg">

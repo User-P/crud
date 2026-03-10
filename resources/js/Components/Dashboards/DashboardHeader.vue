@@ -3,7 +3,7 @@
     <div class="relative overflow-hidden rounded-2xl">
         <!-- Glass background -->
         <span
-            class="absolute inset-0 rounded-2xl border border-white/25 bg-white/65 shadow-sm backdrop-blur-2xl dark:border-white/10 dark:bg-white/5"
+            class="glass-panel absolute inset-0 rounded-2xl transition-all duration-200"
             aria-hidden="true"
         />
         <!-- Left gradient accent strip -->

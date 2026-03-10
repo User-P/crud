@@ -15,7 +15,7 @@
                     >
                         <!-- Glass -->
                         <span
-                            class="absolute inset-0 rounded-2xl border border-white/20 bg-white/65 shadow-md backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-white/5 group-hover:bg-white/80 group-hover:shadow-lg dark:group-hover:bg-white/8"
+                            class="glass-panel absolute inset-0 rounded-2xl transition-all duration-300"
                             aria-hidden="true"
                         />
                         <!-- Colour dot -->
@@ -43,7 +43,7 @@
                 >
                     <!-- Glass -->
                     <span
-                        class="absolute inset-0 rounded-2xl border border-white/20 bg-white/65 shadow-md backdrop-blur-xl transition-all duration-400 dark:border-white/10 dark:bg-white/5 group-hover:bg-white/80 group-hover:shadow-xl dark:group-hover:bg-white/8"
+                        class="glass-panel absolute inset-0 rounded-2xl transition-all duration-400"
                         aria-hidden="true"
                     />
                     <!-- Gradient ring on hover -->
@@ -101,7 +101,7 @@
                         v-for="card in byUnits"
                         :key="card.name"
                         :href="card.href"
-                        class="unit-pill group flex items-center gap-3 rounded-2xl border border-white/20 bg-white/70 px-5 py-3.5 shadow-md backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/90 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                        class="unit-pill glass-panel group flex items-center gap-3 rounded-2xl px-5 py-3.5 transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
                         @click.prevent="navigate(card.href)"
                     >
                         <div

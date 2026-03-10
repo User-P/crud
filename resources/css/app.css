@@ -10,8 +10,8 @@
    ============================================================================= */
 
 :root {
-    --th-app-bg: linear-gradient(145deg, #f5f6f7 0%, #eef1f4 30%, #e8ecf0 65%, #eef4f2 100%);
-    --th-dot: rgba(11, 66, 97, 0.04);
+    --th-app-bg: linear-gradient(145deg, #eef1f4 0%, #e2e8ef 25%, #dbe2eb 60%, #e6eef2 100%);
+    --th-dot: rgba(11, 66, 97, 0.06);
 
     --th-sidebar-bg: rgba(255, 255, 255, 0.78);
     --th-sidebar-border: rgba(11, 66, 97, 0.12);
@@ -38,9 +38,9 @@
     --th-btn-hover-bg: rgba(255, 255, 255, 0.65);
     --th-btn-hover-color: #0b4261;
 
-    --th-border: rgba(11, 66, 97, 0.1);
-    --th-group-label: #8e9094;
-    --th-group-line: rgba(100, 102, 106, 0.25);
+    --th-border: rgba(11, 66, 97, 0.12);
+    --th-group-label: #5f6368;
+    --th-group-line: rgba(100, 102, 106, 0.3);
     --th-divider: rgba(100, 102, 106, 0.35);
 
     --th-input-bg: rgba(255, 255, 255, 0.72);
@@ -60,8 +60,8 @@
     --th-menu-hover-icon: #0d5a7a;
 
     --th-text-primary: #1e293b;
-    --th-text-secondary: #64666a;
-    --th-text-muted: #8e9094;
+    --th-text-secondary: #475569;
+    --th-text-muted: #64748b;
 
     --th-logo-text: #1e293b;
     --th-logo-sub: rgba(11, 66, 97, 0.7);
@@ -83,6 +83,14 @@
     --p-primary-contrast-color: #ffffff;
     --p-primary-hover-color: #0d5a7a;
     --p-focus-ring-color: rgba(11, 66, 97, 0.35);
+    /* Glass panels: visibles en modo claro (borde + sombra) */
+    --glass-bg: rgba(255, 255, 255, 0.78);
+    --glass-bg-hover: rgba(255, 255, 255, 0.88);
+    --glass-border: rgba(11, 66, 97, 0.14);
+    --glass-border-hover: rgba(11, 66, 97, 0.22);
+    --glass-shadow: 0 4px 24px rgba(11, 66, 97, 0.1), 0 2px 12px rgba(0, 0, 0, 0.06);
+    --glass-shadow-hover: 0 20px 48px rgba(11, 66, 97, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
+    --glass-blur: 24px;
 }
 
 [data-theme="dark"] {
@@ -159,6 +167,14 @@
     --p-primary-contrast-color: #0b4261;
     --p-primary-hover-color: #6bc67a;
     --p-focus-ring-color: rgba(91, 181, 106, 0.4);
+    /* Glass panels: modo oscuro */
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-bg-hover: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-hover: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    --glass-shadow-hover: 0 0 0 1px rgba(91, 181, 106, 0.12), 0 24px 56px rgba(0, 0, 0, 0.5), 0 0 80px rgba(91, 181, 106, 0.08);
+    --glass-blur: 24px;
 }
 
 /* =============================================================================
