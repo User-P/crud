@@ -38,12 +38,12 @@
             <section>
                 <a
                     href="/dashboards/vista-consolidada"
-                    class="group relative flex items-center justify-between overflow-hidden rounded-2xl px-6 py-5 transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
+                    class="group relative flex items-center justify-between overflow-hidden rounded-2xl px-6 py-5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
                     @click.prevent="navigate('/dashboards/vista-consolidada')"
                 >
                     <!-- Glass -->
                     <span
-                        class="glass-panel absolute inset-0 rounded-2xl transition-all duration-400"
+                        class="glass-panel absolute inset-0 rounded-2xl transition-all duration-300"
                         aria-hidden="true"
                     />
                     <!-- Gradient ring on hover -->
@@ -127,7 +127,6 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Icon } from '@iconify/vue'
 import { useUsers } from './composables/useUsers'
@@ -136,9 +135,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const navigate = (href: string) => router.visit(href)
 
-const { getResumen, dashboardCards, byUnits } = useUsers()
-
-onMounted(() => { getResumen() })
+const { dashboardCards, byUnits } = useUsers()
 
 const quickStats = [
     { value: '4',    label: 'Dashboards disponibles',   dot: 'bg-[#0b4261] dark:bg-[#5bb56a]' },

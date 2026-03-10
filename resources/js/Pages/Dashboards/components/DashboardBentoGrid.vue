@@ -14,7 +14,7 @@
             <component
                 :is="getTag(card)"
                 :href="getHref(card)"
-                class="dashboard-tile group relative flex overflow-hidden rounded-3xl transition-all duration-400 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
+                class="dashboard-tile group relative flex overflow-hidden rounded-3xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--p-focus-ring-color)] focus:ring-offset-2 focus:ring-offset-[var(--th-ring-offset)]"
                 :class="[
                     i === 0
                         ? 'dashboard-tile--featured col-span-1 row-span-2 flex-col justify-between p-8 min-h-[280px] h-full'
@@ -24,7 +24,7 @@
             >
                 <!-- Glass base -->
                 <span
-                    class="glass-panel absolute inset-0 rounded-3xl transition-all duration-400"
+                    class="glass-panel absolute inset-0 rounded-3xl transition-all duration-300"
                     :class="i === 0 ? 'group-hover:shadow-2xl' : 'group-hover:shadow-xl'"
                     aria-hidden="true"
                 />
@@ -104,7 +104,7 @@
 
                 <!-- CTA row -->
                 <div class="relative z-10 mt-4 flex items-center gap-2 text-[color:var(--th-item-active-color)]">
-                    <span class="text-sm font-semibold">{{ ctaLabel(card) }}</span>
+                    <span class="text-sm font-semibold">{{ ctaLabel(i, card) }}</span>
                     <Icon
                         :icon="isScrollMode(card) ? 'heroicons:arrow-down' : 'heroicons:arrow-right'"
                         class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -157,9 +157,9 @@ function getHref(card: CardWithSection): string | undefined {
     return isScrollMode(card) ? undefined : card.href
 }
 
-function ctaLabel(card: CardWithSection): string {
+function ctaLabel(index: number, card: CardWithSection): string {
     if (isScrollMode(card)) return 'Ver en esta página'
-    return props.cards.indexOf(card) === 0 ? 'Abrir vista' : 'Abrir'
+    return index === 0 ? 'Abrir vista' : 'Abrir'
 }
 
 function accentBarClass(card: CardWithSection): string {

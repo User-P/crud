@@ -1,8 +1,8 @@
+@import "./dashboards-glass.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import "./dashboards-glass.css";
 
 /* =============================================================================
    TEMA — Variables CSS (--th-* = theme, --p-* = PrimeVue)
@@ -11,7 +11,7 @@
 
 :root {
     --th-app-bg: linear-gradient(145deg, #eef1f4 0%, #e2e8ef 25%, #dbe2eb 60%, #e6eef2 100%);
-    --th-dot: rgba(11, 66, 97, 0.06);
+    --th-dot: rgba(11, 66, 97, 0.08);
 
     --th-sidebar-bg: rgba(255, 255, 255, 0.78);
     --th-sidebar-border: rgba(11, 66, 97, 0.12);
@@ -83,14 +83,14 @@
     --p-primary-contrast-color: #ffffff;
     --p-primary-hover-color: #0d5a7a;
     --p-focus-ring-color: rgba(11, 66, 97, 0.35);
-    /* Glass panels: visibles en modo claro (borde + sombra) */
-    --glass-bg: rgba(255, 255, 255, 0.78);
-    --glass-bg-hover: rgba(255, 255, 255, 0.88);
+    /* Glass panels: visibles en modo claro (borde + sombra + inner-highlight) */
+    --glass-bg: rgba(252, 254, 255, 0.82);
+    --glass-bg-hover: rgba(255, 255, 255, 0.94);
     --glass-border: rgba(11, 66, 97, 0.14);
-    --glass-border-hover: rgba(11, 66, 97, 0.22);
-    --glass-shadow: 0 4px 24px rgba(11, 66, 97, 0.1), 0 2px 12px rgba(0, 0, 0, 0.06);
-    --glass-shadow-hover: 0 20px 48px rgba(11, 66, 97, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
-    --glass-blur: 24px;
+    --glass-border-hover: rgba(11, 66, 97, 0.26);
+    --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 4px 20px rgba(11, 66, 97, 0.09), 0 1px 4px rgba(0, 0, 0, 0.05);
+    --glass-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 1), 0 16px 44px rgba(11, 66, 97, 0.13), 0 4px 12px rgba(0, 0, 0, 0.07);
+    --glass-blur: 20px;
 }
 
 [data-theme="dark"] {

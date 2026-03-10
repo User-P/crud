@@ -62,13 +62,6 @@ createInertiaApp({
             .use(PrimeVue, {
                 theme: {
                     preset: CosmosPreset,
-                    options: {
-                        cssLayer: {
-                            name: 'primevue',
-                            order: 'base, primevue, utilities',
-                        },
-                        darkModeSelector: '[data-theme="dark"]',
-                    },
                 },
             })
             .mount(el);
