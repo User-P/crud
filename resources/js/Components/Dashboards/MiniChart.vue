@@ -21,7 +21,7 @@ interface Props {
     /** Chart type: donut (pie) or horizontal bar */
     type: 'donut' | 'bar'
     data: MiniChartDataItem[]
-    /** Optional colour overrides — falls back to Cosmos palette */
+    /** Optional colour overrides — falls back to theme palette */
     colors?: string[]
 }
 

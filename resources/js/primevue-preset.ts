@@ -2,7 +2,7 @@ import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
 
 /**
- * CosmosPreset — PrimeVue theme alineado con la paleta DSI.
+ * Preset PrimeVue alineado con la paleta DSI (glass/bento).
  * Verde #5bb56a, azul #0b4261, gris #64666a.
  */
 const CosmosPreset = definePreset(Aura, {

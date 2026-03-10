@@ -26,7 +26,7 @@ function initTheme() {
 }
 initTheme();
 
-/* Temas ECharts alineados con Cosmos (glass/bento) */
+/* Temas ECharts alineados con el tema glass/bento del dashboard */
 echarts.registerTheme("cosmos-light", cosmosLight);
 echarts.registerTheme("cosmos-dark", cosmosDark);
 

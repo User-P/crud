@@ -11,7 +11,7 @@ echarts.use([CanvasRenderer]);
 
 interface Props {
     option: Record<string, any>;
-    /** Si no se pasa, se usa cosmos-light / cosmos-dark según data-theme */
+    /** Si no se pasa, se usa tema light/dark según data-theme */
     theme?: string;
 }
 

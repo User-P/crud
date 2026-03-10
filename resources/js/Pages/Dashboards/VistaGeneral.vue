@@ -7,8 +7,7 @@
                     <span
                         v-for="chip in headerChips"
                         :key="chip.label"
-                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-[var(--th-border)]"
-                        style="background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);"
+                        class="glass-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-[var(--th-border)]"
                     >
                         <span class="h-1.5 w-1.5 rounded-full" :class="chip.dot" aria-hidden="true" />
                         <span class="text-[color:var(--th-text-secondary)]">{{ chip.label }}:</span>

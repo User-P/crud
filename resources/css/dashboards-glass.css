@@ -1,0 +1,283 @@
+/**
+ * Estilos glassmorphic para dashboards
+ * Tarjetas con backdrop-blur, bordes translúcidos y sombras suaves.
+ * Sin dependencia de "cosmostheme".
+ */
+
+/* =============================================================================
+   CONTENEDOR PRINCIPAL — Fondo, grain, puntos
+   ============================================================================= */
+
+.dashboard-app {
+    background: var(--th-app-bg);
+    min-height: 100vh;
+    position: relative;
+}
+
+.dashboard-app::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+[data-theme="dark"] .dashboard-app::after { opacity: 0.06; }
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-app::after { display: none; }
+}
+
+.dashboard-app::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, var(--th-dot) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* =============================================================================
+   Blobs de ambiente (solo dark)
+   ============================================================================= */
+
+.glass-blob {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    display: none;
+}
+[data-theme="dark"] .glass-blob { display: block; }
+
+.glass-blob-1 {
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(11, 66, 97, 0.15) 0%, transparent 65%);
+    top: -250px; left: -200px;
+    animation: glass-pulse 10s ease-in-out infinite;
+}
+.glass-blob-2 {
+    width: 550px; height: 550px;
+    background: radial-gradient(circle, rgba(91, 181, 106, 0.12) 0%, transparent 65%);
+    bottom: -150px; right: -100px;
+    animation: glass-pulse 13s ease-in-out infinite reverse;
+}
+.glass-blob-3 {
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, rgba(100, 102, 106, 0.08) 0%, transparent 65%);
+    top: 40%; left: 38%;
+    animation: glass-pulse 16s ease-in-out infinite;
+    animation-delay: -5s;
+}
+@keyframes glass-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.75; }
+}
+
+/* =============================================================================
+   REDUCED MOTION
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-app *,
+    .dashboard-app *::before,
+    .dashboard-app *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* =============================================================================
+   REVEAL ESCALONADO
+   ============================================================================= */
+
+@keyframes glass-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glass-reveal {
+    animation: glass-fade-in-up 0.5s ease-out both;
+}
+.glass-reveal--stagger-1 { animation-delay: 0.05s; }
+.glass-reveal--stagger-2 { animation-delay: 0.1s; }
+.glass-reveal--stagger-3 { animation-delay: 0.15s; }
+.glass-reveal--stagger-4 { animation-delay: 0.2s; }
+.glass-reveal--stagger-5 { animation-delay: 0.25s; }
+.glass-reveal--stagger-6 { animation-delay: 0.3s; }
+.glass-reveal--stagger-7 { animation-delay: 0.35s; }
+.glass-reveal--stagger-8 { animation-delay: 0.4s; }
+
+/* =============================================================================
+   HOVER LIFT — Elevación en cards
+   ============================================================================= */
+
+.glass-chip {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+[data-theme="dark"] .glass-chip {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.glass-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.glass-lift:hover {
+    transform: translateY(-4px);
+}
+[data-theme="dark"] .glass-lift:hover {
+    transform: translateY(-4px);
+}
+@media (prefers-reduced-motion: reduce) {
+    .glass-lift:hover { transform: none; }
+}
+
+/* =============================================================================
+   TARJETAS BENTO — dashboard-tile
+   ============================================================================= */
+
+.dashboard-app .dashboard-tile {
+    box-shadow: 0 4px 24px rgba(11, 66, 97, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.dashboard-app .dashboard-tile:hover {
+    box-shadow: 0 16px 48px rgba(11, 66, 97, 0.1), 0 8px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-4px);
+}
+[data-theme="dark"] .dashboard-app .dashboard-tile {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+[data-theme="dark"] .dashboard-app .dashboard-tile:hover {
+    box-shadow: 0 0 0 1px rgba(91, 181, 106, 0.12), 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 60px rgba(91, 181, 106, 0.06);
+    transform: translateY(-4px);
+}
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-app .dashboard-tile:hover { transform: none; }
+}
+
+/* =============================================================================
+   BILLBOARD HERO (opcional)
+   ============================================================================= */
+
+.dashboard-app .billboard-hero__bg {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(232, 245, 235, 0.6) 50%, rgba(235, 243, 248, 0.7) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(11, 66, 97, 0.08), 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+[data-theme="dark"] .dashboard-app .billboard-hero__bg {
+    background: linear-gradient(135deg, rgba(11, 66, 97, 0.25) 0%, rgba(20, 40, 50, 0.5) 50%, rgba(11, 66, 97, 0.2) 100%);
+    border: 1px solid rgba(91, 181, 106, 0.2);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(91, 181, 106, 0.08);
+}
+.dashboard-app .billboard-hero__blob {
+    background: radial-gradient(circle, rgba(11, 66, 97, 0.2) 0%, transparent 70%);
+}
+[data-theme="dark"] .dashboard-app .billboard-hero__blob {
+    background: radial-gradient(circle, rgba(91, 181, 106, 0.2) 0%, transparent 70%);
+}
+
+/* =============================================================================
+   GLASS CARD — Utilidades para tarjetas tipo cristal
+   ============================================================================= */
+
+@keyframes glass-glow-pulse {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50%       { opacity: 0.35; transform: scale(1.06); }
+}
+
+.metric-card--featured .metric-blob {
+    animation: glass-glow-pulse 4s ease-in-out infinite;
+}
+
+.secondary-metric-tile {
+    min-height: 110px;
+}
+
+.metric-card--featured.glass-lift:hover {
+    transform: translateY(-5px) !important;
+}
+
+/* Reveal progresivo para tiles secundarios */
+@keyframes bento-tile-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.secondary-metric-tile:nth-child(1) { animation: bento-tile-in 0.35s ease-out 0.05s both; }
+.secondary-metric-tile:nth-child(2) { animation: bento-tile-in 0.35s ease-out 0.10s both; }
+.secondary-metric-tile:nth-child(3) { animation: bento-tile-in 0.35s ease-out 0.15s both; }
+.secondary-metric-tile:nth-child(4) { animation: bento-tile-in 0.35s ease-out 0.20s both; }
+.secondary-metric-tile:nth-child(5) { animation: bento-tile-in 0.35s ease-out 0.25s both; }
+.secondary-metric-tile:nth-child(6) { animation: bento-tile-in 0.35s ease-out 0.30s both; }
+.secondary-metric-tile:nth-child(n+7) { animation: bento-tile-in 0.35s ease-out 0.35s both; }
+
+@media (prefers-reduced-motion: reduce) {
+    .secondary-metric-tile,
+    .metric-card--featured .metric-blob { animation: none !important; }
+}
+
+/* Featured tile: borde gradiente al hover */
+.dashboard-tile--featured::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg,
+        rgba(11, 66, 97, 0) 0%,
+        rgba(91, 181, 106, 0.12) 50%,
+        rgba(11, 66, 97, 0) 100%
+    );
+    background-size: 200% 200%;
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+    z-index: 0;
+}
+.dashboard-tile--featured:hover::after { opacity: 1; }
+
+[data-theme="dark"] .dashboard-tile--featured::after {
+    background: linear-gradient(135deg,
+        rgba(91, 181, 106, 0) 0%,
+        rgba(107, 198, 122, 0.15) 50%,
+        rgba(91, 181, 106, 0) 100%
+    );
+    background-size: 200% 200%;
+}
+
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
+
+/* =============================================================================
+   SORTABLE — Drag-and-drop tiles
+   ============================================================================= */
+
+.sortable-ghost > .secondary-metric-tile {
+    opacity: 0.35;
+    border: 2px dashed rgba(11, 66, 97, 0.3) !important;
+    background: rgba(11, 66, 97, 0.04) !important;
+}
+[data-theme="dark"] .sortable-ghost > .secondary-metric-tile {
+    border-color: rgba(91, 181, 106, 0.3) !important;
+    background: rgba(91, 181, 106, 0.04) !important;
+}
+
+.sortable-chosen > .secondary-metric-tile {
+    box-shadow: 0 8px 32px rgba(11, 66, 97, 0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
+    transform: scale(1.02);
+}
+
+[data-theme="dark"] .group\/tile .pointer-events-none > div {
+    background: rgba(10, 14, 18, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .group\/tile .pointer-events-none > div > div:last-child > div {
+    border-top-color: rgba(10, 14, 18, 0.95) !important;
+}

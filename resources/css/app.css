@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "./dashboards-glass.css";
+
 /* =============================================================================
    TEMA — Variables CSS (--th-* = theme, --p-* = PrimeVue)
    Paleta DSI: verde #5bb56a, azul #0b4261, gris #64666a
@@ -160,157 +162,39 @@
 }
 
 /* =============================================================================
-   APP SHELL — Contenedor principal + blobs (solo dark)
-   ============================================================================= */
-
-.cosmos-app {
-    background: var(--th-app-bg);
-    min-height: 100vh;
-    position: relative;
-}
-
-/* Textura grain sutil (tendencia glass/paper) — mejora profundidad del glassmorphism */
-.cosmos-app::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-}
-[data-theme="dark"] .cosmos-app::after { opacity: 0.06; }
-@media (prefers-reduced-motion: reduce) {
-    .cosmos-app::after { display: none; }
-}
-
-.cosmos-app::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle at 1px 1px, var(--th-dot) 1px, transparent 0);
-    background-size: 28px 28px;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.cosmos-blob {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-    display: none;
-}
-[data-theme="dark"] .cosmos-blob { display: block; }
-
-.cosmos-blob-1 {
-    width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(11, 66, 97, 0.15) 0%, transparent 65%);
-    top: -250px; left: -200px;
-    animation: cosmos-pulse 10s ease-in-out infinite;
-}
-.cosmos-blob-2 {
-    width: 550px; height: 550px;
-    background: radial-gradient(circle, rgba(91, 181, 106, 0.12) 0%, transparent 65%);
-    bottom: -150px; right: -100px;
-    animation: cosmos-pulse 13s ease-in-out infinite reverse;
-}
-.cosmos-blob-3 {
-    width: 420px; height: 420px;
-    background: radial-gradient(circle, rgba(100, 102, 106, 0.08) 0%, transparent 65%);
-    top: 40%; left: 38%;
-    animation: cosmos-pulse 16s ease-in-out infinite;
-    animation-delay: -5s;
-}
-@keyframes cosmos-pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.75; }
-}
-
-/* =============================================================================
-   TENDENCIAS — Stagger reveal, hover lift, reduced motion
-   ============================================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-    .cosmos-app *,
-    .cosmos-app *::before,
-    .cosmos-app *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-@keyframes cosmos-fade-in-up {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.cosmos-reveal {
-    animation: cosmos-fade-in-up 0.5s ease-out both;
-}
-.cosmos-reveal--stagger-1 { animation-delay: 0.05s; }
-.cosmos-reveal--stagger-2 { animation-delay: 0.1s; }
-.cosmos-reveal--stagger-3 { animation-delay: 0.15s; }
-.cosmos-reveal--stagger-4 { animation-delay: 0.2s; }
-.cosmos-reveal--stagger-5 { animation-delay: 0.25s; }
-.cosmos-reveal--stagger-6 { animation-delay: 0.3s; }
-.cosmos-reveal--stagger-7 { animation-delay: 0.35s; }
-.cosmos-reveal--stagger-8 { animation-delay: 0.4s; }
-
-/* Hover lift: elevación sutil en cards (micro-interacción) */
-.cosmos-lift {
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.cosmos-lift:hover {
-    transform: translateY(-4px);
-}
-[data-theme="dark"] .cosmos-lift:hover {
-    transform: translateY(-4px);
-}
-@media (prefers-reduced-motion: reduce) {
-    .cosmos-lift:hover { transform: none; }
-}
-
-/* =============================================================================
    TIPOGRAFÍA Y COLORES POR DEFECTO (app + drawer)
    ============================================================================= */
 
-.cosmos-app,
+.dashboard-app,
 .drawer-panel {
     color: var(--th-text-primary);
 }
-.cosmos-app p, .drawer-panel p { color: var(--th-text-secondary); }
-.cosmos-app small, .drawer-panel small { color: var(--th-text-muted); }
-.cosmos-app h1, .cosmos-app h2, .cosmos-app h3, .cosmos-app h4, .cosmos-app h5, .cosmos-app h6,
+.dashboard-app p, .drawer-panel p { color: var(--th-text-secondary); }
+.dashboard-app small, .drawer-panel small { color: var(--th-text-muted); }
+.dashboard-app h1, .dashboard-app h2, .dashboard-app h3, .dashboard-app h4, .dashboard-app h5, .dashboard-app h6,
 .drawer-panel h1, .drawer-panel h2, .drawer-panel h3, .drawer-panel h4, .drawer-panel h5, .drawer-panel h6 {
     color: var(--th-text-primary);
 }
-.cosmos-app section h3, .drawer-panel section h3 {
+.dashboard-app section h3, .drawer-panel section h3 {
     color: var(--th-group-label);
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
-.cosmos-app strong, .drawer-panel strong { color: var(--th-text-primary); font-weight: 600; }
-.cosmos-app th, .drawer-panel th { color: var(--th-text-secondary); }
-.cosmos-app td, .drawer-panel td { color: inherit; }
+.dashboard-app strong, .drawer-panel strong { color: var(--th-text-primary); font-weight: 600; }
+.dashboard-app th, .drawer-panel th { color: var(--th-text-secondary); }
+.dashboard-app td, .drawer-panel td { color: inherit; }
 
-.cosmos-app .text-primary, .drawer-panel .text-primary { color: var(--th-text-primary) !important; }
-.cosmos-app .text-secondary, .drawer-panel .text-secondary { color: var(--th-text-secondary) !important; }
-.cosmos-app .text-muted, .drawer-panel .text-muted { color: var(--th-text-muted) !important; }
+.dashboard-app .text-primary, .drawer-panel .text-primary { color: var(--th-text-primary) !important; }
+.dashboard-app .text-secondary, .drawer-panel .text-secondary { color: var(--th-text-secondary) !important; }
+.dashboard-app .text-muted, .drawer-panel .text-muted { color: var(--th-text-muted) !important; }
 
 /* =============================================================================
    LAYOUT — Sidebar y Navbar (glass)
    ============================================================================= */
 
-.cosmos-app .sidebar {
+.dashboard-app .sidebar {
     background: var(--th-sidebar-bg);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -318,7 +202,7 @@
     box-shadow: var(--th-sidebar-shadow);
 }
 
-.cosmos-app .nav {
+.dashboard-app .nav {
     background: var(--th-nav-bg);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -330,30 +214,30 @@
    UI — Botones, navegación, búsqueda, breadcrumb, títulos
    ============================================================================= */
 
-.cosmos-app .btn,
+.dashboard-app .btn,
 .drawer-panel button {
     color: var(--th-btn-color);
     transition: background-color 150ms, color 150ms;
 }
-.cosmos-app .btn:hover,
+.dashboard-app .btn:hover,
 .drawer-panel button:hover {
     background-color: var(--th-btn-hover-bg);
     color: var(--th-btn-hover-color);
 }
 
-.cosmos-app .nav-item { color: var(--th-item-color); }
-.cosmos-app .nav-item:hover {
+.dashboard-app .nav-item { color: var(--th-item-color); }
+.dashboard-app .nav-item:hover {
     background-color: var(--th-item-hover-bg);
     color: var(--th-item-hover-color);
 }
 
-.cosmos-app .item-active {
+.dashboard-app .item-active {
     background: var(--th-item-active-bg);
     color: var(--th-item-active-color);
     position: relative;
     overflow: hidden;
 }
-.cosmos-app .item-active::before {
+.dashboard-app .item-active::before {
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
@@ -362,104 +246,64 @@
     box-shadow: 0 0 10px var(--th-item-active-glow);
 }
 
-.cosmos-app .nav-icon { color: var(--th-icon-color); }
-.cosmos-app .nav-icon-active { color: var(--th-icon-active-color); }
+.dashboard-app .nav-icon { color: var(--th-icon-color); }
+.dashboard-app .nav-icon-active { color: var(--th-icon-active-color); }
 
-.cosmos-app .child-item { color: var(--th-child-color); }
-.cosmos-app .child-item:hover { color: var(--th-child-hover-color); }
-.cosmos-app .child-active { color: var(--th-child-active-color); font-weight: 500; }
+.dashboard-app .child-item { color: var(--th-child-color); }
+.dashboard-app .child-item:hover { color: var(--th-child-hover-color); }
+.dashboard-app .child-active { color: var(--th-child-active-color); font-weight: 500; }
 
-.cosmos-app .search-input {
+.dashboard-app .search-input {
     background: var(--th-input-bg) !important;
     border: 1px solid var(--th-input-border) !important;
     color: var(--th-input-text) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-.cosmos-app .search-input::placeholder { color: var(--th-input-placeholder) !important; }
-.cosmos-app .search-input:focus {
+.dashboard-app .search-input::placeholder { color: var(--th-input-placeholder) !important; }
+.dashboard-app .search-input:focus {
     background: var(--th-input-focus-bg) !important;
     border-color: var(--th-input-focus-border) !important;
     outline: none;
     box-shadow: 0 0 0 3px rgba(11, 66, 97, 0.12) !important;
 }
 
-.cosmos-app .gradient-text {
+.dashboard-app .gradient-text {
     background: var(--th-title-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.cosmos-app .logo-text { color: var(--th-logo-text); }
-.cosmos-app .logo-sub { color: var(--th-logo-sub); }
-.cosmos-app .group-label { color: var(--th-group-label); }
-.cosmos-app .group-line { background-color: var(--th-group-line); }
-.cosmos-app .separator { background-color: var(--th-divider); }
-.cosmos-app .crumb-link { color: var(--th-crumb-link); }
-.cosmos-app .crumb-link:hover { color: var(--th-crumb-hover); }
-.cosmos-app .crumb-current { color: var(--th-crumb-current); }
-.cosmos-app .crumb-separator { color: var(--th-crumb-separator); }
-.cosmos-app .subtitle { color: var(--th-subtitle); }
+.dashboard-app .logo-text { color: var(--th-logo-text); }
+.dashboard-app .logo-sub { color: var(--th-logo-sub); }
+.dashboard-app .group-label { color: var(--th-group-label); }
+.dashboard-app .group-line { background-color: var(--th-group-line); }
+.dashboard-app .separator { background-color: var(--th-divider); }
+.dashboard-app .crumb-link { color: var(--th-crumb-link); }
+.dashboard-app .crumb-link:hover { color: var(--th-crumb-hover); }
+.dashboard-app .crumb-current { color: var(--th-crumb-current); }
+.dashboard-app .crumb-separator { color: var(--th-crumb-separator); }
+.dashboard-app .subtitle { color: var(--th-subtitle); }
 
-.cosmos-app .icon-box,
+.dashboard-app .icon-box,
 .drawer-panel .icon-box {
     background: rgba(11, 66, 97, 0.12);
     color: var(--th-item-active-color);
 }
-[data-theme="dark"] .cosmos-app .icon-box,
+[data-theme="dark"] .dashboard-app .icon-box,
 [data-theme="dark"] .drawer-panel .icon-box {
     background: rgba(91, 181, 106, 0.18);
     color: var(--th-icon-active-color);
 }
 
-.cosmos-app .kbd {
+.dashboard-app .kbd {
     background: var(--th-kbd-bg);
     border: 1px solid var(--th-kbd-border);
     color: var(--th-text-muted);
 }
-.cosmos-app .notification-dot { background-color: var(--th-notification-badge); }
-.cosmos-app .status-ring { --tw-ring-color: var(--th-status-ring); }
-
-/* =============================================================================
-   DASHBOARD — Bento tiles + billboard hero
-   ============================================================================= */
-
-.cosmos-app .dashboard-tile {
-    box-shadow: 0 4px 24px rgba(11, 66, 97, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.cosmos-app .dashboard-tile:hover {
-    box-shadow: 0 16px 48px rgba(11, 66, 97, 0.1), 0 8px 24px rgba(0, 0, 0, 0.06);
-    transform: translateY(-4px);
-}
-[data-theme="dark"] .cosmos-app .dashboard-tile {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-}
-[data-theme="dark"] .cosmos-app .dashboard-tile:hover {
-    box-shadow: 0 0 0 1px rgba(91, 181, 106, 0.12), 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 60px rgba(91, 181, 106, 0.06);
-    transform: translateY(-4px);
-}
-@media (prefers-reduced-motion: reduce) {
-    .cosmos-app .dashboard-tile:hover { transform: none; }
-}
-
-.cosmos-app .billboard-hero__bg {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(232, 245, 235, 0.6) 50%, rgba(235, 243, 248, 0.7) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 8px 32px rgba(11, 66, 97, 0.08), 0 2px 12px rgba(0, 0, 0, 0.04);
-}
-[data-theme="dark"] .cosmos-app .billboard-hero__bg {
-    background: linear-gradient(135deg, rgba(11, 66, 97, 0.25) 0%, rgba(20, 40, 50, 0.5) 50%, rgba(11, 66, 97, 0.2) 100%);
-    border: 1px solid rgba(91, 181, 106, 0.2);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(91, 181, 106, 0.08);
-}
-.cosmos-app .billboard-hero__blob {
-    background: radial-gradient(circle, rgba(11, 66, 97, 0.2) 0%, transparent 70%);
-}
-[data-theme="dark"] .cosmos-app .billboard-hero__blob {
-    background: radial-gradient(circle, rgba(91, 181, 106, 0.2) 0%, transparent 70%);
-}
+.dashboard-app .notification-dot { background-color: var(--th-notification-badge); }
+.dashboard-app .status-ring { --tw-ring-color: var(--th-status-ring); }
 
 /* =============================================================================
    DRAWER (DetailDrawer) — Overlay y panel glass
@@ -862,125 +706,3 @@
 ::-webkit-scrollbar-thumb:hover { background: rgba(11, 66, 97, 0.45); }
 [data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(91, 181, 106, 0.2); }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(91, 181, 106, 0.4); }
-
-/* =============================================================================
-   GLASSMORPHISM ENHANCED — Bento dashboard utilities
-   ============================================================================= */
-
-/* Ambient glow pulsing for featured metric cards */
-@keyframes cosmos-glow-pulse {
-    0%, 100% { opacity: 0.2; transform: scale(1); }
-    50%       { opacity: 0.35; transform: scale(1.06); }
-}
-
-/* Gradient shimmer border sweep (featured card ring) */
-@keyframes border-shimmer {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Value count-up fade-in for featured metric */
-@keyframes metric-value-in {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Tile reveal with slight scale */
-@keyframes bento-tile-in {
-    from { opacity: 0; transform: translateY(8px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Featured MetricCard: animated corner orbs */
-.metric-card--featured .metric-blob {
-    animation: cosmos-glow-pulse 4s ease-in-out infinite;
-}
-
-/* Secondary metric tiles: compact bento glass cards */
-.secondary-metric-tile {
-    /* Inherits glass from inline span — no extra bg needed */
-    min-height: 110px;
-}
-
-/* Hover lift overrides (featured tile goes higher) */
-.metric-card--featured.cosmos-lift:hover {
-    transform: translateY(-5px) !important;
-}
-
-/* Progressive reveal for secondary metric tiles */
-.secondary-metric-tile:nth-child(1) { animation: bento-tile-in 0.35s ease-out 0.05s both; }
-.secondary-metric-tile:nth-child(2) { animation: bento-tile-in 0.35s ease-out 0.10s both; }
-.secondary-metric-tile:nth-child(3) { animation: bento-tile-in 0.35s ease-out 0.15s both; }
-.secondary-metric-tile:nth-child(4) { animation: bento-tile-in 0.35s ease-out 0.20s both; }
-.secondary-metric-tile:nth-child(5) { animation: bento-tile-in 0.35s ease-out 0.25s both; }
-.secondary-metric-tile:nth-child(6) { animation: bento-tile-in 0.35s ease-out 0.30s both; }
-.secondary-metric-tile:nth-child(n+7) { animation: bento-tile-in 0.35s ease-out 0.35s both; }
-
-/* Respect reduced-motion */
-@media (prefers-reduced-motion: reduce) {
-    .secondary-metric-tile,
-    .metric-card--featured .metric-blob { animation: none !important; }
-}
-
-/* Dashboard bento grid: featured card gradient border (shimmer) */
-.dashboard-tile--featured::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: 1.5rem;
-    background: linear-gradient(135deg,
-        rgba(11, 66, 97, 0) 0%,
-        rgba(91, 181, 106, 0.12) 50%,
-        rgba(11, 66, 97, 0) 100%
-    );
-    background-size: 200% 200%;
-    opacity: 0;
-    transition: opacity 0.4s;
-    pointer-events: none;
-    z-index: 0;
-}
-.dashboard-tile--featured:hover::after { opacity: 1; }
-
-[data-theme="dark"] .dashboard-tile--featured::after {
-    background: linear-gradient(135deg,
-        rgba(91, 181, 106, 0) 0%,
-        rgba(107, 198, 122, 0.15) 50%,
-        rgba(91, 181, 106, 0) 100%
-    );
-    background-size: 200% 200%;
-}
-
-/* =============================================================================
-   SORTABLE DRAG-AND-DROP — Secondary metric tiles
-   ============================================================================= */
-
-/* Ghost: the placeholder slot shown while dragging */
-.sortable-ghost > .secondary-metric-tile {
-    opacity: 0.35;
-    border: 2px dashed rgba(11, 66, 97, 0.3) !important;
-    background: rgba(11, 66, 97, 0.04) !important;
-}
-[data-theme="dark"] .sortable-ghost > .secondary-metric-tile {
-    border-color: rgba(91, 181, 106, 0.3) !important;
-    background: rgba(91, 181, 106, 0.04) !important;
-}
-
-/* Chosen: the element being picked up before drag starts */
-.sortable-chosen > .secondary-metric-tile {
-    box-shadow: 0 8px 32px rgba(11, 66, 97, 0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
-    transform: scale(1.02);
-}
-
-/* Drag handle icon visible styles */
-.drag-handle { cursor: grab; }
-.drag-handle:active { cursor: grabbing; }
-
-/* Rich tile popover: dark mode background override */
-[data-theme="dark"] .group\/tile .pointer-events-none > div {
-    background: rgba(10, 14, 18, 0.95) !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-}
-[data-theme="dark"] .group\/tile .pointer-events-none > div > div:last-child > div {
-    border-top-color: rgba(10, 14, 18, 0.95) !important;
-}

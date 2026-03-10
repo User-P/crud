@@ -1,9 +1,9 @@
 <template>
-    <div class="cosmos-app">
+    <div class="dashboard-app">
         <!-- Blobs de fondo (solo dark) -->
-        <div class="cosmos-blob cosmos-blob-1" aria-hidden="true" />
-        <div class="cosmos-blob cosmos-blob-2" aria-hidden="true" />
-        <div class="cosmos-blob cosmos-blob-3" aria-hidden="true" />
+        <div class="glass-blob glass-blob-1" aria-hidden="true" />
+        <div class="glass-blob glass-blob-2" aria-hidden="true" />
+        <div class="glass-blob glass-blob-3" aria-hidden="true" />
 
         <div class="relative z-10 flex min-h-screen">
             <!-- ── Sidebar desktop: sticky mientras scrollea el contenido ── -->

@@ -6,8 +6,8 @@
             v-for="(card, i) in cards"
             :key="card.name"
             :class="[
-                'cosmos-reveal',
-                `cosmos-reveal--stagger-${Math.min(i + 1, 8)}`,
+                'glass-reveal',
+                `glass-reveal--stagger-${Math.min(i + 1, 8)}`,
                 i === 0 ? 'lg:row-span-2 lg:min-h-0 lg:h-full' : '',
             ]"
         >
