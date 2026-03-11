@@ -1,30 +1,63 @@
-import { ref } from "vue"
+import { ref, reactive } from "vue"
 
 /** Datos dummy para visualizar la interfaz sin depender de la API. */
 
 // Respuesta de /resumen (no se usa en template actualmente)
 const DUMMY_RESUMEN = { ok: true, message: "Datos de demostración" }
 
-// Respuesta de /cards/:date (VistaGeneral: hero, primary, secondary)
+// Respuesta de /cards/:date (VistaGeneral: hero, primary, secondary + Cyaal: main, more)
 const DUMMY_USERS_CARDS = {
+    // --- Cyaal: tarjetas hero (grid 2fr) ---
+    main: [
+        { id: "licencias_consumidas", label: "Licencias consumidas", value: "131,500", variant: "blue", iconKey: "heroicons:check-badge" },
+        { id: "licencias_totales",    label: "Licencias totales",    value: "142,000", variant: "green", iconKey: "heroicons:users" },
+    ],
+    // --- Cyaal: tarjetas complementarias (columna 1fr) ---
+    more: [
+        { id: "sin_licencia", label: "Sin licencia", value: "10,500", variant: "red", iconKey: "heroicons:x-circle" },
+    ],
+    // --- Con licencia (primary) ---
     primary: [
-        {
-            id: "total",
-            label: "Usuarios totales",
-            value: 142000,
-            variant: "blue",
-            iconKey: "heroicons:globe-alt",
-        },
-        { id: "activos", label: "Usuarios activos", value: 132000, variant: "green", iconKey: "heroicons:check-circle" },
-        { id: "inactivos", label: "Usuarios inactivos", value: 10000, variant: "red", iconKey: "heroicons:x-circle" },
+        { id: "total",     label: "Usuarios totales",   value: 142000,  variant: "blue",  iconKey: "heroicons:globe-alt" },
+        { id: "activos",   label: "Usuarios activos",   value: 132000,  variant: "green", iconKey: "heroicons:check-circle" },
+        { id: "inactivos", label: "Usuarios inactivos", value: 10000,   variant: "red",   iconKey: "heroicons:x-circle" },
     ],
+    // --- Sin licencia (secondary) ---
     secondary: [
-        { id: "locked", label: "Bloqueados", value: 120, variant: "red", iconKey: "heroicons:no-symbol" },
-        { id: "password", label: "Password expirado", value: 85, variant: "red", iconKey: "heroicons:lock-open" },
-        { id: "provisioned", label: "Provisionados", value: 131500, variant: "red", iconKey: "heroicons:pause-circle" },
-        { id: "suspendidos", label: "Suspendidos", value: 2700, variant: "red", iconKey: "heroicons:user-minus" },
-        { id: "desactivados", label: "Desactivados", value: 605, variant: "red", iconKey: "heroicons:minus-circle" },
+        { id: "locked",       label: "Bloqueados",         value: 120,    variant: "red", iconKey: "heroicons:no-symbol" },
+        { id: "password",     label: "Password expirado",  value: 85,     variant: "red", iconKey: "heroicons:lock-open" },
+        { id: "provisioned",  label: "Provisionados",      value: 131500, variant: "red", iconKey: "heroicons:pause-circle" },
+        { id: "suspendidos",  label: "Suspendidos",        value: 2700,   variant: "red", iconKey: "heroicons:user-minus" },
+        { id: "desactivados", label: "Desactivados",       value: 605,    variant: "red", iconKey: "heroicons:minus-circle" },
     ],
+}
+
+// Datos dummy por tarjeta para la vista Cyaal (campos reales de la API)
+const DUMMY_CYAAL_USERS_BY_CARD: Record<string, Record<string, unknown>[]> = {
+    licencias_consumidas: [
+        { id_cyaal_usr: "CYAAL-0001", estatus_cyaal_usr: "PROVISIONED" },
+        { id_cyaal_usr: "CYAAL-0002", estatus_cyaal_usr: "ACTIVE" },
+        { id_cyaal_usr: "CYAAL-0003", estatus_cyaal_usr: "LOCKED" },
+        { id_cyaal_usr: "CYAAL-0004", estatus_cyaal_usr: "SUSPENDED" },
+        { id_cyaal_usr: "CYAAL-0005", estatus_cyaal_usr: "PROVISIONED" },
+    ],
+    licencias_totales: [
+        { id_cyaal_usr: "CYAAL-0001", estatus_cyaal_usr: "PROVISIONED" },
+        { id_cyaal_usr: "CYAAL-0006", estatus_cyaal_usr: "ACTIVE" },
+        { id_cyaal_usr: "CYAAL-0007", estatus_cyaal_usr: "INACTIVE" },
+    ],
+    sin_licencia: [
+        { id_cyaal_usr: "CYAAL-0008", estatus_cyaal_usr: "LOCKED" },
+        { id_cyaal_usr: "CYAAL-0009", estatus_cyaal_usr: "PASSWORD_EXPIRED" },
+    ],
+    total:       [{ id_cyaal_usr: "CYAAL-0001", estatus_cyaal_usr: "ACTIVE" }, { id_cyaal_usr: "CYAAL-0002", estatus_cyaal_usr: "PROVISIONED" }],
+    activos:     [{ id_cyaal_usr: "CYAAL-0001", estatus_cyaal_usr: "ACTIVE" }],
+    inactivos:   [{ id_cyaal_usr: "CYAAL-0003", estatus_cyaal_usr: "LOCKED" }, { id_cyaal_usr: "CYAAL-0004", estatus_cyaal_usr: "SUSPENDED" }],
+    locked:      [{ id_cyaal_usr: "CYAAL-0003", estatus_cyaal_usr: "LOCKED" }],
+    password:    [{ id_cyaal_usr: "CYAAL-0005", estatus_cyaal_usr: "PASSWORD_EXPIRED" }],
+    provisioned: [{ id_cyaal_usr: "CYAAL-0002", estatus_cyaal_usr: "PROVISIONED" }],
+    suspendidos: [{ id_cyaal_usr: "CYAAL-0004", estatus_cyaal_usr: "SUSPENDED" }],
+    desactivados:[{ id_cyaal_usr: "CYAAL-0006", estatus_cyaal_usr: "INACTIVE" }],
 }
 
 // Respuesta de /charts/:date
@@ -203,7 +236,9 @@ export const useUsers = () => {
     const charts = ref<typeof DUMMY_CHARTS | undefined>()
     const categories = ref<typeof DUMMY_CHARTS.charts | undefined>()
     const suspended = ref<typeof DUMMY_SUSPENDED | undefined>()
-    const details = ref<typeof DUMMY_DETAILS | undefined>()
+    // Mapa reactivo: cardId → filas de detalle. Usando reactive() para que
+    // computed() en los componentes detecte cuando se agrega una clave nueva.
+    const details = reactive<Record<string, Record<string, unknown>[]>>({})
     const isLoading = ref(false)
 
     const usersAdd = ref<typeof DUMMY_USERS_ADD | undefined>()
@@ -280,10 +315,16 @@ export const useUsers = () => {
         usersAdd.value = DUMMY_USERS_ADD
     }
 
-    const getDetails = async (_type: string, _date: string, _unit?: string) => {
+    const getDetails = async (type: string, _date: string, _unit?: string) => {
         isLoading.value = true
-        details.value = DUMMY_DETAILS
+        // Simula latencia de red; reemplazar con llamada axios en producción
+        details[type] = DUMMY_CYAAL_USERS_BY_CARD[type] ?? []
         isLoading.value = false
+    }
+
+    /** Limpia el caché de detalles (útil al cambiar fecha o unidad). */
+    const clearDetails = () => {
+        Object.keys(details).forEach((k) => delete details[k])
     }
 
     const getUsersAddDetails = async (_type: string, _date: string, _unit?: string) => {
@@ -308,6 +349,7 @@ export const useUsers = () => {
         getUsersAddDetails,
         getUsersAdd,
         getDetails,
+        clearDetails,
         getCharts,
         getIndicadores,
         getResumen,
