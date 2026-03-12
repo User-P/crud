@@ -3,10 +3,9 @@
         v-if="overlay"
         :class="[
             'app-loading-overlay flex flex-col items-center justify-center gap-3 bg-[var(--th-input-bg)] backdrop-blur-sm',
-            fullScreen ? 'fixed inset-0 z-9999' : 'absolute inset-0 z-10 rounded-2xl'
+            fullScreen ? 'fixed inset-0 z-[9999]' : 'absolute inset-0 z-10 rounded-2xl'
         ]"
         role="status"
-        aria-live="polite"
         :aria-label="message || 'Cargando'"
     >
         <ProgressSpinner
