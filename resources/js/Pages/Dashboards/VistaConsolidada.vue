@@ -14,7 +14,7 @@
                     </h2>
                     <div class="grid gap-5 sm:grid-cols-3">
                         <MetricCard v-for="card in primaryCards" :key="card.id" :label="card.label" :value="card.value"
-                            :icon="card.icon" :variant="card.variant" class="transition-shadow"
+                            :icon="card.icon" :color="card.variant" class="transition-shadow"
                             :class="{ 'ring-2 ring-[var(--th-input-focus-border)] ring-offset-2 ring-offset-[var(--th-ring-offset)]': selectedCard?.id === card.id }"
                             @click="selectedCard = card" />
                     </div>
@@ -112,13 +112,13 @@
                         El 94% de los usuarios están activos; 6% inactivos. La mayoría en estatus PROVISIONED.
                     </div>
                     <div class="grid gap-4 sm:grid-cols-3">
-                        <MetricCard label="Usuarios totales" value="140,000" icon="heroicons:globe-alt" variant="violet"
+                        <MetricCard label="Usuarios totales" value="140,000" icon="heroicons:globe-alt" color="violet"
                             trend="up" :trend-percent="2.4" :sparkline-data="[128, 131, 132, 130, 134, 138, 140]"
                             comparison="vs. mes anterior" />
                         <MetricCard label="Usuarios activos" value="132,000" icon="heroicons:check-circle"
-                            variant="green" trend="up" :trend-percent="1.8"
+                            color="green" trend="up" :trend-percent="1.8"
                             :sparkline-data="[126, 128, 129, 130, 131, 132, 132]" comparison="vs. mes anterior" />
-                        <MetricCard label="Usuarios inactivos" value="8,000" icon="heroicons:x-circle" variant="red"
+                        <MetricCard label="Usuarios inactivos" value="8,000" icon="heroicons:x-circle" color="red"
                             trend="down" :trend-percent="-0.5" :sparkline-data="[9, 8.5, 8.2, 8.1, 8.2, 8, 8]"
                             comparison="vs. mes anterior" />
                     </div>
@@ -188,7 +188,7 @@
                         <MetricCard v-for="card in usersAdd.cards" :key="card.id" :label="card.label"
                             :value="formatValue(card.value)"
                             :icon="'iconKey' in card ? (card as { iconKey: string }).iconKey : (card as { icon: string }).icon"
-                            :variant="(card.variant === 'yellow' ? 'blue' : card.variant) as 'blue' | 'green' | 'red' | 'violet'" />
+                            :color="(card.variant === 'yellow' ? 'blue' : card.variant)" />
                     </div>
                     <ExpandableChart title="Tendencia de altas (mensual)">
                         <div class="flex h-64 items-center justify-center text-sm text-[color:var(--th-text-muted)]">

@@ -261,8 +261,6 @@ interface Props {
     icon: string
     /** Color base de PrimeVue, ej. "blue" -> usa `--p-blue-400` */
     color?: string
-    /** Compat: alias histórico (si no se pasa color). */
-    variant?: 'blue' | 'green' | 'red' | 'violet'
     trend?: 'up' | 'down' | 'neutral'
     trendPercent?: number | null
     sparklineData?: number[]
@@ -279,7 +277,6 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     color: undefined,
-    variant: 'blue',
     trendPercent: null,
     featured: false,
     live: false,
@@ -287,7 +284,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 defineEmits<{ (e: 'click'): void }>()
 
-const resolvedColor = computed(() => props.color ?? props.variant ?? 'blue')
+const resolvedColor = computed(() => props.color ?? 'blue')
 const { iconStyle, dotStyle, badgeStyle, barStyle, blobStyle, gradientRingStyle, pingStyle, colorName } =
     usePrimeColorStyles(resolvedColor)
 

@@ -16,7 +16,7 @@
             <div v-if="chartCards.length" class="grid gap-4 sm:grid-cols-3">
                 <MetricCard v-for="card in chartCards" :key="card.id" :label="card.label"
                     :value="formatValue(card.value)" :icon="card.iconKey"
-                    :variant="(card.variant === 'yellow' ? 'blue' : card.variant) as 'blue' | 'green' | 'red' | 'violet'" />
+                    :color="(card.variant === 'yellow' ? 'blue' : card.variant)" />
             </div>
 
             <!-- Gráfica lineal (tendencia mensual) -->
