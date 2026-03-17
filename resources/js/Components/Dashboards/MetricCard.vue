@@ -9,7 +9,7 @@
         <span
             v-if="featured"
             class="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            :class="v.gradientRing"
+            :style="gradientRingStyle"
             aria-hidden="true"
         />
 
@@ -24,13 +24,13 @@
         <span
             v-if="featured"
             class="metric-blob absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-25 blur-3xl transition-all duration-500 group-hover:opacity-40 group-hover:scale-110"
-            :class="v.blob"
+            :style="blobStyle"
             aria-hidden="true"
         />
         <span
             v-if="featured"
             class="absolute -bottom-8 -left-8 h-28 w-28 rounded-full opacity-15 blur-2xl transition-opacity duration-500 group-hover:opacity-25"
-            :class="v.blob"
+            :style="blobStyle"
             aria-hidden="true"
         />
 
@@ -38,7 +38,7 @@
         <span
             v-if="!featured"
             class="absolute left-0 top-5 bottom-5 w-1.5 rounded-full transition-all duration-300 group-hover:w-2"
-            :class="v.bar"
+            :style="barStyle"
             aria-hidden="true"
         />
 
@@ -66,15 +66,15 @@
                     aria-hidden="true"
                 />
                 <span class="inline-flex items-center gap-1.5">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                    <span class="h-1.5 w-1.5 rounded-full" :style="dotStyle" aria-hidden="true" />
                     {{ liveLabel }}
                 </span>
             </span>
 
             <!-- Pulsing dot -->
             <span class="absolute inline-flex h-2.5 w-2.5 rounded-full">
-                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" aria-hidden="true" />
-                <span class="relative h-2.5 w-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400" aria-hidden="true" />
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" :style="pingStyle" aria-hidden="true" />
+                <span class="relative h-2.5 w-2.5 rounded-full" :style="dotStyle" aria-hidden="true" />
             </span>
         </span>
 
@@ -84,15 +84,16 @@
             <!-- Header: icon + trend pill -->
             <div class="flex items-start justify-between gap-2">
                 <div
-                    class="flex shrink-0 items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                    class="flex shrink-0 items-center justify-center border transition-transform duration-300 group-hover:scale-105"
                     :class="[
                         featured ? 'h-14 w-14 rounded-2xl' : 'h-11 w-11 rounded-xl',
-                        v.iconBg,
                     ]"
+                    :style="badgeStyle"
                 >
                     <Icon
                         :icon="icon"
-                        :class="[featured ? 'h-7 w-7' : 'h-5 w-5', v.iconColor]"
+                        :class="[featured ? 'h-7 w-7' : 'h-5 w-5']"
+                        :style="iconStyle"
                         aria-hidden="true"
                     />
                 </div>
@@ -242,8 +243,11 @@ import Sparkline from './Sparkline.vue'
 import MiniChart from './MiniChart.vue'
 import type { MiniChartDataItem } from './MiniChart.vue'
 import { useCountUp } from '@/composables/useCountUp'
+import { usePrimeColorStyles } from '@/composables/usePrimeColorStyles'
 
 const DONUT_DEFAULTS = ['#5bb56a', '#0b4261', '#ef4444', '#f59e0b', '#64666a']
+
+type SparklineColor = 'blue' | 'green' | 'red' | 'slate' | 'violet'
 
 interface MiniChartProp {
     type: 'donut' | 'bar'
@@ -255,6 +259,9 @@ interface Props {
     label: string
     value: string | number
     icon: string
+    /** Color base de PrimeVue, ej. "blue" -> usa `--p-blue-400` */
+    color?: string
+    /** Compat: alias histórico (si no se pasa color). */
     variant?: 'blue' | 'green' | 'red' | 'violet'
     trend?: 'up' | 'down' | 'neutral'
     trendPercent?: number | null
@@ -271,6 +278,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+    color: undefined,
     variant: 'blue',
     trendPercent: null,
     featured: false,
@@ -279,42 +287,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 defineEmits<{ (e: 'click'): void }>()
 
-// ── Variant styles ───────────────────────────────────────────────────────────
-const variants: Record<
-    'blue' | 'green' | 'red' | 'violet',
-    { iconBg: string; iconColor: string; bar: string; blob: string; gradientRing: string }
-> = {
-    blue: {
-        iconBg: 'bg-[#0b4261]/15 dark:bg-[#0d5a7a]/25',
-        iconColor: 'text-[#0b4261] dark:text-[#5bb56a]',
-        bar: 'bg-[#0b4261] dark:bg-[#0d5a7a]',
-        blob: 'bg-[#0b4261]',
-        gradientRing: 'bg-gradient-to-br from-[#0b4261]/40 via-[#5bb56a]/20 to-transparent',
-    },
-    green: {
-        iconBg: 'bg-[#5bb56a]/15 dark:bg-[#5bb56a]/25',
-        iconColor: 'text-[#4a9d58] dark:text-[#6bc67a]',
-        bar: 'bg-[#5bb56a]',
-        blob: 'bg-emerald-400',
-        gradientRing: 'bg-gradient-to-br from-emerald-400/40 via-emerald-300/20 to-transparent',
-    },
-    red: {
-        iconBg: 'bg-rose-500/15 dark:bg-rose-400/25',
-        iconColor: 'text-rose-600 dark:text-rose-400',
-        bar: 'bg-rose-500 dark:bg-rose-400',
-        blob: 'bg-rose-400',
-        gradientRing: 'bg-gradient-to-br from-rose-400/40 via-rose-300/20 to-transparent',
-    },
-    violet: {
-        iconBg: 'bg-violet-500/15 dark:bg-violet-400/25',
-        iconColor: 'text-violet-600 dark:text-violet-400',
-        bar: 'bg-violet-500 dark:bg-violet-400',
-        blob: 'bg-violet-400',
-        gradientRing: 'bg-gradient-to-br from-violet-400/40 via-violet-300/20 to-transparent',
-    },
-}
-
-const v = computed(() => variants[props.variant])
+const resolvedColor = computed(() => props.color ?? props.variant ?? 'blue')
+const { iconStyle, dotStyle, badgeStyle, barStyle, blobStyle, gradientRingStyle, pingStyle, colorName } =
+    usePrimeColorStyles(resolvedColor)
 
 const liveLabel = computed(() =>
     props.lastSync ? `Actualizado: ${props.lastSync}` : 'Datos en tiempo real',
@@ -329,9 +304,11 @@ const trendPillClass = computed(() => {
 })
 
 const sparklineColor = computed(() => {
-    if (props.trend === 'up' && props.variant !== 'red') return 'green'
-    if (props.trend === 'down' && props.variant === 'red') return 'red'
-    return props.variant === 'violet' ? 'violet' : props.variant
+    if (props.trend === 'up') return 'green'
+    if (props.trend === 'down') return 'red'
+    const candidate = (colorName.value === 'purple' ? 'violet' : colorName.value) as string
+    const allowed: Record<SparklineColor, true> = { blue: true, green: true, red: true, slate: true, violet: true }
+    return (allowed[candidate as SparklineColor] ? (candidate as SparklineColor) : 'blue') satisfies SparklineColor
 })
 
 const numericValue = computed<number | null>(() => {
