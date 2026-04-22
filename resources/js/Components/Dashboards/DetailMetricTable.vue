@@ -190,6 +190,7 @@ const pageSize = ref(props.rowsPerPage)
 const workerTotal = ref(props.rows.length)
 const workerPageIndexes = ref<number[]>([])
 const sorting = ref<{ key: string; desc: boolean } | null>(null)
+const datasetVersion = ref(0)
 
 let searchDebounce: ReturnType<typeof setTimeout> | undefined
 
@@ -233,6 +234,7 @@ function ensureWorker() {
     const workerSource = `
     let dataset = [];
     let columnKeys = [];
+    let activeDatasetVersion = 0;
     const parseMaybeNumber = (value) => {
       if (typeof value === 'number' && Number.isFinite(value)) return value;
       if (typeof value !== 'string') return null;
@@ -252,6 +254,7 @@ function ensureWorker() {
       if (payload.type === 'init') {
         dataset = Array.isArray(payload.rows) ? payload.rows : [];
         columnKeys = Array.isArray(payload.columnKeys) ? payload.columnKeys : [];
+        activeDatasetVersion = Number(payload.datasetVersion || 0);
         return;
       }
       if (payload.type !== 'process') return;
@@ -312,6 +315,7 @@ function ensureWorker() {
 
       self.postMessage({
         reqId: payload.reqId,
+        datasetVersion: activeDatasetVersion,
         total,
         pageIndexes,
       });
@@ -324,10 +328,12 @@ function ensureWorker() {
 
 function initWorkerData() {
     const w = ensureWorker()
+    datasetVersion.value += 1
     w.postMessage({
         type: 'init',
         rows: toRaw(props.rows),
         columnKeys: props.columns.map((c) => c.key),
+        datasetVersion: datasetVersion.value,
     })
 }
 
@@ -339,6 +345,7 @@ function processRows() {
     w.postMessage({
         type: 'process',
         reqId: currentReqId,
+        datasetVersion: datasetVersion.value,
         query: searchText.value,
         sorting: sorting.value ? { key: sorting.value.key, desc: sorting.value.desc } : null,
         pageIndex: pageIndex.value,
@@ -369,8 +376,14 @@ function sortIndicator(key: string): string {
 watch(
     () => [props.rows, props.columns],
     () => {
+        // Al cambiar de tarjeta/dataset, limpiar estado evita mezclar resultados previos.
+        rawSearchText.value = ''
+        searchText.value = ''
+        sorting.value = null
         initWorkerData()
         pageIndex.value = 0
+        workerPageIndexes.value = []
+        workerTotal.value = props.rows.length
         processRows()
     },
     { immediate: true }
@@ -392,9 +405,10 @@ watch(
 
 if (typeof window !== 'undefined') {
     const w = ensureWorker()
-    w.onmessage = (event: MessageEvent<{ reqId: number; total: number; pageIndexes: number[] }>) => {
+    w.onmessage = (event: MessageEvent<{ reqId: number; datasetVersion: number; total: number; pageIndexes: number[] }>) => {
         const payload = event.data
         if (payload.reqId !== requestId) return
+        if (payload.datasetVersion !== datasetVersion.value) return
         workerTotal.value = payload.total
         workerPageIndexes.value = payload.pageIndexes
         isProcessing.value = false
