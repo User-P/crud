@@ -10,7 +10,7 @@
                 <InputText
                     v-model="rawSearchText"
                     :placeholder="searchPlaceholder"
-                    class="w-full rounded-lg border-[var(--th-input-border)] bg-[var(--th-input-bg)] pl-9 text-sm placeholder:italic"
+                    class="w-full rounded-lg border-[var(--th-input-border)] bg-[var(--th-input-bg)] pl-9 text-sm placeholder:italic shadow-sm"
                     aria-label="Buscar en la tabla"
                 />
             </span>
@@ -42,21 +42,21 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="border-b border-[var(--th-border)] bg-[var(--th-input-bg)]">
+        <div class="overflow-x-auto max-h-[62vh]">
+            <table class="min-w-full text-sm border-separate border-spacing-0">
+                <thead class="sticky top-0 z-10 border-b border-[var(--th-border)] bg-[var(--th-input-bg)]">
                     <tr>
                         <th
-                            v-for="header in table.getHeaderGroups()[0]?.headers ?? []"
-                            :key="header.id"
-                            class="px-4 py-2.5 text-left font-semibold text-[color:var(--th-text-primary)]"
-                            :class="{ 'cursor-pointer select-none': header.column.getCanSort() }"
-                            @click="header.column.getCanSort() && toggleSort(header.column.id)"
+                            v-for="col in columns"
+                            :key="col.key"
+                            class="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold text-[color:var(--th-text-secondary)] border-b border-[var(--th-border)]/80"
+                            :class="{ 'cursor-pointer select-none hover:text-[color:var(--th-item-active-color)]': col.sortable !== false }"
+                            @click="col.sortable !== false && toggleSort(col.key)"
                         >
                             <div class="flex items-center gap-2">
-                                <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-                                <span v-if="header.column.getCanSort()" class="text-xs text-[color:var(--th-text-muted)]">
-                                    {{ sortIndicator(header.column.id) }}
+                                <span>{{ col.header }}</span>
+                                <span v-if="col.sortable !== false" class="text-xs text-[color:var(--th-text-muted)]">
+                                    {{ sortIndicator(col.key) }}
                                 </span>
                             </div>
                         </th>
@@ -67,7 +67,7 @@
                     <tr
                         v-for="(row, rowIndex) in pageRows"
                         :key="rowIndex"
-                        class="border-b border-[var(--th-border)]/60 odd:bg-[var(--th-input-bg)] even:bg-[var(--th-item-hover-bg)]/20"
+                        class="border-b border-[var(--th-border)]/60 odd:bg-[var(--th-input-bg)] even:bg-[var(--th-item-hover-bg)]/20 hover:bg-[var(--th-item-hover-bg)]/35 transition-colors"
                     >
                         <td
                             v-for="col in columns"
@@ -135,7 +135,6 @@ import { Icon } from '@iconify/vue'
 import EmptyState from '@/Components/EmptyState.vue'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
-import { FlexRender, createColumnHelper, getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 
 /** Configuración de una columna (datos dinámicos) */
 export interface DetailMetricColumn<T = Record<string, unknown>> {
@@ -215,36 +214,11 @@ function formatCellValue(row: Record<string, unknown>, col: DetailMetricColumn):
     return raw == null ? '' : String(raw)
 }
 
-const columnHelper = createColumnHelper<Record<string, unknown>>()
-const tanstackColumns = computed(() =>
-    props.columns.map((col) =>
-        columnHelper.accessor((row) => getCellValue(row, col.key), {
-            id: col.key,
-            header: col.header,
-            enableSorting: col.sortable !== false,
-            cell: (info) => {
-                const row = info.row.original
-                return formatCellValue(row, col)
-            },
-        })
-    )
-)
-
 const pageRows = computed<Record<string, unknown>[]>(() => {
     if (workerPageIndexes.value.length === 0) return []
     return workerPageIndexes.value
         .map((idx) => props.rows[idx])
         .filter((row): row is Record<string, unknown> => !!row)
-})
-
-const table = useVueTable({
-    get data() {
-        return pageRows.value
-    },
-    get columns() {
-        return tanstackColumns.value
-    },
-    getCoreRowModel: getCoreRowModel(),
 })
 
 const totalRecords = computed(() => workerTotal.value)
@@ -259,6 +233,20 @@ function ensureWorker() {
     const workerSource = `
     let dataset = [];
     let columnKeys = [];
+    const parseMaybeNumber = (value) => {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value !== 'string') return null;
+      const normalized = value.replace(/[%,$\\s]/g, '').replace(/\\./g, '').replace(',', '.');
+      if (!normalized) return null;
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+    const parseMaybeDate = (value) => {
+      if (value instanceof Date) return value.getTime();
+      if (typeof value !== 'string') return null;
+      const ts = Date.parse(value);
+      return Number.isFinite(ts) ? ts : null;
+    };
     self.onmessage = (event) => {
       const payload = event.data;
       if (payload.type === 'init') {
@@ -298,12 +286,21 @@ function ensureWorker() {
           if (av == null && bv == null) return 0;
           if (av == null) return sort.desc ? 1 : -1;
           if (bv == null) return sort.desc ? -1 : 1;
-          if (typeof av === 'number' && typeof bv === 'number') {
-            return sort.desc ? bv - av : av - bv;
+          const nav = parseMaybeNumber(av);
+          const nbv = parseMaybeNumber(bv);
+          if (nav !== null && nbv !== null) {
+            return sort.desc ? nbv - nav : nav - nbv;
           }
-          const as = String(av);
-          const bs = String(bv);
-          const cmp = as.localeCompare(bs, 'es', { numeric: true, sensitivity: 'base' });
+
+          const dav = parseMaybeDate(av);
+          const dbv = parseMaybeDate(bv);
+          if (dav !== null && dbv !== null) {
+            return sort.desc ? dbv - dav : dav - dbv;
+          }
+
+          const as = String(av ?? '');
+          const bs = String(bv ?? '');
+          const cmp = as.localeCompare(bs, 'es', { numeric: true, sensitivity: 'base', ignorePunctuation: true });
           return sort.desc ? -cmp : cmp;
         });
       }
