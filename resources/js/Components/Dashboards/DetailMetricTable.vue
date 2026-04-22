@@ -1,5 +1,5 @@
 <template>
-    <div class="detail-metric-table overflow-hidden rounded-xl border border-[var(--th-border)] bg-[var(--th-input-bg)] backdrop-blur-sm shadow-sm">
+    <div class="detail-metric-table overflow-hidden rounded-xl border border-[var(--th-border)] bg-[var(--th-input-bg)] shadow-sm">
         <div v-if="showToolbar"
             class="flex flex-wrap items-center gap-3 border-b border-[var(--th-border)] bg-[var(--th-input-bg)] px-4 py-3">
             <span v-if="showSearch" class="relative flex-1 min-w-[220px] max-w-sm">

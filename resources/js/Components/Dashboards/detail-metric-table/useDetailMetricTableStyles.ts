@@ -25,11 +25,15 @@ export function useDetailMetricTableStyles(params: {
 
     const tableViewportStyle = computed(() => ({ maxHeight: params.props.maxBodyHeight }))
 
-    const headerClass = computed(() =>
-        params.props.stickyHeader
-            ? 'sticky top-0 z-10 border-b border-[var(--th-border)] bg-[var(--th-input-bg)]'
-            : 'border-b border-[var(--th-border)] bg-[var(--th-input-bg)]'
-    )
+
+    const headerClass = computed(() => {
+        const opaqueTh = '[&_th]:bg-[var(--th-input-bg)]'
+        const base = `border-b border-[var(--th-border)] bg-[var(--th-input-bg)] ${opaqueTh}`
+        if (params.props.stickyHeader) {
+            return `${base} sticky top-0 z-20 shadow-[0_1px_0_0_var(--th-border),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_0_0_var(--th-border),0_4px_14px_-4px_rgba(0,0,0,0.35)]`
+        }
+        return base
+    })
 
     const bodyCellClass = computed(() => (params.props.compact ? 'py-2' : 'py-2.5'))
 
@@ -39,7 +43,7 @@ export function useDetailMetricTableStyles(params: {
         const isSorted = params.sorting.value?.key === col.key
         const basePadding = params.props.compact ? 'py-2.5' : 'py-3'
         if (!isSorted) return basePadding
-        return `${basePadding} bg-[var(--th-item-hover-bg)]/30 text-[color:var(--th-item-active-color)]`
+        return `${basePadding} bg-[var(--th-input-bg)] text-[color:var(--th-item-active-color)] shadow-[inset_0_-3px_0_0_var(--th-item-active-color)]`
     }
 
     function rowClass(rowIndex: number, datasetIndex: number): string {
