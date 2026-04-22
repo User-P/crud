@@ -25,6 +25,8 @@ export interface DetailMetricTableProps {
     maxBodyHeight?: string
     maxRowsPerCsvFile?: number
     enableRowSelection?: boolean
+    /** Botón en la barra para seleccionar todas las filas filtradas (todas las páginas), no solo la vista actual. */
+    showSelectAllFilteredButton?: boolean
     showSelectionCount?: boolean
     clearSelectionOnDataChange?: boolean
     clearSelectionOnFilterChange?: boolean
@@ -52,6 +54,7 @@ export const DETAIL_METRIC_TABLE_DEFAULTS: Required<
         | 'maxBodyHeight'
         | 'maxRowsPerCsvFile'
         | 'enableRowSelection'
+        | 'showSelectAllFilteredButton'
         | 'showSelectionCount'
         | 'clearSelectionOnDataChange'
         | 'clearSelectionOnFilterChange'
@@ -76,6 +79,7 @@ export const DETAIL_METRIC_TABLE_DEFAULTS: Required<
     maxBodyHeight: '62vh',
     maxRowsPerCsvFile: 0,
     enableRowSelection: false,
+    showSelectAllFilteredButton: true,
     showSelectionCount: true,
     clearSelectionOnDataChange: true,
     clearSelectionOnFilterChange: true,

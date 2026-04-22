@@ -66,6 +66,12 @@ export function useDetailMetricTableSelection(params: {
         setSelectedIndexes([])
     }
 
+    /** Todas las filas que coinciden con búsqueda y orden en el worker (no solo la página actual). */
+    async function selectAllFilteredRows(fetchIndexes: () => Promise<number[]>): Promise<void> {
+        const indexes = await fetchIndexes()
+        setSelectedIndexes(indexes)
+    }
+
     watch(
         () => [params.rows.value, params.columns.value] as const,
         () => {
@@ -100,5 +106,6 @@ export function useDetailMetricTableSelection(params: {
         toggleRowSelected,
         toggleSelectAllPage,
         clearSelection,
+        selectAllFilteredRows,
     }
 }

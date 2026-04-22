@@ -1,4 +1,4 @@
-import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch, type Ref } from 'vue'
+import { computed, onBeforeUnmount, ref, toRaw, watch, type Ref } from 'vue'
 import { WORKER_SOURCE } from './workerSource'
 import type { DetailMetricColumn, TableSort } from './types'
 
@@ -27,8 +27,10 @@ export function useDetailMetricTableWorker(params: {
 
     let searchDebounce: ReturnType<typeof setTimeout> | undefined
     let worker: Worker | null = null
+    let workerObjectUrl: string | null = null
     let requestId = 0
-    let pendingExportResolve: ((indexes: number[]) => void) | null = null
+    /** Una entrada por `reqId` con `exportAll`, para que export y «seleccionar todo» no se pisen entre sí. */
+    const pendingExportResolves = new Map<number, (indexes: number[]) => void>()
 
     const pageRows = computed<Record<string, unknown>[]>(() => {
         if (workerPageIndexes.value.length === 0) return []
@@ -42,7 +44,27 @@ export function useDetailMetricTableWorker(params: {
     function ensureWorker(): Worker {
         if (worker) return worker
         const blob = new Blob([WORKER_SOURCE], { type: 'application/javascript' })
-        worker = new Worker(URL.createObjectURL(blob))
+        workerObjectUrl = URL.createObjectURL(blob)
+        const w = new Worker(workerObjectUrl)
+        w.onmessage = (event: MessageEvent<WorkerResponse>) => {
+            const payload = event.data
+            if (payload.reqId !== requestId) return
+            if (payload.datasetVersion !== datasetVersion.value) return
+
+            if (payload.exportAll) {
+                const resolve = pendingExportResolves.get(payload.reqId)
+                if (resolve) {
+                    resolve(payload.pageIndexes)
+                    pendingExportResolves.delete(payload.reqId)
+                }
+                return
+            }
+
+            workerTotal.value = payload.total
+            workerPageIndexes.value = payload.pageIndexes
+            isProcessing.value = false
+        }
+        worker = w
         return worker
     }
 
@@ -70,13 +92,14 @@ export function useDetailMetricTableWorker(params: {
         })
     }
 
-    function requestExportIndexes(): Promise<number[]> {
+    function requestAllFilteredRowIndexes(): Promise<number[]> {
         return new Promise((resolve) => {
-            pendingExportResolve = resolve
             requestId += 1
+            const id = requestId
+            pendingExportResolves.set(id, resolve)
             ensureWorker().postMessage({
                 type: 'process',
-                reqId: requestId,
+                reqId: id,
                 datasetVersion: datasetVersion.value,
                 query: searchText.value,
                 sorting: sorting.value ? { key: sorting.value.key, desc: sorting.value.desc } : null,
@@ -86,6 +109,9 @@ export function useDetailMetricTableWorker(params: {
             })
         })
     }
+
+    /** Índices de todas las filas que cumplen búsqueda y orden (misma lista que el CSV completo). */
+    const requestExportIndexes = requestAllFilteredRowIndexes
 
     function toggleSort(key: string) {
         if (sorting.value?.key !== key) {
@@ -143,30 +169,15 @@ export function useDetailMetricTableWorker(params: {
         }
     )
 
-    onMounted(() => {
-        const w = ensureWorker()
-        w.onmessage = (event: MessageEvent<WorkerResponse>) => {
-            const payload = event.data
-            if (payload.reqId !== requestId) return
-            if (payload.datasetVersion !== datasetVersion.value) return
-
-            if (payload.exportAll) {
-                pendingExportResolve?.(payload.pageIndexes)
-                pendingExportResolve = null
-                return
-            }
-
-            workerTotal.value = payload.total
-            workerPageIndexes.value = payload.pageIndexes
-            isProcessing.value = false
-        }
-    })
-
     onBeforeUnmount(() => {
         if (searchDebounce) clearTimeout(searchDebounce)
         worker?.terminate()
         worker = null
-        pendingExportResolve = null
+        if (workerObjectUrl) {
+            URL.revokeObjectURL(workerObjectUrl)
+            workerObjectUrl = null
+        }
+        pendingExportResolves.clear()
     })
 
     return {
@@ -182,6 +193,7 @@ export function useDetailMetricTableWorker(params: {
         totalPages,
         currentPage,
         requestExportIndexes,
+        requestAllFilteredRowIndexes,
         toggleSort,
         sortIndicator,
     }

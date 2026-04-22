@@ -24,6 +24,16 @@
                 <span v-if="enableRowSelection && showSelectionCount" class="text-xs text-[color:var(--th-text-muted)]">
                     {{ selectedCount }} seleccionados
                 </span>
+                <button
+                    v-if="enableRowSelection && showSelectAllFilteredButton && totalRecords > 0"
+                    type="button"
+                    class="shrink-0 rounded-md border border-[var(--th-border)] px-2 py-1 text-xs font-medium text-[color:var(--th-item-active-color)] transition-colors hover:bg-[var(--th-item-hover-bg)] disabled:opacity-40"
+                    :disabled="isProcessing || selectingAllFiltered"
+                    :title="'Incluye todas las páginas; respeta la búsqueda y el orden actuales.'"
+                    @click="onSelectAllFiltered"
+                >
+                    {{ selectingAllFiltered ? 'Seleccionando…' : `Seleccionar todas (${totalRecords.toLocaleString('es')})` }}
+                </button>
                 <span v-if="showProcessingStatus && isProcessing" class="text-xs text-[color:var(--th-text-muted)]">
                     Procesando...
                 </span>
@@ -38,7 +48,7 @@
             <table class="min-w-full text-sm border-separate border-spacing-0">
                 <thead :class="headerClass">
                     <tr>
-                        <th v-if="enableRowSelection"
+                        <th v-if="enableRowSelection" scope="col"
                             class="w-12 px-3 text-left text-xs uppercase tracking-wide font-semibold text-[color:var(--th-text-secondary)] border-b border-[var(--th-border)]/80"
                             :class="selectionHeaderPaddingClass">
                             <Checkbox binary :model-value="isAllPageSelected" :indeterminate="isSomePageSelected"
@@ -46,7 +56,7 @@
                                 aria-label="Seleccionar filas visibles"
                                 @update:model-value="toggleSelectAllPage" />
                         </th>
-                        <th v-for="col in columns" :key="col.key"
+                        <th v-for="col in columns" :key="col.key" scope="col"
                             class="px-4 text-left text-xs uppercase tracking-wide font-semibold text-[color:var(--th-text-secondary)] border-b border-[var(--th-border)]/80"
                             :class="[
                                 headerCellClass(col),
@@ -54,14 +64,17 @@
                                     'cursor-pointer select-none hover:text-[color:var(--th-item-active-color)]':
                                         col.sortable !== false,
                                 },
-                            ]" :aria-sort="col.sortable !== false
+                            ]" :tabindex="col.sortable !== false ? 0 : undefined"
+                            :aria-sort="col.sortable !== false
                                 ? sorting?.key === col.key
                                     ? sorting.desc
                                         ? 'descending'
                                         : 'ascending'
                                     : 'none'
                                 : undefined
-                                " @click="col.sortable !== false && toggleSort(col.key)">
+                                " @click="col.sortable !== false && toggleSort(col.key)"
+                            @keydown.enter.prevent="col.sortable !== false && toggleSort(col.key)"
+                            @keydown.space.prevent="col.sortable !== false && toggleSort(col.key)">
                             <div class="flex items-center gap-2">
                                 <span>{{ col.header }}</span>
                                 <span v-if="col.sortable !== false" class="text-xs text-[color:var(--th-text-muted)]">
@@ -73,7 +86,7 @@
                 </thead>
 
                 <tbody v-if="normalizedPageRows.length > 0">
-                    <tr v-for="(row, rowIndex) in normalizedPageRows" :key="rowIndex"
+                    <tr v-for="(row, rowIndex) in normalizedPageRows" :key="rowKey(rowIndex)"
                         class="border-b border-[var(--th-border)]/60 transition-colors"
                         :class="rowClass(rowIndex, rowDatasetIndex(rowIndex))">
                         <td v-if="enableRowSelection" class="w-12 px-3 align-middle" :class="bodyCellClass" @click.stop>
@@ -148,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { computed, ref, toRef, useSlots } from 'vue'
 import { Icon } from '@iconify/vue'
 import EmptyState from '@/Components/EmptyState.vue'
 import InputText from 'primevue/inputtext'
@@ -188,6 +201,7 @@ const {
     totalPages,
     currentPage,
     requestExportIndexes,
+    requestAllFilteredRowIndexes,
     toggleSort,
     sortIndicator,
 } = useDetailMetricTableWorker({
@@ -198,6 +212,10 @@ const {
 
 const normalizedPageRows = computed<Record<string, unknown>[]>(() => pageRows.value.filter((row) => !!row))
 const pageRowIndexes = computed(() => workerPageIndexes.value)
+
+const slots = useSlots()
+/** No invocar el slot aquí: el padre usa props scoped (`{ selectedIndexes }`) y sin argumentos revienta la desestructuración. */
+const hasSelectionActionsSlot = computed(() => typeof slots['selection-actions'] === 'function')
 
 const selection = useDetailMetricTableSelection({
     props,
@@ -213,6 +231,7 @@ const styles = useDetailMetricTableStyles({
     props,
     sorting,
     isRowSelected: selection.isRowSelected,
+    hasSelectionActionsSlot,
 })
 
 const {
@@ -235,7 +254,24 @@ const {
     toggleRowSelected,
     toggleSelectAllPage,
     clearSelection,
+    selectAllFilteredRows,
 } = selection
+
+const selectingAllFiltered = ref(false)
+
+async function onSelectAllFiltered() {
+    if (totalRecords.value === 0 || selectingAllFiltered.value) return
+    selectingAllFiltered.value = true
+    try {
+        await selectAllFilteredRows(requestAllFilteredRowIndexes)
+    } finally {
+        selectingAllFiltered.value = false
+    }
+}
+
+function rowKey(pageRowIndex: number): string {
+    return `row-${rowDatasetIndex(pageRowIndex)}`
+}
 
 const { exportingCsv, exportCSV } = useDetailMetricTableExport({
     rows: toRef(props, 'rows'),

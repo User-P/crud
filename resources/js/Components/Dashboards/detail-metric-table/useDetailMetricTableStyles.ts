@@ -1,4 +1,4 @@
-import { computed, type Ref } from 'vue'
+import { computed, type ComputedRef, type Ref } from 'vue'
 import type { DetailMetricColumn } from './types'
 import type { TableSort } from './types'
 import type { DetailMetricTableProps } from './detailMetricTableProps'
@@ -7,15 +7,21 @@ export function useDetailMetricTableStyles(params: {
     props: Readonly<DetailMetricTableProps>
     sorting: Ref<TableSort>
     isRowSelected: (datasetIndex: number) => boolean
+    /** Si el consumidor pasó `#selection-actions`, mostrar barra aunque el resto de controles estén ocultos. */
+    hasSelectionActionsSlot?: ComputedRef<boolean>
 }) {
-    const showToolbar = computed(
-        () =>
+    const showToolbar = computed(() => {
+        const slotBar = params.hasSelectionActionsSlot?.value && params.props.enableRowSelection
+        return (
             params.props.showSearch ||
             params.props.showExportButton ||
             params.props.showSearchMatches ||
             params.props.showProcessingStatus ||
-            (params.props.enableRowSelection && params.props.showSelectionCount)
-    )
+            (params.props.enableRowSelection && params.props.showSelectionCount) ||
+            (params.props.enableRowSelection && params.props.showSelectAllFilteredButton) ||
+            !!slotBar
+        )
+    })
 
     const tableViewportStyle = computed(() => ({ maxHeight: params.props.maxBodyHeight }))
 
