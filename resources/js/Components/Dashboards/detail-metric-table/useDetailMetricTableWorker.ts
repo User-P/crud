@@ -177,6 +177,7 @@ export function useDetailMetricTableWorker(params: {
         pageSize,
         sorting,
         pageRows,
+        workerPageIndexes,
         totalRecords,
         totalPages,
         currentPage,

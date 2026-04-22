@@ -21,9 +21,13 @@
                     class="rounded-full border border-[var(--th-border)] bg-[var(--th-item-active-bg)] px-2.5 py-1 text-xs font-medium text-[color:var(--th-item-active-color)]">
                     {{ totalRecords }} de {{ rows.length }} coincidencias
                 </span>
+                <span v-if="enableRowSelection && showSelectionCount" class="text-xs text-[color:var(--th-text-muted)]">
+                    {{ selectedCount }} seleccionados
+                </span>
                 <span v-if="showProcessingStatus && isProcessing" class="text-xs text-[color:var(--th-text-muted)]">
                     Procesando...
                 </span>
+                <slot name="selection-actions" :selected-indexes="selectedIndexesSorted" :clear-selection="clearSelection" />
                 <Button v-if="showExportButton" label="Exportar CSV" icon="pi pi-download" size="small" outlined
                     :disabled="totalRecords === 0" severity="secondary" class="shrink-0" :loading="exportingCsv"
                     @click="exportCSV" />
@@ -34,6 +38,14 @@
             <table class="min-w-full text-sm border-separate border-spacing-0">
                 <thead :class="headerClass">
                     <tr>
+                        <th v-if="enableRowSelection"
+                            class="w-12 px-3 text-left text-xs uppercase tracking-wide font-semibold text-[color:var(--th-text-secondary)] border-b border-[var(--th-border)]/80"
+                            :class="selectionHeaderPaddingClass">
+                            <Checkbox binary :model-value="isAllPageSelected" :indeterminate="isSomePageSelected"
+                                :disabled="isProcessing || pageRowIndexes.length === 0"
+                                aria-label="Seleccionar filas visibles"
+                                @update:model-value="toggleSelectAllPage" />
+                        </th>
                         <th v-for="col in columns" :key="col.key"
                             class="px-4 text-left text-xs uppercase tracking-wide font-semibold text-[color:var(--th-text-secondary)] border-b border-[var(--th-border)]/80"
                             :class="[
@@ -63,14 +75,25 @@
                 <tbody v-if="normalizedPageRows.length > 0">
                     <tr v-for="(row, rowIndex) in normalizedPageRows" :key="rowIndex"
                         class="border-b border-[var(--th-border)]/60 transition-colors"
-                        :class="rowClass(rowIndex)">
+                        :class="rowClass(rowIndex, rowDatasetIndex(rowIndex))">
+                        <td v-if="enableRowSelection" class="w-12 px-3 align-middle" :class="bodyCellClass" @click.stop>
+                            <Checkbox binary :model-value="isRowSelected(rowDatasetIndex(rowIndex))"
+                                :disabled="isProcessing"
+                                :aria-label="`Seleccionar fila ${rowDatasetIndex(rowIndex) + 1}`"
+                                @update:model-value="(v) => toggleRowSelected(rowDatasetIndex(rowIndex), !!v)" />
+                        </td>
                         <td v-for="col in columns" :key="col.key"
                             class="px-4 text-[color:var(--th-text-primary)]" :class="[
                                 bodyCellClass,
                                 col.class,
                                 { 'tabular-nums font-semibold': col.numeric },
                             ]">
-                            {{ formatCellValue(row, col) }}
+                            <template v-if="col.cellRender">
+                                <component :is="renderCell(col, row)" />
+                            </template>
+                            <template v-else>
+                                {{ formatCellValue(row, col) }}
+                            </template>
                         </td>
                     </tr>
                 </tbody>
@@ -125,11 +148,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, toRef } from 'vue'
+import { computed, h, ref, toRef, watch, type VNode } from 'vue'
 import { Icon } from '@iconify/vue'
 import EmptyState from '@/Components/EmptyState.vue'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import type { DetailMetricColumn } from './detail-metric-table/types'
 import { useDetailMetricTableWorker } from './detail-metric-table/useDetailMetricTableWorker'
 import { buildCsvChunk, downloadBlob } from './detail-metric-table/csvUtils'
@@ -169,7 +193,12 @@ const props = withDefaults(
          * Si > 0, export CSV se divide en varios archivos de hasta esta cantidad
          * de filas cada uno y se empaqueta en un único ZIP.
          */
-        maxRowsPerCsvFile?: number
+        maxRowsPerCsvFile?: number;
+        /** Selección de filas por índice del dataset original (`rows`) */
+        enableRowSelection?: boolean;
+        showSelectionCount?: boolean;
+        clearSelectionOnDataChange?: boolean;
+        clearSelectionOnFilterChange?: boolean;
     }>(),
     {
         searchPlaceholder: 'Buscar en la tabla…',
@@ -191,8 +220,20 @@ const props = withDefaults(
         compact: false,
         maxBodyHeight: '62vh',
         maxRowsPerCsvFile: 0,
+        enableRowSelection: false,
+        selectedIndexes: undefined,
+        showSelectionCount: true,
+        clearSelectionOnDataChange: true,
+        clearSelectionOnFilterChange: true,
     }
 )
+
+const emit = defineEmits<{
+    (e: 'update:selectedIndexes', value: number[]): void
+    (e: 'selection-change', value: { indexes: number[]; rows: Record<string, unknown>[] }): void
+}>()
+
+const selectedIndexesModel = defineModel<number[]>('selectedIndexes', { default: () => [] })
 
 const {
     rawSearchText,
@@ -202,6 +243,7 @@ const {
     pageSize,
     sorting,
     pageRows,
+    workerPageIndexes,
     totalRecords,
     totalPages,
     currentPage,
@@ -217,7 +259,15 @@ const {
 const exportingCsv = ref(false)
 
 const normalizedPageRows = computed<Record<string, unknown>[]>(() => pageRows.value.filter((row) => !!row))
-const showToolbar = computed(() => props.showSearch || props.showExportButton || props.showSearchMatches || props.showProcessingStatus)
+const pageRowIndexes = computed(() => workerPageIndexes.value)
+const showToolbar = computed(
+    () =>
+        props.showSearch ||
+        props.showExportButton ||
+        props.showSearchMatches ||
+        props.showProcessingStatus ||
+        (props.enableRowSelection && props.showSelectionCount)
+)
 const tableViewportStyle = computed(() => ({ maxHeight: props.maxBodyHeight }))
 const headerClass = computed(() =>
     props.stickyHeader
@@ -225,6 +275,7 @@ const headerClass = computed(() =>
         : 'border-b border-[var(--th-border)] bg-[var(--th-input-bg)]'
 )
 const bodyCellClass = computed(() => (props.compact ? 'py-2' : 'py-2.5'))
+const selectionHeaderPaddingClass = computed(() => (props.compact ? 'py-2.5' : 'py-3'))
 
 function headerCellClass(col: DetailMetricColumn): string {
     const isSorted = sorting.value?.key === col.key
@@ -233,13 +284,16 @@ function headerCellClass(col: DetailMetricColumn): string {
     return `${basePadding} bg-[var(--th-item-hover-bg)]/30 text-[color:var(--th-item-active-color)]`
 }
 
-function rowClass(rowIndex: number): string {
+function rowClass(rowIndex: number, datasetIndex: number): string {
     const classes: string[] = []
     if (props.stripedRows) {
         classes.push(rowIndex % 2 === 0 ? 'bg-[var(--th-input-bg)]' : 'bg-[var(--th-item-hover-bg)]/20')
     }
     if (props.rowHover) {
         classes.push('hover:bg-[var(--th-item-hover-bg)]/35')
+    }
+    if (props.enableRowSelection && isRowSelected(datasetIndex)) {
+        classes.push('ring-1 ring-inset ring-[var(--th-item-active-color)]/25')
     }
     return classes.join(' ')
 }
@@ -257,6 +311,96 @@ function formatCellValue(row: Record<string, unknown>, col: DetailMetricColumn):
     if (col.format) return col.format(raw, row as Record<string, unknown>)
     return raw == null ? '' : String(raw)
 }
+
+function renderCell(col: DetailMetricColumn, row: Record<string, unknown>) {
+    const raw = getCellValue(row, col.key)
+    const vnode = col.cellRender?.(raw, row as Record<string, unknown>)
+    if (vnode == null) return h('span', formatCellValue(row, col))
+    if (typeof vnode === 'string' || typeof vnode === 'number') return h('span', String(vnode))
+    return vnode as VNode
+}
+
+// ─── Selección ────────────────────────────────────────────────────────────────
+
+const selectedSet = computed(() => new Set(selectedIndexesModel.value))
+
+const selectedIndexesSorted = computed(() => [...selectedIndexesModel.value].sort((a, b) => a - b))
+
+const selectedCount = computed(() => selectedIndexesModel.value.length)
+
+const isAllPageSelected = computed(() => {
+    const idxs = pageRowIndexes.value
+    if (!idxs.length) return false
+    return idxs.every((i) => selectedSet.value.has(i))
+})
+
+const isSomePageSelected = computed(() => {
+    const idxs = pageRowIndexes.value
+    if (!idxs.length) return false
+    const any = idxs.some((i) => selectedSet.value.has(i))
+    return any && !isAllPageSelected.value
+})
+
+function rowDatasetIndex(pageRowIndex: number): number {
+    return pageRowIndexes.value[pageRowIndex] ?? pageRowIndex
+}
+
+function isRowSelected(datasetIndex: number): boolean {
+    return selectedSet.value.has(datasetIndex)
+}
+
+function setSelectedIndexes(next: number[]) {
+    const unique = Array.from(new Set(next.filter((i) => i >= 0 && i < props.rows.length))).sort((a, b) => a - b)
+    selectedIndexesModel.value = unique
+    emit('update:selectedIndexes', unique)
+    emit('selection-change', {
+        indexes: unique,
+        rows: unique.map((i) => props.rows[i]).filter((r): r is Record<string, unknown> => !!r),
+    })
+}
+
+function toggleRowSelected(datasetIndex: number, selected: boolean) {
+    const next = new Set(selectedIndexesModel.value)
+    if (selected) next.add(datasetIndex)
+    else next.delete(datasetIndex)
+    setSelectedIndexes([...next])
+}
+
+function toggleSelectAllPage(selected: boolean) {
+    const idxs = pageRowIndexes.value
+    const next = new Set(selectedIndexesModel.value)
+    if (selected) idxs.forEach((i) => next.add(i))
+    else idxs.forEach((i) => next.delete(i))
+    setSelectedIndexes([...next])
+}
+
+function clearSelection() {
+    setSelectedIndexes([])
+}
+
+watch(
+    () => [props.rows, props.columns] as const,
+    () => {
+        if (props.enableRowSelection && props.clearSelectionOnDataChange) clearSelection()
+    }
+)
+
+watch(
+    () => searchText.value,
+    () => {
+        if (props.enableRowSelection && props.clearSelectionOnFilterChange) clearSelection()
+    }
+)
+
+watch(
+    () => props.rows.length,
+    () => {
+        if (!props.enableRowSelection) return
+        const max = props.rows.length
+        const pruned = selectedIndexesModel.value.filter((i) => i >= 0 && i < max)
+        if (pruned.length !== selectedIndexesModel.value.length) setSelectedIndexes(pruned)
+    }
+)
 
 async function exportCSV() {
     if (totalRecords.value === 0) return

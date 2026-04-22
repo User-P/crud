@@ -233,17 +233,46 @@
                     <div
                         class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--th-border)] bg-[var(--th-input-bg)] px-4 py-3"
                     >
-                        <h3 class="text-sm font-semibold text-[color:var(--th-text-primary)]">
-                            {{ selectedCard ? `Detalle: ${selectedCard.label}` : 'Detalle de la métrica' }}
-                        </h3>
-                        <button
-                            v-if="selectedCard"
-                            type="button"
-                            class="text-xs font-medium text-[color:var(--th-text-muted)] transition-colors hover:text-[color:var(--th-item-active-color)]"
-                            @click="selectedCard = null"
-                        >
-                            Limpiar selección
-                        </button>
+                        <div class="min-w-0 flex-1 space-y-1">
+                            <h3 class="text-sm font-semibold text-[color:var(--th-text-primary)]">
+                                {{ selectedCard ? `Detalle: ${selectedCard.label}` : 'Detalle de la métrica' }}
+                            </h3>
+                            <p v-if="selectedCard" class="text-xs text-[color:var(--th-text-muted)]">
+                                <span class="font-medium text-[color:var(--th-text-secondary)]">Registros enviados a la tabla:</span>
+                                <span class="tabular-nums font-semibold text-[color:var(--th-text-primary)]">{{ detailRowCount.toLocaleString('es') }}</span>
+                                <span v-if="useBulkDetailTest" class="ml-2 rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800 dark:text-amber-200">
+                                    Modo prueba 10k
+                                </span>
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button
+                                v-if="selectedCard && !useBulkDetailTest"
+                                type="button"
+                                class="text-xs font-medium text-[color:var(--th-item-active-color)] hover:underline"
+                                :disabled="loadingBulkRows"
+                                @click="enableBulkDetailTest"
+                            >
+                                Probar con 10.000 filas
+                            </button>
+                            <button
+                                v-if="selectedCard && useBulkDetailTest"
+                                type="button"
+                                class="text-xs font-medium text-[color:var(--th-text-muted)] transition-colors hover:text-[color:var(--th-item-active-color)]"
+                                :disabled="loadingBulkRows"
+                                @click="disableBulkDetailTest"
+                            >
+                                Volver a datos reales
+                            </button>
+                            <button
+                                v-if="selectedCard"
+                                type="button"
+                                class="text-xs font-medium text-[color:var(--th-text-muted)] transition-colors hover:text-[color:var(--th-item-active-color)]"
+                                @click="selectedCard = null"
+                            >
+                                Cerrar detalle
+                            </button>
+                        </div>
                     </div>
                     <!-- ── Illustrated empty state ── -->
                     <div
@@ -295,13 +324,50 @@
                         </div>
                     </div>
                     <div v-else class="relative min-h-[200px] overflow-x-auto px-4 pb-4">
+                        <div v-if="loadingBulkRows" class="flex flex-col items-center justify-center gap-2 py-12 text-center">
+                            <Icon icon="heroicons:arrow-path" class="h-10 w-10 animate-spin text-[color:var(--th-text-muted)]" aria-hidden="true" />
+                            <p class="text-sm text-[color:var(--th-text-muted)]">Generando {{ BULK_DETAIL_ROW_COUNT.toLocaleString('es') }} filas de prueba…</p>
+                        </div>
                         <DetailMetricTable
+                            v-else
                             v-show="!detailLoading"
-                            :rows="detailRows as Record<string, unknown>[]"
+                            v-model:selected-indexes="selectedDetailIndexes"
+                            :rows="detailRowsForTable as Record<string, unknown>[]"
                             :columns="detailTableColumns"
                             search-placeholder="Buscar en concepto, valor, %..."
                             :export-label="selectedCard?.label"
-                        />
+                            :rows-per-page="15"
+                            :rows-per-page-options="[10, 15, 25, 50, 100]"
+                            :max-rows-per-csv-file="500_000"
+                            enable-row-selection
+                            :show-processing-status="true"
+                            :show-search-matches="true"
+                            :allow-clear-search="true"
+                            sticky-header
+                            striped-rows
+                            row-hover
+                            compact
+                            max-body-height="58vh"
+                            @selection-change="onDetailSelectionChange"
+                        >
+                            <template #selection-actions="{ selectedIndexes, clearSelection }">
+                                <button
+                                    type="button"
+                                    class="rounded-md border border-[var(--th-border)] px-2 py-1 text-xs font-medium text-[color:var(--th-text-secondary)] transition-colors hover:bg-[var(--th-item-hover-bg)] disabled:opacity-40"
+                                    :disabled="selectedIndexes.length === 0"
+                                    @click="logSelectedRows(selectedIndexes)"
+                                >
+                                    Log selección ({{ selectedIndexes.length }})
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-md border border-[var(--th-border)] px-2 py-1 text-xs text-[color:var(--th-text-muted)] hover:bg-[var(--th-item-hover-bg)]"
+                                    @click="clearSelection"
+                                >
+                                    Quitar selección
+                                </button>
+                            </template>
+                        </DetailMetricTable>
                     </div>
                 </section>
 
@@ -314,7 +380,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, h, nextTick, onMounted, ref, shallowRef, watch } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { VueDraggable } from 'vue-draggable-plus'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -327,7 +393,7 @@ import MetricCard from '@/Components/Dashboards/MetricCard.vue'
 import Sparkline from '@/Components/Dashboards/Sparkline.vue'
 import CustomPicker from '@/Components/Tables/Pickers/CustomPicker.vue'
 import { Icon } from '@iconify/vue'
-import { useUsers } from './composables/useUsers'
+import { useUsers, generateDummyDetailRows } from './composables/useUsers'
 import type { DetailTableRow } from './composables/useUsers'
 
 // Variant styles for compact tiles
@@ -453,6 +519,13 @@ const selectedCard = ref<CardItem | null>(null)
 const detailLoading = ref(false)
 const { show: showGlobalLoading, hide: hideGlobalLoading } = useGlobalLoading()
 
+/** Cantidad de filas dummy para pruebas de rendimiento de la tabla de detalle */
+const BULK_DETAIL_ROW_COUNT = 10_000
+const useBulkDetailTest = ref(false)
+const loadingBulkRows = ref(false)
+const bulkDetailRows = shallowRef<DetailTableRow[] | null>(null)
+const selectedDetailIndexes = ref<number[]>([])
+
 function openDetail(card: CardItem) {
     selectedCard.value = card
 }
@@ -462,12 +535,43 @@ const detailRows = computed<DetailTableRow[]>(() => {
     return detailsByCard[selectedCard.value.id] ?? []
 })
 
-const hasPorcentaje = computed(() => detailRows.value.some((r) => r.porcentaje != null))
-const hasActualizado = computed(() => detailRows.value.some((r) => r.actualizado != null))
+/** Filas que recibe `DetailMetricTable`: reales o 10k dummy según modo prueba */
+const detailRowsForTable = computed<DetailTableRow[]>(() => {
+    if (useBulkDetailTest.value && bulkDetailRows.value?.length) return bulkDetailRows.value
+    return detailRows.value
+})
+
+const detailRowCount = computed(() => detailRowsForTable.value.length)
+
+const hasPorcentaje = computed(() => detailRowsForTable.value.some((r) => r.porcentaje != null))
+const hasActualizado = computed(() => detailRowsForTable.value.some((r) => r.actualizado != null))
 
 const detailTableColumns = computed<DetailMetricColumn[]>(() => {
+    const conceptoCol: DetailMetricColumn = useBulkDetailTest.value
+        ? {
+              key: 'concepto',
+              header: 'Concepto',
+              sortable: true,
+              class: 'font-medium',
+              cellRender: (value) =>
+                  h('span', { class: 'inline-flex items-center gap-2' }, [
+                      h(Icon, {
+                          icon: 'heroicons:rectangle-stack',
+                          class: 'h-4 w-4 shrink-0 text-[color:var(--th-text-muted)]',
+                          'aria-hidden': true,
+                      }),
+                      h(
+                          'span',
+                          { class: 'rounded-md bg-[var(--th-item-active-bg)] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[color:var(--th-item-active-color)]' },
+                          'Prueba'
+                      ),
+                      h('span', String(value ?? '')),
+                  ]),
+          }
+        : { key: 'concepto', header: 'Concepto', sortable: true, class: 'font-medium' }
+
     const cols: DetailMetricColumn[] = [
-        { key: 'concepto', header: 'Concepto', sortable: true, class: 'font-medium' },
+        conceptoCol,
         {
             key: 'valor',
             header: 'Valor',
@@ -481,6 +585,41 @@ const detailTableColumns = computed<DetailMetricColumn[]>(() => {
     if (hasActualizado.value) cols.push({ key: 'actualizado', header: 'Última actualización', sortable: true, class: 'text-[color:var(--th-text-secondary)]' })
     return cols
 })
+
+async function enableBulkDetailTest() {
+    if (loadingBulkRows.value || useBulkDetailTest.value) return
+    loadingBulkRows.value = true
+    selectedDetailIndexes.value = []
+    try {
+        const raw = await generateDummyDetailRows(BULK_DETAIL_ROW_COUNT)
+        bulkDetailRows.value = raw.map((r) => ({
+            concepto: String(r.concepto ?? ''),
+            valor: typeof r.valor === 'number' ? r.valor : Number(r.valor) || 0,
+            porcentaje: r.porcentaje != null ? String(r.porcentaje) : undefined,
+            unidad: r.unidad != null ? String(r.unidad) : undefined,
+            actualizado: r.fecha != null ? String(r.fecha) : undefined,
+        }))
+        useBulkDetailTest.value = true
+    } finally {
+        loadingBulkRows.value = false
+    }
+}
+
+function disableBulkDetailTest() {
+    useBulkDetailTest.value = false
+    bulkDetailRows.value = null
+    selectedDetailIndexes.value = []
+}
+
+function onDetailSelectionChange(payload: { indexes: number[]; rows: Record<string, unknown>[] }) {
+    // Punto de enganche para acciones masivas (API, modal, etc.)
+    void payload
+}
+
+function logSelectedRows(indexes: number[]) {
+    const rows = indexes.map((i) => detailRowsForTable.value[i]).filter(Boolean)
+    console.info('[VistaGeneral] filas seleccionadas', { count: indexes.length, indexes: [...indexes].slice(0, 20), sample: rows.slice(0, 3) })
+}
 
 function formatValor(v: number | string): string {
     if (typeof v === 'number') return v.toLocaleString('es')
@@ -500,6 +639,7 @@ watch(users, (u) => {
 
 watch(selectedCard, (card) => {
     if (card) {
+        disableBulkDetailTest()
         showGlobalLoading('Cargando detalle…')
         detailLoading.value = true
         nextTick(() => {
@@ -508,6 +648,8 @@ watch(selectedCard, (card) => {
                 hideGlobalLoading()
             }, 280)
         })
+    } else {
+        disableBulkDetailTest()
     }
 })
 
