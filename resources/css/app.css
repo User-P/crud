@@ -44,6 +44,8 @@
     --th-divider: rgba(100, 102, 106, 0.35);
 
     --th-input-bg: rgba(255, 255, 255, 0.72);
+    /** Cabeceras de tabla sticky: opaco para que no se vea el scroll debajo (glass en --th-input-bg). */
+    --th-sticky-table-header-bg: #eef1f5;
     --th-input-border: rgba(255, 255, 255, 0.6);
     --th-input-text: #1e293b;
     --th-input-placeholder: rgba(100, 102, 106, 0.6);
@@ -128,6 +130,7 @@
     --th-divider: rgba(255, 255, 255, 0.09);
 
     --th-input-bg: rgba(255, 255, 255, 0.04);
+    --th-sticky-table-header-bg: #0b1219;
     --th-input-border: rgba(255, 255, 255, 0.1);
     --th-input-text: #e2e8f0;
     --th-input-placeholder: rgba(100, 102, 106, 0.6);

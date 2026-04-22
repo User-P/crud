@@ -26,13 +26,20 @@ export function useDetailMetricTableStyles(params: {
     const tableViewportStyle = computed(() => ({ maxHeight: params.props.maxBodyHeight }))
 
 
+    /**
+     * Sticky en cada `th` (más fiable que solo en `thead`). Fondo con --th-sticky-table-header-bg
+     * (opaco en app.css); --th-input-bg es rgba y deja ver el scroll debajo.
+     */
     const headerClass = computed(() => {
-        const opaqueTh = '[&_th]:bg-[var(--th-input-bg)]'
-        const base = `border-b border-[var(--th-border)] bg-[var(--th-input-bg)] ${opaqueTh}`
         if (params.props.stickyHeader) {
-            return `${base} sticky top-0 z-20 shadow-[0_1px_0_0_var(--th-border),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_0_0_var(--th-border),0_4px_14px_-4px_rgba(0,0,0,0.35)]`
+            return [
+                'border-b border-[var(--th-border)]',
+                '[&_th]:sticky [&_th]:top-0 [&_th]:z-20',
+                '[&_th]:bg-[var(--th-sticky-table-header-bg)]',
+                'shadow-[0_1px_0_0_var(--th-border)]',
+            ].join(' ')
         }
-        return base
+        return 'border-b border-[var(--th-border)] bg-[var(--th-input-bg)] [&_th]:bg-[var(--th-input-bg)]'
     })
 
     const bodyCellClass = computed(() => (params.props.compact ? 'py-2' : 'py-2.5'))
@@ -43,7 +50,12 @@ export function useDetailMetricTableStyles(params: {
         const isSorted = params.sorting.value?.key === col.key
         const basePadding = params.props.compact ? 'py-2.5' : 'py-3'
         if (!isSorted) return basePadding
-        return `${basePadding} bg-[var(--th-input-bg)] text-[color:var(--th-item-active-color)] shadow-[inset_0_-3px_0_0_var(--th-item-active-color)]`
+        const sortAccent =
+            'text-[color:var(--th-item-active-color)] shadow-[inset_0_-3px_0_0_var(--th-item-active-color)]'
+        if (params.props.stickyHeader) {
+            return `${basePadding} ${sortAccent}`
+        }
+        return `${basePadding} bg-[var(--th-input-bg)] ${sortAccent}`
     }
 
     function rowClass(rowIndex: number, datasetIndex: number): string {
