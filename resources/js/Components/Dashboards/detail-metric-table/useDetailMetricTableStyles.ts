@@ -25,17 +25,28 @@ export function useDetailMetricTableStyles(params: {
 
     const tableViewportStyle = computed(() => ({ maxHeight: params.props.maxBodyHeight }))
 
+    /**
+     * Contenedor de scroll de la tabla: debe ser el ancestro que hace overflow en **ambos** ejes
+     * para que `position: sticky` en `th` funcione de forma predecible (especialmente dentro de flex).
+     * `min-h-0` permite que el área encoja en layouts flex/grid; `overscroll-x-contain` evita
+     * “robar” el scroll horizontal al documento padre al llegar al borde.
+     */
+    const tableScrollClass = computed(() =>
+        ['overflow-auto', 'min-h-0', 'overscroll-x-contain'].join(' '),
+    )
 
     /**
-     * Sticky en cada `th` (más fiable que solo en `thead`). Fondo con --th-sticky-table-header-bg
-     * (opaco en app.css); --th-input-bg es rgba y deja ver el scroll debajo.
+     * Cabecera sticky: `position: sticky` en `<thead>` o `<tr>` sigue siendo irregular en tablas;
+     * en cada `<th>` es el patrón más compatible (Chrome, Firefox, Safari).
+     * Fondo opaco vía `--th-sticky-table-header-bg` (ver app.css): `--th-input-bg` es translúcido
+     * y al hacer scroll las filas se verían a través de la cabecera.
      */
     const headerClass = computed(() => {
         if (params.props.stickyHeader) {
             return [
                 'border-b border-[var(--th-border)]',
                 '[&_th]:sticky [&_th]:top-0 [&_th]:z-20',
-                '[&_th]:bg-[var(--th-sticky-table-header-bg)]',
+                '[&_th]:bg-[var(--th-sticky-table-header-bg)] [&_th]:bg-clip-padding',
                 'shadow-[0_1px_0_0_var(--th-border)]',
             ].join(' ')
         }
@@ -75,6 +86,7 @@ export function useDetailMetricTableStyles(params: {
     return {
         showToolbar,
         tableViewportStyle,
+        tableScrollClass,
         headerClass,
         bodyCellClass,
         selectionHeaderPaddingClass,

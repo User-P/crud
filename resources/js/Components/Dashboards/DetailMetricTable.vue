@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto" :style="tableViewportStyle">
+        <div :class="tableScrollClass" :style="tableViewportStyle">
             <table class="min-w-full text-sm border-separate border-spacing-0">
                 <caption v-if="tableSummary" class="sr-only">{{ tableSummary }}</caption>
                 <thead :class="headerClass">
@@ -275,6 +275,7 @@ const styles = useDetailMetricTableStyles({
 const {
     showToolbar,
     tableViewportStyle,
+    tableScrollClass,
     headerClass,
     bodyCellClass,
     selectionHeaderPaddingClass,
