@@ -334,6 +334,7 @@
                             v-model:selected-indexes="selectedDetailIndexes"
                             :rows="detailRowsForTable as Record<string, unknown>[]"
                             :columns="detailTableColumns"
+                            :table-summary="selectedCard ? `Detalle de métrica: ${selectedCard.label}` : undefined"
                             search-placeholder="Buscar en concepto, valor, %..."
                             :export-label="selectedCard?.label"
                             :rows-per-page="15"
@@ -581,7 +582,7 @@ const detailTableColumns = computed<DetailMetricColumn[]>(() => {
             exportFormat: (v, row) => formatValor(v as number | string) + (row.unidad ? ` ${row.unidad}` : ''),
         },
     ]
-    if (hasPorcentaje.value) cols.push({ key: 'porcentaje', header: '%', sortable: true })
+    if (hasPorcentaje.value) cols.push({ key: 'porcentaje', header: '%', sortable: true, numeric: true })
     if (hasActualizado.value) cols.push({ key: 'actualizado', header: 'Última actualización', sortable: true, class: 'text-[color:var(--th-text-secondary)]' })
     return cols
 })

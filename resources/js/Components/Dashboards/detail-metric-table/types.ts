@@ -13,6 +13,7 @@ export interface DetailMetricColumn<T = Record<string, unknown>> {
      */
     cellRender?: (value: unknown, row: T) => VNode | string | number | null | undefined
     class?: string
+    /** Alineación a la derecha en cabecera y celdas (p. ej. importes y porcentajes). */
     numeric?: boolean
 }
 

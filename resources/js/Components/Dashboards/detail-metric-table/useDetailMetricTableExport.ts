@@ -20,6 +20,9 @@ export function useDetailMetricTableExport(params: {
         try {
             const indexes = await params.requestExportIndexes()
             const rows = indexes.map((i) => params.rows.value[i]).filter((row): row is Record<string, unknown> => !!row)
+            if (rows.length === 0 && params.totalRecords.value > 0) {
+                return
+            }
             const maxPerFile = params.maxRowsPerCsvFile.value ?? 0
             const baseName = `detalle-${(params.exportLabel.value || 'datos')
                 .replace(/[^\w\s-]/g, '')

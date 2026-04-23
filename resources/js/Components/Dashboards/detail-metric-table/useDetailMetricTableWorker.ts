@@ -24,12 +24,17 @@ export function useDetailMetricTableWorker(params: {
     const workerPageIndexes = ref<number[]>([])
     const sorting = ref<TableSort>(null)
     const datasetVersion = ref(0)
+    /** Se incrementa al cambiar filas/columnas para forzar un `process` aunque búsqueda/página no varien. */
+    const dataRevision = ref(0)
 
     let searchDebounce: ReturnType<typeof setTimeout> | undefined
     let worker: Worker | null = null
     let workerObjectUrl: string | null = null
-    let requestId = 0
-    /** Una entrada por `reqId` con `exportAll`, para que export y «seleccionar todo» no se pisen entre sí. */
+    /** Peticiones de página / orden / búsqueda (no confundir con exportaciones masivas). */
+    let uiRequestId = 0
+    /** Contador aparte: las respuestas `exportAll` deben emparejarse por `reqId`, no con el último `uiRequestId`. */
+    let exportRequestId = 0
+    /** Resoluciones pendientes de `exportAll` (export CSV y «seleccionar todas las filtradas»). */
     const pendingExportResolves = new Map<number, (indexes: number[]) => void>()
 
     const pageRows = computed<Record<string, unknown>[]>(() => {
@@ -48,8 +53,16 @@ export function useDetailMetricTableWorker(params: {
         const w = new Worker(workerObjectUrl)
         w.onmessage = (event: MessageEvent<WorkerResponse>) => {
             const payload = event.data
-            if (payload.reqId !== requestId) return
-            if (payload.datasetVersion !== datasetVersion.value) return
+            if (payload.datasetVersion !== datasetVersion.value) {
+                if (payload.exportAll) {
+                    const resolve = pendingExportResolves.get(payload.reqId)
+                    if (resolve) {
+                        resolve([])
+                        pendingExportResolves.delete(payload.reqId)
+                    }
+                }
+                return
+            }
 
             if (payload.exportAll) {
                 const resolve = pendingExportResolves.get(payload.reqId)
@@ -59,6 +72,8 @@ export function useDetailMetricTableWorker(params: {
                 }
                 return
             }
+
+            if (payload.reqId !== uiRequestId) return
 
             workerTotal.value = payload.total
             workerPageIndexes.value = payload.pageIndexes
@@ -70,6 +85,10 @@ export function useDetailMetricTableWorker(params: {
 
     function initWorkerData() {
         datasetVersion.value += 1
+        for (const resolve of pendingExportResolves.values()) {
+            resolve([])
+        }
+        pendingExportResolves.clear()
         ensureWorker().postMessage({
             type: 'init',
             rows: toRaw(params.rows.value),
@@ -80,10 +99,10 @@ export function useDetailMetricTableWorker(params: {
 
     function processRows() {
         isProcessing.value = true
-        requestId += 1
+        uiRequestId += 1
         ensureWorker().postMessage({
             type: 'process',
-            reqId: requestId,
+            reqId: uiRequestId,
             datasetVersion: datasetVersion.value,
             query: searchText.value,
             sorting: sorting.value ? { key: sorting.value.key, desc: sorting.value.desc } : null,
@@ -94,8 +113,8 @@ export function useDetailMetricTableWorker(params: {
 
     function requestAllFilteredRowIndexes(): Promise<number[]> {
         return new Promise((resolve) => {
-            requestId += 1
-            const id = requestId
+            exportRequestId += 1
+            const id = exportRequestId
             pendingExportResolves.set(id, resolve)
             ensureWorker().postMessage({
                 type: 'process',
@@ -149,17 +168,19 @@ export function useDetailMetricTableWorker(params: {
             pageIndex.value = 0
             workerPageIndexes.value = []
             workerTotal.value = params.rows.value.length
+            dataRevision.value += 1
             initWorkerData()
-            processRows()
         },
         { immediate: true }
     )
 
     watch(
-        () => [searchText.value, pageIndex.value, pageSize.value, sorting.value] as const,
+        () =>
+            [dataRevision.value, searchText.value, pageIndex.value, pageSize.value, sorting.value] as const,
         () => {
             processRows()
-        }
+        },
+        { immediate: true }
     )
 
     watch(
@@ -171,13 +192,16 @@ export function useDetailMetricTableWorker(params: {
 
     onBeforeUnmount(() => {
         if (searchDebounce) clearTimeout(searchDebounce)
+        for (const resolve of pendingExportResolves.values()) {
+            resolve([])
+        }
+        pendingExportResolves.clear()
         worker?.terminate()
         worker = null
         if (workerObjectUrl) {
             URL.revokeObjectURL(workerObjectUrl)
             workerObjectUrl = null
         }
-        pendingExportResolves.clear()
     })
 
     return {

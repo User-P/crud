@@ -30,6 +30,10 @@ export interface DetailMetricTableProps {
     showSelectionCount?: boolean
     clearSelectionOnDataChange?: boolean
     clearSelectionOnFilterChange?: boolean
+    /** Texto opcional para `<caption class="sr-only">` (accesibilidad). */
+    tableSummary?: string
+    /** Primera / última página además de anterior / siguiente. */
+    showFirstLastPageButtons?: boolean
 }
 
 export const DETAIL_METRIC_TABLE_DEFAULTS: Required<
@@ -58,6 +62,7 @@ export const DETAIL_METRIC_TABLE_DEFAULTS: Required<
         | 'showSelectionCount'
         | 'clearSelectionOnDataChange'
         | 'clearSelectionOnFilterChange'
+        | 'showFirstLastPageButtons'
     >
 > = {
     searchPlaceholder: 'Buscar en la tabla…',
@@ -83,4 +88,5 @@ export const DETAIL_METRIC_TABLE_DEFAULTS: Required<
     showSelectionCount: true,
     clearSelectionOnDataChange: true,
     clearSelectionOnFilterChange: true,
+    showFirstLastPageButtons: true,
 }

@@ -1,5 +1,10 @@
 <template>
-    <div class="detail-metric-table overflow-hidden rounded-xl border border-[var(--th-border)] bg-[var(--th-input-bg)] shadow-sm">
+    <div
+        class="detail-metric-table overflow-hidden rounded-xl border border-[var(--th-border)] bg-[var(--th-input-bg)] shadow-sm"
+        role="region"
+        :aria-label="tableRegionLabel"
+        :aria-busy="isProcessing ? 'true' : 'false'"
+    >
         <div v-if="showToolbar"
             class="flex flex-wrap items-center gap-3 border-b border-[var(--th-border)] bg-[var(--th-input-bg)] px-4 py-3">
             <span v-if="showSearch" class="relative flex-1 min-w-[220px] max-w-sm">
@@ -39,13 +44,14 @@
                 </span>
                 <slot name="selection-actions" :selected-indexes="selectedIndexesSorted" :clear-selection="clearSelection" />
                 <Button v-if="showExportButton" label="Exportar CSV" icon="pi pi-download" size="small" outlined
-                    :disabled="totalRecords === 0" severity="secondary" class="shrink-0" :loading="exportingCsv"
-                    @click="exportCSV" />
+                    :disabled="totalRecords === 0 || isProcessing || exportingCsv" severity="secondary" class="shrink-0"
+                    :loading="exportingCsv" @click="exportCSV" />
             </div>
         </div>
 
         <div class="overflow-x-auto" :style="tableViewportStyle">
             <table class="min-w-full text-sm border-separate border-spacing-0">
+                <caption v-if="tableSummary" class="sr-only">{{ tableSummary }}</caption>
                 <thead :class="headerClass">
                     <tr>
                         <th v-if="enableRowSelection" scope="col"
@@ -57,11 +63,14 @@
                                 @update:model-value="toggleSelectAllPage" />
                         </th>
                         <th v-for="col in columns" :key="col.key" scope="col"
-                            class="px-4 text-left text-xs uppercase tracking-wide font-semibold text-[color:var(--th-text-secondary)] border-b border-[var(--th-border)]/80"
+                            class="px-4 text-xs uppercase tracking-wide font-semibold text-[color:var(--th-text-secondary)] border-b border-[var(--th-border)]/80"
                             :class="[
+                                col.numeric ? 'text-end' : 'text-left',
                                 headerCellClass(col),
                                 {
                                     'cursor-pointer select-none hover:text-[color:var(--th-item-active-color)]':
+                                        col.sortable !== false,
+                                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--th-item-active-color)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--th-input-bg)]':
                                         col.sortable !== false,
                                 },
                             ]" :tabindex="col.sortable !== false ? 0 : undefined"
@@ -75,7 +84,10 @@
                                 " @click="col.sortable !== false && toggleSort(col.key)"
                             @keydown.enter.prevent="col.sortable !== false && toggleSort(col.key)"
                             @keydown.space.prevent="col.sortable !== false && toggleSort(col.key)">
-                            <div class="flex items-center gap-2">
+                            <div
+                                class="flex items-center gap-2"
+                                :class="col.numeric ? 'justify-end' : ''"
+                            >
                                 <span>{{ col.header }}</span>
                                 <span v-if="col.sortable !== false" class="text-xs text-[color:var(--th-text-muted)]">
                                     {{ sortIndicator(col.key) }}
@@ -98,8 +110,8 @@
                         <td v-for="col in columns" :key="col.key"
                             class="px-4 text-[color:var(--th-text-primary)]" :class="[
                                 bodyCellClass,
+                                col.numeric ? 'text-end tabular-nums font-semibold' : 'text-start',
                                 col.class,
-                                { 'tabular-nums font-semibold': col.numeric },
                             ]">
                             <template v-if="col.cellRender">
                                 <component :is="renderCell(col, row)" />
@@ -113,7 +125,7 @@
             </table>
         </div>
 
-        <div v-if="normalizedPageRows.length === 0" class="px-4 py-8">
+        <div v-if="normalizedPageRows.length === 0" class="px-4 py-8" role="status" aria-live="polite">
             <EmptyState :title="searchText
                 ? 'Ningún registro coincide con la búsqueda'
                 : 'No hay datos para mostrar'
@@ -130,20 +142,41 @@
                 {{ totalRecords === 1 ? 'registro' : 'registros' }}
                 <span v-if="searchText" class="ml-1 text-[color:var(--th-text-muted)]">(filtrados)</span>
             </p>
-            <div v-if="showPagination" class="flex items-center gap-2 text-xs">
+            <div v-if="showPagination" class="flex flex-wrap items-center gap-2 text-xs">
+                <button
+                    v-if="showFirstLastPageButtons"
+                    type="button"
+                    class="rounded-md border border-[var(--th-border)] px-2 py-1 text-[color:var(--th-text-secondary)] disabled:opacity-40 hover:bg-[var(--th-item-hover-bg)]"
+                    :disabled="pageIndex === 0 || isProcessing"
+                    aria-label="Ir a la primera página"
+                    @click="goFirstPage"
+                >
+                    Primera
+                </button>
                 <button type="button"
                     class="rounded-md border border-[var(--th-border)] px-2 py-1 text-[color:var(--th-text-secondary)] disabled:opacity-40 hover:bg-[var(--th-item-hover-bg)]"
-                    :disabled="pageIndex === 0 || isProcessing" @click="pageIndex = Math.max(0, pageIndex - 1)">
+                    :disabled="pageIndex === 0 || isProcessing" aria-label="Página anterior"
+                    @click="goPrevPage">
                     Anterior
                 </button>
-                <span v-if="showPageIndicator" class="text-[color:var(--th-text-muted)]">
+                <span v-if="showPageIndicator" class="min-w-[7.5rem] text-center text-[color:var(--th-text-muted)]">
                     Página {{ currentPage }} de {{ totalPages }}
                 </span>
                 <button type="button"
                     class="rounded-md border border-[var(--th-border)] px-2 py-1 text-[color:var(--th-text-secondary)] disabled:opacity-40 hover:bg-[var(--th-item-hover-bg)]"
-                    :disabled="pageIndex >= totalPages - 1 || isProcessing"
-                    @click="pageIndex = Math.min(totalPages - 1, pageIndex + 1)">
+                    :disabled="pageIndex >= totalPages - 1 || isProcessing" aria-label="Página siguiente"
+                    @click="goNextPage">
                     Siguiente
+                </button>
+                <button
+                    v-if="showFirstLastPageButtons"
+                    type="button"
+                    class="rounded-md border border-[var(--th-border)] px-2 py-1 text-[color:var(--th-text-secondary)] disabled:opacity-40 hover:bg-[var(--th-item-hover-bg)]"
+                    :disabled="pageIndex >= totalPages - 1 || isProcessing"
+                    aria-label="Ir a la última página"
+                    @click="goLastPage"
+                >
+                    Última
                 </button>
                 <template v-if="showRowsPerPageSelector">
                     <label class="ml-2 text-[color:var(--th-text-muted)]">Filas:</label>
@@ -187,6 +220,11 @@ const emit = defineEmits<{
 }>()
 
 const selectedIndexesModel = defineModel<number[]>('selectedIndexes', { default: () => [] })
+
+const tableRegionLabel = computed(() => {
+    const s = props.tableSummary?.trim()
+    return s || 'Tabla de datos con búsqueda, orden y paginación'
+})
 
 const {
     rawSearchText,
@@ -284,5 +322,21 @@ const { exportingCsv, exportCSV } = useDetailMetricTableExport({
 
 function clearSearch() {
     rawSearchText.value = ''
+}
+
+function goFirstPage() {
+    pageIndex.value = 0
+}
+
+function goPrevPage() {
+    pageIndex.value = Math.max(0, pageIndex.value - 1)
+}
+
+function goNextPage() {
+    pageIndex.value = Math.min(totalPages.value - 1, pageIndex.value + 1)
+}
+
+function goLastPage() {
+    pageIndex.value = Math.max(0, totalPages.value - 1)
 }
 </script>
